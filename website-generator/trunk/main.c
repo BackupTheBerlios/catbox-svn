@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
+
 #include <malloc.h>
 #include "files.h"
-typedef char[50] string;
+#include "main.h"
+typedef char string[50];
 typedef struct
 {
 	string url;
 	string name;
-	sFile filename;
+	FileStruct script;
 }WebSite;
 int main (int argc, char **argv[])
 {
 	WebSite sWebSite;
-	printf(_("Website-Generator 1.0"\n),);
+	printf("Website-Generator 1.0\n");
 	return (0);
 }
