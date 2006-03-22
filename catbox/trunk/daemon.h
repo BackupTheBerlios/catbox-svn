@@ -12,7 +12,7 @@ typedef struct
 
 typedef struct
 {
-typedef struct
+struct hoppla
 {
 	int Farbe;
 }Blume;
