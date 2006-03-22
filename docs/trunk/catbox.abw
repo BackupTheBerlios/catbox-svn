@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE abiword PUBLIC "-//ABISOURCE//DTD AWML 1.0 Strict//EN" "http://www.abisource.com/awml.dtd">
-<abiword template="false" styles="unlocked" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xid-max="6" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.9.1" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-CH; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
+<abiword template="false" styles="unlocked" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:math="http://www.w3.org/1998/Math/MathML" xid-max="54" xmlns:dc="http://purl.org/dc/elements/1.1/" fileformat="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns:awml="http://www.abisource.com/awml.dtd" xmlns="http://www.abisource.com/awml.dtd" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.9.1" xml:space="preserve" props="dom-dir:ltr; document-footnote-restart-section:0; document-endnote-type:numeric; document-endnote-place-enddoc:1; document-endnote-initial:1; lang:en-CH; document-endnote-restart-section:0; document-footnote-restart-page:0; document-footnote-type:numeric; document-footnote-initial:1; document-endnote-place-endsection:0">
 <!-- ======================================================================== -->
 <!-- This file is an AbiWord document.                                        -->
 <!-- AbiWord is a free, Open Source word processor.                           -->
@@ -9,24 +9,84 @@
 <!-- ======================================================================== -->
 
 <metadata>
+<m key="dc.format">application/x-abiword</m>
 <m key="abiword.generator">AbiWord</m>
 <m key="dc.subject">CatBox</m>
-<m key="dc.creator">Michael Durrer</m>
-<m key="dc.format">application/x-abiword</m>
 <m key="dc.title">CatBox Dokumentation</m>
 <m key="dc.publisher">Michael Durrer</m>
+<m key="dc.creator">Michael Durrer</m>
 </metadata>
-<history version="8" edit-time="5495" last-saved="1142966067" uid="887facaa-b8fc-11da-83a2-83ef8986d430">
+<history version="28" edit-time="11240" last-saved="1143060752" uid="887facaa-b8fc-11da-83a2-83ef8986d430">
 <version id="8" started="1142964170" uid="54166988-b909-11da-83a2-83ef8986d430" auto="0" top-xid="6"/>
+<version id="17" started="1143056040" uid="6a323080-b9e0-11da-9291-c434e41c2c47" auto="0" top-xid="10"/>
+<version id="18" started="1143058696" uid="fedf2cec-b9e0-11da-9291-c434e41c2c47" auto="1" top-xid="46"/>
+<version id="19" started="1143058710" uid="07936e34-b9e1-11da-9291-c434e41c2c47" auto="1" top-xid="46"/>
+<version id="20" started="1143058746" uid="1d0274cc-b9e1-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="21" started="1143059046" uid="cfd2e14a-b9e1-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="22" started="1143059346" uid="82a34e7c-b9e2-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="23" started="1143059646" uid="3573bbd6-b9e3-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="24" started="1143059946" uid="e8440360-b9e3-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="25" started="1143060246" uid="9b144946-b9e4-11da-9291-c434e41c2c47" auto="1" top-xid="48"/>
+<version id="26" started="1143060546" uid="4de4b66e-b9e5-11da-9291-c434e41c2c47" auto="1" top-xid="52"/>
+<version id="27" started="1143060676" uid="9b20b8ba-b9e5-11da-9291-c434e41c2c47" auto="1" top-xid="53"/>
+<version id="28" started="1143060752" uid="c87661b6-b9e5-11da-9291-c434e41c2c47" auto="1" top-xid="54"/>
 </history>
+<revisions show="0" mark="1" show-level="268435455" auto="1">
+<r id="4" time-started="1143058746" version="20">Autorevision</r>
+<r id="5" time-started="1143059046" version="21">Autorevision</r>
+<r id="6" time-started="1143059346" version="22">Autorevision</r>
+<r id="7" time-started="1143059646" version="23">Autorevision</r>
+<r id="8" time-started="1143059946" version="24">Autorevision</r>
+<r id="9" time-started="1143060246" version="25">Autorevision</r>
+<r id="10" time-started="1143060546" version="26">Autorevision</r>
+<r id="11" time-started="1143060676" version="27">Autorevision</r>
+<r id="12" time-started="1143060752" version="28">Autorevision</r>
+</revisions>
 <styles>
-<s type="P" name="Normal" followedby="Current Settings" props="font-family:Times New Roman; margin-top:0pt; color:000000; margin-left:0pt; text-position:normal; widows:2; font-style:normal; text-indent:0in; font-variant:normal; margin-right:0pt; lang:en-CH; line-height:1.0; font-size:12pt; text-decoration:none; margin-bottom:0pt; font-weight:normal; bgcolor:transparent; text-align:left; font-stretch:normal"/>
+<s type="P" name="Normal" followedby="Current Settings" props="font-weight:normal; font-family:Times New Roman; margin-top:0pt; color:000000; margin-left:0pt; bgcolor:transparent; widows:2; font-style:normal; text-indent:0in; text-position:normal; margin-bottom:0pt; lang:en-CH; line-height:1.0; text-align:left; font-variant:normal; text-decoration:none; margin-right:0pt; font-size:12pt; font-stretch:normal"/>
+<s type="P" name="Numbered Heading 1" basedon="Heading 1" followedby="Normal" props="list-delim:%L.; list-style:Numbered List; start-value:1; field-color:transparent; field-font:Arial; margin-left:0.0in; text-indent:0.0in; tabstops:0.3in/L0"/>
+<s type="P" name="Heading 1" basedon="Normal" followedby="Normal" props="keep-with-next:1; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; font-size:17pt"/>
+<s type="P" name="Numbered Heading 2" basedon="Heading 2" followedby="Normal" props="list-delim:%L.; list-style:Numbered List; start-value:1; field-color:transparent; field-font:Arial; margin-left:0.0in; text-indent:0.0in; tabstops:0.3in/L0"/>
+<s type="P" name="Heading 2" basedon="Normal" followedby="Normal" props="keep-with-next:1; margin-top:22pt; font-weight:bold; margin-bottom:3pt; font-family:Arial; font-size:14pt"/>
+<s type="C" name="Reference" props="font-size:10pt"/>
 </styles>
-<pagesize pagetype="A4" orientation="portrait" width="210.000000" height="297.000000" units="mm" page-scale="1.000000"/>
-<section header="0" xid="5" props="page-margin-footer:0.5000in; page-margin-header:0.5000in; page-margin-right:1.0000in; page-margin-left:1.0000in; page-margin-top:1.0000in; page-margin-bottom:1.0000in">
-<p style="Normal" xid="6"></p>
+<lists>
+<l id="1000" parentid="0" type="0" start-value="1" list-delim="%L." list-decimal=""/>
+<l id="1003" parentid="1000" type="0" start-value="1" list-delim="%L." list-decimal=""/>
+</lists>
+<pagesize pagetype="A4" orientation="portrait" width="8.267717" height="11.692913" units="in" page-scale="1.000000"/>
+<section footer="1" header="0" footer-first="3" header-first="2" xid="5" props="page-margin-right:1.0000in; section-restart:0; page-margin-header:0.5000in; page-margin-left:1.0000in; page-margin-footer:0.5000in; page-margin-top:1.0000in; page-margin-bottom:1.0000in">
+<p style="Normal" xid="6" props="text-align:center"><br/><br/><br/><br/><br/><c props="font-family:MgOpen Cosmetica; font-size:36pt">CatBox Dokumentation<pbr/></c></p>
+<p style="Normal" xid="21" props="text-align:center"><pbr/></p>
+<p style="Normal" xid="20"></p>
+<p style="Normal" xid="22"></p>
+<toc xid="24" props="toc-label-type2:numeric; toc-label-type3:numeric; toc-source-style1:Heading 1; toc-source-style2:Heading 2; toc-label-type4:numeric; toc-source-style4:Heading 4; toc-source-style3:Heading 3; toc-page-type1:numeric; toc-page-type2:numeric; toc-page-type3:numeric; toc-page-type4:numeric; toc-indent1:0.5in; toc-indent2:0.5in; toc-indent3:0.5in; toc-indent4:0.5in; toc-has-label2:1; toc-label-start4:1; toc-label-inherits1:1; toc-label-start1:1; toc-label-start2:1; toc-label-inherits4:1; toc-label-start3:1; toc-tab-leader2:dot; toc-has-label1:1; toc-id:0; toc-has-label3:1; toc-has-label4:1; toc-label-inherits2:1; toc-label-inherits3:1; toc-heading-style:Contents Header; toc-tab-leader3:dot; toc-heading:Inhaltsverzeichnis; toc-tab-leader1:dot; toc-tab-leader4:dot; toc-dest-style1:Contents 1; toc-dest-style2:Contents 2; toc-dest-style3:Contents 3; toc-dest-style4:Contents 4; toc-has-heading:1; toc-label-type1:numeric">
+</toc><p style="Normal" xid="23"><pbr/></p>
+<p level="1" listid="1000" parentid="0" style="Numbered Heading 1" xid="26" props="start-value:1; text-indent:0.0000in; list-style:Numbered List; field-font:Arial; margin-left:0.0000in"><field type="list_label" xid="28" props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:17pt; height:0in; list-style:Numbered List; font-stretch:normal"></field><c props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:17pt; height:0in; list-style:Numbered List; font-stretch:normal">	Einführung</c></p>
+<p style="Normal" xid="30"><c props="height:0in; display:inline; list-style:Numbered List; width:0in; homogeneous:1">CatBox ist das Akronym für Central Administration ToolBox und lässt sich als Konfigurationswerkzeug auf allen Linux-basierten Distributionen einsetzen.</c></p>
+<p style="Normal" xid="31"><c props="height:0in; display:inline; list-style:Numbered List; width:0in; homogeneous:1"><br/>Da es modular aufgebaut ist, kann man über die CatBox Library mit Leichtigkeit eigene Module einbauen. Die Module enthalten Daten zum Aufbau der CatBox-GUI und eine Struktur die dem CatBox-Daemon sagt wie er Konfigurationsdateien einzulesen und manipulieren hat.</c></p>
+<p style="Normal" xid="33"></p>
+<p style="Normal" xid="34"><c props="height:0in; display:inline; list-style:Numbered List; width:0in; homogeneous:1">CatBox ist aus 4 Grundkomponenten aufgebaut, zum Betrieb davon sind 3 nötig.</c></p>
+<p style="Normal" xid="35"><c props="height:0in; display:inline; list-style:Numbered List; width:0in; homogeneous:1">Nähere Informationen gibt es dazu im 2. Kapitel "Das Trinity-Konzept".<pbr/></c></p>
+<p level="1" listid="1000" style="Numbered Heading 1" xid="38" props="list-delim:%L.; list-style:Numbered List; start-value:1; margin-left:0.0000in; text-indent:0.0000in; field-font:Arial"><field type="list_label" xid="39" props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:17pt; height:0in; list-style:Numbered List; font-stretch:normal"></field><c props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:17pt; height:0in; list-style:Numbered List; font-stretch:normal">	</c><c props="height:0in; display:inline; width:0in; homogeneous:1">Das Trinity-Konzept / CatBox Grundkomponenten</c></p>
+<p style="Normal" xid="40"><c props="height:0in; display:inline; width:0in; homogeneous:1">CatBox basiert auf dem sogenannten Trinity(Dreifalitgkeit)-Prinzip und besitzt daher 3 Grundkomponenten die unentbehrlich sind für den Betrieb.</c></p>
+<p level="2" listid="1003" parentid="1000" style="Numbered Heading 2" xid="42" props="start-value:1; text-indent:0.0000in; list-style:Numbered List; field-font:Arial; margin-left:0.0000in"><field type="list_label" xid="44" props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:14pt; height:0in; list-style:Numbered List; font-stretch:normal"></field><c props="width:0in; font-family:Arial; display:inline; font-style:normal; font-weight:bold; bgcolor:transparent; lang:en-CH; text-position:normal; homogeneous:1; color:000000; font-variant:normal; text-decoration:none; font-size:14pt; height:0in; list-style:Numbered List; font-stretch:normal">	</c><c revision="-9" props="height:0in; display:inline; width:0in; homogeneous:1"><br/></c><c props="height:0in; display:inline; width:0in; homogeneous:1">Der CatBox-Daemon</c></p>
+<p style="Normal" xid="46"><c props="height:0in; display:inline; width:0in; homogeneous:1">Der CatBox-Daemon ( = System-Dienst, im Hintergrund) wird nach der </c><c revision="4" props="height:0in; display:inline; width:0in; homogeneous:1">Installation auf dem Client oder dem CatMS(CatBox Management Server) beim Booten gestartet</c><c revision="9" props="height:0in; display:inline; width:0in; homogeneous:1"> über xinetd oder wahlweise inetd. Alternativ wird ein eigenes Bootscript angelegt, dass nach dem Starten des Netzwerks aktiviert wird.</c><c revision="10" props="height:0in; display:inline; width:0in; homogeneous:1"> Er lädt die Konfiguration aus /etc/catbox/catbox.conf und startet alle angegebenen Module mit ihren jeweiligen Konfigurationen.</c></p>
+<p style="Normal" revision="10" xid="53"><c revision="10" props="height:0in; display:inline; width:0in; homogeneous:1">Nun ist er bereit Befehle von CatBox-NC und CatBox-GTK entgegenzunehmen, den Frontends zu CatBox-Daemon.</c><c revision="-4,-10" props="height:0in; display:inline; width:0in; homogeneous:1">Installa</c></p>
+<p revision="-4,!9{list-delim:-/-;list-decimal:-/-;list-style:-/-;start-value:-/-;field-color:-/-;margin-left:0pt;text-indent:0in;list-tag:-/-;field-font:-/-}{level:-/-;listid:-/-;parentid:-/-;style:Normal;type:-/-},-10" xid="43"><field type="list_label" revision="-9,-10" xid="45" props="width:0in; font-family:Arial; display:inline; color:000000; font-weight:bold; text-position:normal; lang:en-CH; font-style:normal; font-variant:normal; list-style:Numbered List; bgcolor:transparent; homogeneous:1; text-decoration:none; height:0in; font-size:14pt; font-stretch:normal"></field><c revision="-9,-10" props="width:0in; font-family:Arial; display:inline; color:000000; font-weight:bold; text-position:normal; lang:en-CH; font-style:normal; font-variant:normal; list-style:Numbered List; bgcolor:transparent; homogeneous:1; text-decoration:none; height:0in; font-size:14pt; font-stretch:normal">	</c></p>
+</section>
+<section id="3" listid="0" parentid="0" type="footer-first" xid="15">
+<p xid="17" props="margin-top:0.0000in; margin-left:0.0000in; text-indent:0.0000in; dom-dir:ltr; margin-bottom:0.0000in; line-height:1.000000; text-align:center; margin-right:0.0000in"></p>
+<p xid="16" props="font-family:Times New Roman; font-size:12pt; lang:-none-; text-align:left; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none"></p>
+</section>
+<section id="2" listid="0" parentid="0" type="header-first" xid="12">
+<p xid="14" props="margin-top:0.0000in; margin-left:0.0000in; text-indent:0.0000in; dom-dir:ltr; margin-bottom:0.0000in; line-height:1.000000; text-align:center; margin-right:0.0000in"></p>
+<p xid="13" props="font-family:Times New Roman; font-size:12pt; lang:-none-; text-align:left; text-position:normal; font-weight:normal; font-style:normal; text-decoration:none"></p>
+</section>
+<section id="1" listid="0" parentid="0" type="footer" xid="7">
+<p xid="8" props="text-align:center">Seite <field type="page_number" xid="9"></field> von <field type="page_count" xid="10"></field></p>
 </section>
 <section id="0" listid="0" parentid="0" type="header" xid="1">
-<p xid="2" props="text-align:left">CatBox Dokumentation Deutsch 0.1, </p>
+<p xid="2" props="text-align:center">CatBox Dokumentation Deutsch 0.1, <field type="meta_publisher" xid="11"></field> </p>
 </section>
 </abiword>
