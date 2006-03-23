@@ -2,13 +2,23 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include "daemon.h"
-int main (int argc, char **argv[])
+int main (int argc, char *argv[])
 {
+	int iArgLocal,iArgType;
 	CatSocket csSocket;
 	printf("Starting CatBox-Daemon...\n");
-	iInitNetwork(csSocket);
-	int test;
-
-	test = iSetUpSocket(csSocket,2,2); /* Soll derefenziert werden, hab ich gehört... seltsame Zahlen in Param. 2 & 3 */
+	iInitNetwork(&csSocket);
+	printf("%d",argc);
+	if(argc < 2)
+	{
+		iArgLocal = 1;
+		iArgType = 1;
+	}
+	else if(argc >1)
+	{
+	iArgLocal = atoi(argv[1]);
+	iArgType = atoi(argv[2]);
+	}
+	iSetUpSocket(&csSocket,iArgLocal,iArgType);
 	return (1);
 }

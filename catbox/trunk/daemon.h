@@ -2,11 +2,12 @@
 #define DAEMON_H
 #include <stdbool.h>
 #endif
+
 typedef struct 
 {
-	bool (*sIsLocal) ();
+	int (*sIsLocal) ();
 	int (*sConnect) (int,int,int);
-	bool bLocal;
+	int iLocal;
 }CatSocket;
 typedef struct 
 {
@@ -17,3 +18,6 @@ typedef struct
 {
 
 }CatApp;
+int iInitNetwork(CatSocket *csSocket);
+int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType);
+int IsLocal(CatSocket *csSocket);
