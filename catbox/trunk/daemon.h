@@ -8,6 +8,7 @@ typedef struct
 	int (*sIsLocal) ();
 	int (*sConnect) (int,int,int);
 	int iLocal;
+	int socket;
 }CatSocket;
 typedef struct 
 {
