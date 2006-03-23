@@ -1,19 +1,21 @@
-#ifndef DAEMON_H
-#define DAEMON_H
+#ifndef _DAEMON_H
+#define _DAEMON_H
 #include <stdbool.h>
 #endif
-typedef struct 
+
+typedef struct CatSocket
 {
-	bool (*sIsLocal) ();
-	int (*sConnect) (int,int,int);
+	bool (*sIsLocal)();
+	int (*sConnect)(int,int,int);
 	bool bLocal;
-}CatSocket;
-typedef struct 
+};
+
+typedef struct CatDaemon 
 {
 	char test;
-}CatDaemon;
+};
 
 typedef struct
 {
-
+	char test;
 }CatApp;

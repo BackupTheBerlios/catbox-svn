@@ -35,14 +35,12 @@ int iInitNetwork(CatSocket *csSocket)
 
 int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
 {
-	int iProtocol;
 	printf("iLocal = %d\n", iLocal);
 	printf("iType = %d\n", iType);
 	if(iLocal < 3 && iLocal > 0)
 	{
-		iProtocol = iLocal;
 		printf("iLocal = %d\n", iLocal);
-		if(iLocal == '1') printf("Loopback device is being used.\n");
+		if(iLocal == 1) printf("Loopback device is being used.\n");
 		if(iLocal == 2) printf("Standard-Ethernet device is being used.\n");
 	}
 		if(iType == 1)
