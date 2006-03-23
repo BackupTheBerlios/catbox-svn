@@ -3,14 +3,8 @@
 
 #include <malloc.h>
 #include "files.h"
-#include "main.h"
-typedef char string[50];
-typedef struct
-{
-	string url;
-	string name;
-	FileStruct script;
-}WebSite;
+#include "website.h"
+
 int main (int argc, char **argv[])
 {
 	WebSite sWebSite;
