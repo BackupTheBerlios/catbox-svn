@@ -45,14 +45,14 @@ int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
 	}
 		if(iType == 1)
 	{
-		csSocket->sConnect(iProtocol, iLocal, SOCK_STREAM);
+		csSocket->sConnect(iLocal, iLocal, SOCK_STREAM);
 	}
 	else if(iType == 2)
 	{
-		csSocket->sConnect(iProtocol, iLocal, SOCK_DGRAM);
+		csSocket->sConnect(iLocal, iLocal, SOCK_DGRAM);
 	}
 	else
 	{
-		printf("%d is no valid type",iProtocol);
+		printf("%d is no valid type",iLocal);
 	}
 }

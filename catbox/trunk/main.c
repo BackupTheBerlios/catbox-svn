@@ -7,6 +7,8 @@ int main (int argc, char **argv[])
 	CatSocket csSocket;
 	printf("Starting CatBox-Daemon...\n");
 	iInitNetwork(csSocket);
-	iSetUpSocket(csSocket,1,2);
+	int test;
+
+	test = iSetUpSocket(csSocket,2,2); /* Soll derefenziert werden, hab ich gehört... seltsame Zahlen in Param. 2 & 3 */
 	return (1);
-} 
+}
