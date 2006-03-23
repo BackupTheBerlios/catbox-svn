@@ -1,9 +1,12 @@
 #ifndef DAEMON_H
 #define DAEMON_H
+#include <stdbool.h>
 #endif
 typedef struct 
 {
-	int (*sConnect) (int);
+	bool (*sIsLocal) ();
+	int (*sConnect) (int,int,int);
+	bool bLocal;
 }CatSocket;
 typedef struct 
 {
@@ -12,8 +15,5 @@ typedef struct
 
 typedef struct
 {
-struct hoppla
-{
-	int Farbe;
-}Blume;
+
 }CatApp;

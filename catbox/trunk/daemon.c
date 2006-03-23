@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "daemon.h"
@@ -13,7 +14,47 @@
 @param 
 @return
 */
+
+bool bIsLocal(CatSocket *csSocket)
+{
+	switch(csSocket->bLocal)
+	{
+		case true:
+		return true;
+		case false:
+		return false;
+	} 
+}
+	
 int iInitNetwork(CatSocket *csSocket)
 {
+	csSocket->sIsLocal = bIsLocal;
+	csSocket->sConnect = socket;
 	return (1);
+}
+
+int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
+{
+	int iProtocol;
+	printf("iLocal = %d\n", iLocal);
+	printf("iType = %d\n", iType);
+	if(iLocal < 3 && iLocal > 0)
+	{
+		iProtocol = iLocal;
+		printf("iLocal = %d\n", iLocal);
+		if(iLocal == '1') printf("Loopback device is being used.\n");
+		if(iLocal == 2) printf("Standard-Ethernet device is being used.\n");
+	}
+		if(iType == 1)
+	{
+		csSocket->sConnect(iProtocol, iLocal, SOCK_STREAM);
+	}
+	else if(iType == 2)
+	{
+		csSocket->sConnect(iProtocol, iLocal, SOCK_DGRAM);
+	}
+	else
+	{
+		printf("%d is no valid type",iProtocol);
+	}
 }
