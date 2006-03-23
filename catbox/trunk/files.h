@@ -3,8 +3,8 @@
 #endif
 typedef struct
 {
-	FILE *file=NULL;
+	FILE *file;
 	char mode[4];
-	char *buffer=NULL;
-	int_8t (_stdcall* ReadFile)(int_8t);		
+	char *buffer;
+	int (* OpenFile) (int);	
 }FileStruct;
