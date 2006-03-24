@@ -1,0 +1,65 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: Sample Source Code</TITLE>
+</HEAD>
+<BODY>
+<A HREF="unix-socket-faq-6.html">Previous</A>
+Next
+<A HREF="unix-socket-faq.html#toc7">Table of Contents</A>
+<HR>
+<H2><A NAME="examples"></A> <A NAME="s7">7. Sample Source Code</A></H2>
+
+<P>The sample source code is no longer included in the faq.  To get it, 
+please download it from one of the unix-socket-faq www pages:</P>
+<P>
+<BLOCKQUOTE>
+<A HREF="http://www.ibrado.com/sock-faq">http://www.ibrado.com/sock-faq</A><BR>
+<A HREF="http://kipper.york.ac.uk/~vic/sock-faq">http://kipper.york.ac.uk/~vic/sock-faq</A>
+<A HREF="http://www.ntua.gr/sock-faq">http://www.ntua.gr/sock-faq</A></BLOCKQUOTE>
+</P>
+<P>If you don't have web access, you can ftp it with ftpmail by following 
+the following instructions.</P>
+<P>To get the sample source by mail, send mail to 
+<A HREF="mailto:ftpmail@decwrl.dec.com">ftpmail@decwrl.dec.com</A>, 
+with no subject line and a body like this:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+  reply &lt;put your email address here&gt;
+  connect ftp.zymsys.com
+  binary
+  uuencode
+  get pub/sockets/examples.tar.gz
+  quit
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Save the reply as examples.uu, and type:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+  % uudecode examples.uu
+  % gunzip examples.tar.gz
+  % tar xf examples.tar
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>This will create a directory called socket-faq-examples which contains the
+sample code from this faq, plus a sample client and server for both tcp and
+udp.</P>
+<P>Note that this package requires the gnu unzip program to be installed on 
+your system.  It is very common, but if you don't have it you can get the 
+source for it from:</P>
+<P>
+<BLOCKQUOTE>
+<A HREF="ftp://prep.ai.mit.edu/pub/gnu/gzip-1.2.4.tar">ftp://prep.ai.mit.edu/pub/gnu/gzip-1.2.4.tar</A></BLOCKQUOTE>
+</P>
+<P>If you don't have ftp access, you can obtain it in a way similar to 
+obtaining the sample source.  I'll leave the exact changes to the body of 
+the message as an excersise for the reader.</P>
+<HR>
+<A HREF="unix-socket-faq-6.html">Previous</A>
+Next
+<A HREF="unix-socket-faq.html#toc7">Table of Contents</A>
+</BODY>
+</HTML>

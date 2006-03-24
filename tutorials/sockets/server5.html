@@ -1,0 +1,1258 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<A NAME="4"></A>
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate<BR>und J&ouml;g Holzmann</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>5 Standard-Server</H1>
+
+<A NAME="5.1"></A>
+<H2>5.1 Administration eines Apache Servers</H2>
+<center>
+<p><img src="http.gif"><p>
+</center>
+Der Apache Web-Server basiert auf dem NCSA Web-Server, Version 1.3 und
+wurde im April 1995 als erste Beta Version ver&ouml;ffentlicht. Innerhalb
+k&uuml;rzester Zeit hat er sich zur Nummer 1 unter den im Internet eingesetzten
+Servern entwickelt.  Ihn zeichnet die Verf&uuml;gbarkeit auf fast
+allen Plattformen, die hohe Performance bei geringen Hardwareanforderungen
+und seine Flexibilit&auml;t aus. Dieser letzte Punkt wird vor allem durch das
+modulare Konzept des Apache erreicht. 
+<P>
+Es wird normalerweise ein <TT>httpd</TT>-Hauptproze&szlig; gestartet, der sich 
+an alle ihm durch <TT>Port</TT> oder <TT>Listen</TT> zugewiesene Ports 
+(normalerweise 80 (Standard) oder 443 (SSL)) bindet. Anschlie&szlig;end
+erzeugt dieser Hauptproze&szlig; Kindprozesse unter der eingestellten UID
+und GID, die die Client-Anfragen behandeln. Mit der <TT>MinSpareServer</TT>
+und <TT>MaxSpareServers</TT> wird bestimmt, wieviele unbesch&auml;ftigte 
+Kindprozesse in Reserve gehalten werden (preforking). Mit der Variablen 
+<TT>MaxClients</TT> kann man festlegen, wieviele Kindprozesse maximal 
+gleichzeitig gestartet werden k&ouml;nnen.
+<P>
+Vorteil dieser Methode ist die schnelle Reaktion des Servers auf Clientanfragen.
+Nachteil ist der gro&szlig;e Speicherplatzbedarf. Hat man das Maximum an
+gleichzeitigen Kindprozessen zu hoch eingestellt, reicht der Hauptspeicher
+nicht f&uuml;r alle Prozesse aus und das dadurch hervorgerufene Swapping
+verringert die Performance drastisch.
+<P>
+
+<H3>Konfiguration</H3>
+Normalerweise wird f&uuml;r die Konfiguration nur eine Datei verwendet,
+<TT>httpd.conf</TT>, in der auch die Einstellungen von <TT>access.conf</TT>
+und <TT>srm.conf</TT> vorgenommen werden. An dieser Stelle werden die Daten
+der &uuml;bersichtlichkeit halber dreigeteilt:
+<P>
+
+<H4>Einstellungen in <TT>httpd.conf</TT></H4>
+Abh&auml;ngig von den eingebundenen Modulen steht eine Vielzahl von Eintr&auml;gen 
+zur Verf&uuml;gung. Hier werden nur einige Standardparameter aufgelistet:
+<P>
+<TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ServerType standalone</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Es wird festgelegt, da&szlig; der Server beim
+Starten selbst den mit Listen definierten Port (Standard ist 80) &ouml;ffnet
+und auf Anfragen wartet.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>Listen 80</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Falls mehrere Interfaces bzw. IP Adressen f&uuml;r
+den Rechner vorhanden sind, kann mit Listen festgelegt werden, welche Ports
+f&uuml;r welche Adresse abgeh&ouml;rt werden sollen</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>User wwwrun</TT><BR><TT>Group nogroup</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Nach dem &ouml;ffnen des Ports (als root), wechselt
+Apache zu der als User und Group angegebenen UID bzw. GID. Die Zuweisung
+kann entweder durch angeben des Namens oder durch # gefolgt von der ID
+erfolgen</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ServerAdmin webmaster@domain.tld</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Bei Fehlermeldungen wird diese Mail-Adresse an den Client
+geliefert.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ServerName www.zwergenburg.de</A></TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Name des Servers. Ohne ServerName w&uuml;rde der
+richtige Hostname des Rechners zur&uuml;ckgeliefert. Wichtig f&uuml;r Redirects
+und virtuelle Hosts.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ServerRoot /opt/www</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Diese Einstellung sorgt daf&uuml;r, da&szlig;
+Apache ausgehend von diesem Verzeichnis die Verzeichnisse f&uuml;r Dokumente,
+Logfiles und Konfigurationsdateien sucht.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>DocumentRoot /opt/www/htdocs</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Hier werden die HTML Seiten abgelegt. Unterhalb
+<TT>/opt/www</TT> k&ouml;nnen dann Dateien liegen, die nicht &uuml;ber das
+Webinterface zug&auml;nglich sein sollen.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>AccessConfig /etc/httpd/access.conf</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Datei zur Definition der Funktionen und Zugriffsrechte
+bestimmter Verzeichnisse</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ResourceConfig /etc/httpd/srm.conf</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Diese Datei enth&auml;lt Angaben zur Formatierung
+und dem Aussehen der automatisch erzeugten Verzeichnisindizes (FancyIndexing)
+sowie Angaben zu den einzelnen Dateitypen.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>TypesConfig /etc/httpd/mime.types</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Enth&auml;lt die Zuordnung Dateiendung zu Mime-Typ</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>PidFile /var/run/httpd.pid</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Datei, in der sich die Proze&szlig; ID des Httpd-Daemons
+befindet</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>LockFile /var/locks/httpd.lock</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Spezifizert das Lock File</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ErrorLog /var/log/httpd/httpd.error</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Datei zur Aufnahme von Fehlermeldungen und sonstigen
+Info Meldungen (mod_log_config)</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>ScriptLog /var/log/httpd/httpd.script</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Datei zum Debuggen von CGI-Scripten (mod_cgi)</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>CustomLog /var/log/httpd/httpd.access
+"%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\""</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Erzeugt die Datei httpd.access im Combined Log
+Format (Hostname, Remote Logname, User ID, Zeit, erste Zeile der Client-Anfrage,
+HTTP-Statuscode, Gr&ouml;&szlig;e der vom Server ausgelieferten Datei (ohne
+Header), Wert des Referer Headers, Wert des User-Agent Headers)</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>Timeout 300</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Zeitlimit f&uuml;r Client-Anfragen in
+Sekunden</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>StartServers 5</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Es werden automatisch 5 Kindprozesse des
+Apache gestartet</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>MaxClients 150</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Maximal gleichzeitig laufende Server-Prozesse</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>MaxRequestsPerChild 30</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Nach 30 Anfragen wird der Kindproze&szlig; beendet
+und gegebenenfalls ein neuer gestartet.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>MinSpareServers 5</TT><BR><TT>MaxSpareServers 10</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Es existieren immer mindestens 5 und h&ouml;chstens
+10 leerlaufende Prozesse</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>KeepAlive On</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Unterst&uuml;tzung der HTTP-1.1-Persistent
+Connections. Dadurch k&ouml;nnen &uuml;ber eine TCP-Verbindung mehrere
+Anfragen an den Server geschickt werden.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>MaxKeepAliveRequests 10</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Es werden 10 aufeinanderfolgende Anfragen innerhalb
+einer Keep-Alive-Verbindung erlaubt.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>KeepAliveTimeout 15</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Der Server wartet maximal 15 Sekunden
+auf weitere Anfragen des Clients bei einer Keep-Alive-Verbindung</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>HostnameLookups Off</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Es sollen keine DNS-Lookups ausgef&uuml;hrt
+werden. Aus performancegr&uuml;nden anzuraten.</TD>
+</TR>
+</TABLE>
+<P>
+
+<H4>Einstellungen in <TT>access.conf</TT></H4>
+<TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>&lt;Directory /&gt;</TT>
+<BR><TT>Options None</TT>
+<BR><TT>AllowOverride None</TT>
+<BR><TT>Order deny,allow</TT>
+<BR><TT>Deny from all</TT>
+<BR><TT>&lt;/Directory&gt;</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">&nbsp;Im root-Verzeichnis werden keine Konfigurationsanweisungen
+in der Datei <TT>.htaccess</TT> beachtet und es wird kein Zugriff auf irgendwelche
+Unterverzeichnisse gestattet</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>&lt;Files ~</TT>
+<BR><TT>"(\.htaccess|/core|~|#|\.bak|\.BAK)$"&gt;</TT>
+<BR><TT>order deny,allow</TT>
+<BR><TT>deny from all</TT>
+<BR><TT>&lt;/Files&gt;</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">&nbsp;Es wird kein Zugriff auf Dateien gestattet
+die .htaccess hei&szlig;en, sich in einem Verzeichnis core befinden oder
+~ bzw. # enthalten oder mit .bak bzw. .BAK enden</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP><TT>&lt;Location /&gt;</TT>
+<BR><TT>Otions SymLinksIfOwnerMatch IncludesNOEXEC</TT>
+<BR><TT>order allow,deny</TT>
+<BR><TT>allow from all</TT>
+<BR><TT>AuthType Basic</TT>
+<BR><TT>AuthUserFile /etc/httpd/passwd</TT>
+<BR><TT>&lt;/Location&gt;</TT></TD>
+<TD VALIGN=TOP>F&uuml;r <TT>/opt/www/htdocs</TT>
+und alle Unterverzeichnisse wirde festgelegt, da&szlig; symbolische Links
+verfolgt werden d&uuml;rfen, wenn sie dem Benutzer (<TT>wwwrun</TT>)
+geh&ouml;ren und da&szlig; Include Anweisungen ausgef&uuml;hrt werden d&uuml;rfen
+(au&szlig;er <TT>exec</TT>).
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>&lt;Directory /opt/www/cgi-bin&gt;</TT>
+<BR><TT>Options ExecCGI</TT>
+<BR><TT>Order allow,deny</TT>
+<BR><TT>Allow from all</TT>
+<BR><TT>&lt;/Directory&gt;</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">&nbsp;Im Verzeichnis cgi-bin k&ouml;nnen CGI-Scripts
+ausgef&uuml;hrt werden</TD>
+</TR>
+</TABLE>
+<P>
+
+<H4>Einstellungen in <TT>srm.conf</TT></H4>
+<TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>Alias /icons /opt/www/icons</TT>
+<BR><TT>Alias /cgi-bin /opt/www/cgi-bin</TT>
+<BR><TT>Alias /images /opt/www/images</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Aliasname f&uuml;r bestimmte Directories. Diese
+werden anschlie&szlig;end behandelt, wie wenn sie sich unter <TT>htdocs</TT>
+befinden w&uuml;rden</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>UserDir public_html</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Benutzer k&ouml;nnen in ihren 
+Homedirectories ein Unterverzeichnis namens <TT>public_html</TT>
+anlegen und so eigene Seiten ver&ouml;ffentlichen, die &uuml;ber
+<TT>servername/~username</TT> erreichbar sind.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>DirectoryIndex index.html</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Wird nur ein Directory angegeben, wird automatisch
+nach einer Datei <TT>index.html</TT> gesucht und angezeigt.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>IndexOptions FancyIndexing</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Wird keine Index-Datei gefunden, wird der Inhalt
+des Verzeichnisses als Verzeichnisbaum angezeigt. Mit <TT>AddIcon</TT>
+werden bestimmten Dateendungen dann bestimmte Icons zugeordnet.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>IndexIgnore .??* *~
+*# *.bak *.BAK HEADER.* README.* RCS core</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Diese Dateien werden nicht durch FancyIndexing
+angezeigt</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>AccessFileName .htaccess</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Jedes Verzeichnis kann eine Datei <TT>.htaccess</TT>
+enthalten, mit der (falls erlaubt) die Optionen von <TT>access.conf</TT>
+&uuml;berschrieben werden k&oum;nnen.</TD>
+</TR>
+
+<TR>
+<TD VALIGN=TOP WIDTH="40%"><TT>DefaultType text/plain</TT></TD>
+<TD VALIGN=TOP WIDTH="60%">Dateien ohne Endung werden wie Text-Files behandelt.</TD>
+</TR>
+</TABLE>
+<P>
+
+Wie man Verzeichnisse durch Passwort sch&uuml;tzen kann, erfahren Sie, wenn Sie
+das Verzeichnis <A HREF="http://www.netzmafia.de/geheim/"><b><tt>/geheim</tt></b></A> auf diesem
+Server w&auml;hlen. Um sich zu authentisieren, geben Sie als Usernamen "<tt>user</tt>"
+und als Passwort "<tt>geheim</tt>" eingeben.
+<P>
+Viele Server bieten die M&ouml;glichkeit, zu jedem Verzeichnis automatisch 
+eine Inhaltsseite zu erstellen. Da freut sich der Hacker: Mit der URL
+"http://domain/cgi-bin/" erh&auml;lt er ein sch&ouml;nes Listing aller 
+installierten CGI-Skripte. Mit etwas Gl&uuml;ck ist auch noch die eine oder 
+andere von einem Editor erstellte Backup-Datei &uuml;briggeblieben und kann 
+direkt heruntergeladen werden. Zur Abhilfe sollte man unbedingt die 
+automatische Indexfunktion ausschalten, zumindest in allen Verzeichnissen, 
+die CGI-Skripte enthalten. Unter Windows NT sollte man dem Web-Server im 
+/cgi-bin/-Verzeichnis nur Ausf&uuml;hrungs- und keine Leserechte gew&auml;hren.<BR>
+Falls man keinen Einflu&szlig; auf die Konfiguration hat, etwa weil die
+Website bei einem Service-Provider liegt, sollte man eine leere 
+"index.html"-Seite anlegen. Surfer bekommen dann diese anstelle des 
+Verzeichnis-Listings angezeigt. Weiterhin sollte man pr&uuml;fen, ob der 
+Lieblings-Editor Backup-Dateien hinterl&auml;&szlig;t, und diese 
+regelm&auml;&szlig;ig l&ouml;schen.<BR>
+Wo wir schon beim Aufr&auml;umen sind: Es gab in der Vergangenheit 
+F&auml;lle, wo im Lieferumfang des Web-Servers gef&auml;hrliche 
+CGI-Beispielskripte enthalten waren. Deshalb sollte man alle CGI-Skripte 
+vom Server entfernen, die man nicht ben&ouml;tigt. Denn was nicht 
+vorhanden ist, kann auch keinen Schaden anrichten. 
+<P>
+<H4><A HREF="http://www.apache.org/">Webserver Apache</A></H4>
+<P>
+
+<A NAME="5.2"></A>
+<H2>5.2 Administration des ProFTPD</H2>
+<center>
+<p><img src="ftp.gif"><p>
+</center>
+
+Die Entwickler von <i>ProFTPD</i> haben einen völlig neuen
+FTP-Server entwickelt, der wesentlich übersichtlichere Konfiguration 
+und neue Features bietet. 
+Bei den meisten Distributionen ist dieser FTP-Server ebenso wie der WuFTPD
+mit enthalten und steht als Bin&auml;rpaket zur Verf&uuml;gung. Sollte das
+nicht der Fall sein, kann man die ProFTPD-Quellen von <i>ftp://ftp.proftpd.org/</i> 
+herunterladen. Das Entpacken, Compilieren und Installieren des Quellpakets 
+erfolgt standardm&auml;&szlig;ig mit 
+<PRE> 
+./configure --enable-autoshadow --sysconfdir /etc/
+make
+make install
+</PRE>
+Die erste Option bewirkt, da&szlig; die Datei <TT>/etc/shadow</TT> als 
+Passwortdatei benutzt wird und die zweite Option setzt das 
+Konfigurationsverzeichnis auf <TT>/etc</TT>.
+<P>
+Nachdem Sie einen eventuell schon vorhandenen FTP-Server deaktiviert
+haben, wird in der Datei <TT>/etc/inetd.conf</TT> die Zeile
+<PRE>
+ftp stream tcp nowait root /usr/sbin/proftpd proftpd
+</PRE>
+oder bei Verwendung des <tt>tcpd</tt>:
+<PRE>
+ftp stream tcp nowait root /usr/sbin/tcpd /usr/sbin/proftpd proftpd
+</PRE>
+eingef&uuml;gt und der <TT>inetd</TT> neu gestartet. Im zweiten Fall muss dann
+noch die Datei <tt>hosts.allow</tt> durch die Zeile
+<PRE>
+proftpd: localhost : ALLOW
+</PRE>
+erg&auml;nzt werden (statt "localhost" kommt da ggf. etwas anderes hin).
+<P>
+Falls ein Anonymous-FTP-Zugang geboten werden soll, mu&szlig; noch ein Benutzer 
+<TT>ftp</TT> mit dem Homeverzeichnis <TT>/home/ftp</TT> (mit den 
+Unterverzeichnissen <TT>pub</TT> und ggf. <TT>pub/incoming</TT>)
+eingerichtet werden. Ein Text, der immer beim Login ausgegeben wird, 
+kann in <TT>/home/ftp/login.txt</TT> gespeichert werden.
+<P>
+Vor allem muss die Datei <TT>/etc/proftpd.conf</TT> konfiguriert werden. Im
+Source-Verzeichnis befinden sich unter <TT>sample-configurations/</TT> einige
+Beispiel-Konfigurationen, die man zum ersten Testen verwenden kann.
+<P>
+
+<H3> Konfiguration </H3>
+Die Konfiguration von proftpd ist sehr flexibel, leider auch etwas
+un&uuml;bersichtlich, wenn die Komplexit&auml;t der Einstellungen steigt. Sie ist
+aber auch sehr einfach zu erlenen, da die Syntax dem HTML-&auml;hnlichen Code
+von apache folgt.<P>
+Wir spielen das ganze einfach einmal anhand eines einfachen Beispiels
+durch, wie es auch in der Praxis auftreten d&uuml;rfte. Die deutsche Pinguin
+GmbH, die sich auf die Herstellung von Netzwerkl&ouml;sungen f&uuml;r Linux
+spezialisiert hat, m&ouml;chte ihre Programme per FTP der gesamten Welt zur
+Verf&uuml;gung stellen, ihren G&auml;sten und Kunden aber auch die M&ouml;glichkeit
+bieten, Programme auf dem Server abzulegen (z.B. zum Debuggen). Da die
+kleine Firma auch ein paar au&szlig;enstehende Mitarbeiter hat, die im
+gesamten Bundesgebiet operieren, sollen sie auch an Daten kommen, die
+nicht f&uuml;r die Öffentlichkeit bestimmt sind. Diese Dateien sind dann im
+jeweiligen Home-Verzeichnes der User-Accounts zu finden.
+Zuerst wird ein Grundger&uuml;st f&uuml;r die Konfigurationsdatei
+<TT>/etc/proftpd.conf</TT> erzeugt, in der die wichtigsten Grundeinstellungen
+eingetragen werden:
+<PRE>
+ServerName          "Bluff GmbH"
+ServerAdmin         ftpadm@bluff.de
+
+ServerType          inetd
+
+Umask               022
+
+User                nobody
+Group               nobody
+
+DisplayLogin        login.txt
+DisplayFirstChdir	.message
+
+MaxClients	        15
+MaxInstances        30
+</PRE>
+<P>
+
+<H4>Eine Beispiel-login.txt</H4>
+<PRE>
+Hallo, Benutzer %U@%R!
+
+Willkommen auf dem FTP-Server der Bluff GmbH! Sie koennen Programme 
+aus dem Verzeichnis /pub/coolstuff downloaden. Falls Sie uns Dateien 
+zukommen lassen, legen Sie diese im Verzeichnis /pub/incoming ab. 
+
+Falls Sie Fragen oder Probleme zu unserem FTP-Server haben, schreiben
+Sie bitte eine E-Mail an %E.
+
+Viel Spa&szlig; w&uuml;nscht Ihnen
+  Das Bluff-Team
+</PRE>
+<P>
+Der Anonymous-FTP-Zugang f&uuml;r die G&auml;ste wird eingerichtet (als
+Fortsetzung der <TT>/etc/proftpd.conf</TT>):
+<PRE>
+# Normally, we want files to be overwriteable.
+&lt;Directory /*&gt;
+  AllowOverwrite        on
+&lt;/Directory&gt;  
+
+# anonymous ftp section
+&lt;Anonymous ~ftp&gt;
+
+  RequireValidShell   off
+  User                ftp
+  Group               ftp
+# Maximum clients with message
+  MaxClients          5 "Sorry, max %m users -- try again later"
+  User                ftp
+  Group               ftp
+  UserAlias	anonymous ftp
+
+   &lt;Limit LOGIN&gt;
+     AllowAll
+     order allow,deny
+     Allow from 192.168.1. , .example.net
+     deny from all
+  &lt;/Limit&gt;
+
+  &lt;Limit WRITE&gt;
+    DenyAll # Schreiben verboten
+  &lt;/Limit&gt;
+
+  &lt;Directory incoming&gt;
+    &lt;Limit READ&gt;
+      DenyAll
+    &lt;/Limit&gt;
+    &lt;Limit STOR&gt;
+      AllowAll
+    &lt;/Limit&gt;
+  &lt;/Directory&gt;
+&lt;/Anonymous&gt;
+</PRE>
+Das war's schon f&uuml;r die Konfigurationsdateien. 
+<P>
+<H3> Weitere Features </H3>
+<P>
+Eine besonders interessante Eigenschaft des ProFTPD: Man kann mehrere virtuellle
+Hosts einrichten, die alle getrennt ansprechbar sind:
+<PRE>
+&lt;VirtualHost ftp.trouble.de&gt;
+ServerName   "Trouble"
+ServerAdmin  boss@trouble.de
+&lt;/VirtualHost&gt;
+</PRE>
+Bei sehr besch&auml;ftigten Servern sollte man unbedingt die
+Variablen <TT>TimeoutIdle</TT>, <TT>TimeoutLogin</TT> und 
+<TT>TimeoutNoTransfer</TT> setzen, um den Server besser auszunutzen. 
+Au&szlig;erdem sind die Zugriffsbeschr&auml;nkungen des Servers nat&uuml;rlich 
+viel komplexer und detaillierter konfigurierbar
+als diese kurze &Uuml;bersicht erahnen l&auml;&szlig;t.
+<P>
+Weitererf&uuml;hrende Infos liefern der 
+<A HREF="http://www.proftpd.org/configuration.html">Konfigurationstext</A> 
+und die
+<A HREF="http://www.proftpd.org/reference.html">Referenz</A>, 
+die leider nicht im proftpd-Paket erhalten sind und extra
+heruntergeladen werden m&uuml;ssen. 
+<P>
+
+<A NAME="5.3"></A>
+<h2>5.3 Anlegen des Anonymous-Users</h2>
+Um den FTP-Dienst auch f&uuml;r Leute zur Verf&uuml;gung zu stellen, die keine
+Zugriffsberechtigung auf den Server besitzen, wird ein anonymer User
+namens <i>ftp</i> eingerichtet. Er erh&auml;lt ein
+eigenes Home-Verzeichnis, das beim Betrieb mit dem chroot()-Systemaufruf
+zum Hauptverzeichnis dieses Benutzers wird. Er hat also nur eine eingeschr&auml;nkte
+Sicht auf das System. Ein weiterer wichtiger Aspekt: Es darf nicht
+m&ouml;glich sein, sich als Anonymous an einen anderen Unix-Dienst
+anzumelden, oder sogar mit einer Shell Befehle abzusetzen. Dies w&auml;re
+eine grobe Verletzung der Systemsicherheit. Der Eintrag zum Anlegen
+dieses Benutzers in der Datei <tt>/etc/passwd</tt>  lautet:
+<PRE>
+ftp:*:40:2:Anonymous FTP user:/home/ftp:/bin/false
+</PRE>
+Bitte darauf achten, da&szlig; <tt>/bin/false</tt>  in der Datei <tt>/etc/shells</tt> 
+verzeichnet ist.
+<P> 
+Nachdem der Benutzer eingetragen wurde, mu&szlig; in seinem Home-Bereich
+eine bestimmte Verzeichnisstruktur erstellt werden. Durch die Einschr&auml;nkung
+der Sicht auf den Dateibaum darf aber nicht die Funktionalit&auml;t des
+FTP-Prozesses behindert werden, besonders nicht durch fehlende Bibliotheken
+oder Hilfsprogramme. Zu diesem Zweck wird zun&auml;chst das Home-Verzeichnis
+angelegt:
+<PRE>
+/home/ftp
+</PRE>
+In diesem Verzeichnis m&uuml;ssen nun diejenigen Subdirectories angelegt
+werden, die das System nach dem Change Root noch erwartet oder die
+FTP ben&ouml;tigt. Dies sind:
+<UL> 
+<LI> <b> <tt>bin/</tt></b>  f&uuml;r ausf&uuml;hrbare Dateien
+<LI> <b> <tt>/usr/bin/</tt></b>  f&uuml;r ausf&uuml;hrbare Dateien
+<LI> <b> <tt>lib/</tt></b>  f&uuml;r dynamische Bibliotheken
+<LI> <b> <tt>etc/</tt></b>  f&uuml;r Pa&szlig;wort- und Gruppendatei
+<LI> <b> <tt>pub/</tt></b>  f&uuml;r das eigentliche Archiv
+<LI> <b> <tt>dev/</tt></b>  f&uuml;r Ger&auml;tedateien
+<LI> <b> <tt>msgs/</tt></b>   f&uuml;r Meldungsdateien
+</UL> 
+<P> 
+Dar&uuml;ber hinaus ist es m&ouml;glich, da&szlig; bestimmte Betriebssysteme noch
+weitere Verzeichnisse ben&ouml;tigen. Unter Linux stellt sich der 
+Vezeichnisbaum folgenderma&szlig;en dar:
+<P>
+<pre>
+total 7
+d--x--x--x   2 root     root         1024 Jan 25 18:01 bin
+dr-xr-xr-x   2 root     root         1024 Jan 25 18:01 dev
+d--x--x--x   2 root     root         1024 Jan 25 18:01 etc
+dr-xr-xr-x   2 root     root         1024 Jan 25 18:01 lib
+dr-xr-xr-x   2 root     root         1024 Jan 25 18:01 msgs
+dr-xr-xr-x   2 root     root         1024 Feb  3 15:58 pub
+d--x--x--x   3 root     root         1024 Nov 11  1999 usr<P>
+
+bin:
+total 1012
+-r-xr-xr-x   1 root     root       233736 Nov 11  1999 compress
+-r-xr-xr-x   1 root     root       366272 Nov 11  1999 ls
+-r-xr-xr-x   1 root     root       427792 Nov 11  1999 tar<P>
+
+dev:
+total 0
+crw-rw-rw-   1 root     root       1,   3 Nov 11  1999 null<P>
+
+etc:
+total 2
+-r--r--r--   1 root     root           31 Apr 21  1996 group
+-r--r--r--   1 root     root           38 Apr 21  1996 passwd<P>
+
+lib:
+total 0
+
+msgs:
+total 2
+-r--r--r--   1 root     root           61 Mai  7  1996 msg.dead
+-r--r--r--   1 root     root          661 Feb  3 16:13 welcome.msg<P>
+
+pub:
+total 0
+
+usr:
+total 1
+d--x--x--x   2 root     root         1024 Jan 25 18:01 bin<P>
+
+usr/bin:
+total 722
+-r-xr-xr-x   1 root     root       365652 Nov 11  1999 gzip
+-r-xr-xr-x   1 root     root       366272 Nov 11  1999 ls
+</pre> 
+
+Gerade bei anonymem Zugriff spielen auch die Zugriffsrechte eine wichtige Rolle.
+Keines der Verzeichnisse und keine der Dateien sollten dem User <tt>ftp</tt> 
+geh&ouml;ren. Auch Schreibrecht darf nirgendwo existieren. 
+<P> 
+Nachdem nun die Verzeichnisstruktur erzeugt ist, m&uuml;ssen noch einige
+Dateien angelegt werden, die Unix zum Betrieb ben&ouml;tigt. Im Verzeichnis <tt>bin/</tt>  mu&szlig; sich von den ausf&uuml;hrbaren Programmen nur 
+der ls-Befehl befinden. 
+<P> 
+Im <tt>etc/</tt> -Verzeichnis befinden sich die Pa&szlig;wortdatei und die 
+Gruppendatei. Die Dateien <tt>passwd</tt>  und <tt>group</tt>  sind 
+&quot;`Spieldateien&quot;', in der lediglich die Eigent&uuml;mer der Dateien im 
+FTP-Verzeichnis eingetragen sind, damit beim ls-Kommando
+nicht nur numerische User- und Gruppen-IDs angezeigt werden.<P>
+In <tt>passwd</tt>  sollen nur diejenigen Eintr&auml;ge erscheinen, die 
+f&uuml;r den Anonymous-Betrieb sinnvoll sind:
+<pre> 
+root:*:0:0::/:/bin/false
+bin:*:2:2::/:/bin/false
+ftp:*:40:100::/:/bin/false
+ftpadm:*:99:100::/:/bin/false
+</pre> 
+Auch <tt>etc/group</tt>  hat nur wenige Eintr&auml;ge:
+<pre> 
+users:x:100:root
+bin:*:2:root
+root:*:0:root
+</pre> 
+In das <tt>lib</tt>-Verzeichnis kommen alle ben&ouml;tigten Libraries - was bei manchen
+Distributionen nicht immer vollst&auml;ndig geschieht. Sie k&ouml;nnen mit dem Kommando <tt>ldd &lt;Programmname&gt;</tt> feststellen, welche dynamische Bibliotheken
+gebraucht werden. Diese kopieren Sie dann nach <tt>lib</tt>. Deutliches Zeichen,
+da&szlig; noch etwas fehlt ist z.B. keine Dateianzeige bei <tt>ls</tt>.<P>
+<BR>
+Abschlie&szlig;end sind f&uuml;r den gesamten Verzeichnisbaum noch geeignete
+Zugriffsrechte und Eigent&uuml;mer zu setzen. Die Dokumentation schl&auml;gt
+hier Vorgabewerte vor, die in der folgenden Tabelle aufgelistet sind und die man
+auch am obigen Dateilisting sehen kann. Das Verzeichnis <tt>lib/</tt>  ist
+normalerweise leer. Nur wenn dynamisch gelinkte Versionen von <tt>ls</tt>  und
+anderen Programmen verwendet werden, kommen hier die passenden Libraries hinein.
+Mit dem Kommando <tt>ldd</tt>  kann man herausbekommen, welche Libraries ein
+Programm ben&ouml;tigt. 
+<P>
+<TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0>
+<TR><TD>Verzeichnis/Datei</TD><TD>Eigent&uuml;mer</TD><TD>Rechte </TR> 
+<TR><TD><tt>/home/ftp</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 555</tt> </TR> 
+<TR><TD><tt>bin/</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 111</tt> </TR> 
+<TR><TD><tt>etc/</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 111</tt> </TR> 
+<TR><TD><tt>pub/</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 555</tt> </TR> 
+<TR><TD><tt>bin/ls</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 111</tt> </TR> 
+<TR><TD><tt>etc/group</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 444</tt> </TR> 
+<TR><TD><tt>etc/passwd</tt></TD><TD><tt>root:root</tt></TD><TD><tt>Mode 444</tt> </TR>
+</TABLE>
+<P> 
+Achten Sie auch darauf, da&szlig; alle Dateien, die der ftpd erreichen mu&szlig;,
+auch innerhalb des ftp-Verzeichnisses angeordnet sind. Beim anonymen Login wird ja
+ein <tt>chroot()</tt> ausgef&uuml;hrt, so da&szlig; nur noch das ftp-Verzeichnis 
+sichtbar ist. 
+<P>
+<H4><A HREF="http://www.proftpd.org/">FTP-Server ProFTPD</A></H4>
+<P>
+
+<A NAME="5.4"></A>
+<H2>5.4 Domain-Name-Service (DNS)</H2>
+
+Grundlagenwissen zum DNS finden Sie im Netzwerk-Skript
+unter <A HREF="netz8.html#8.8">Domain Name System (DNS)</A>.
+Darum geht es hier um die Einrichtung eines DNS-Servers.
+<P>
+
+<H3>Aufbau der Dateien des DNS-Servers (ab BIND 8.x)</H3>
+<H4>Aufbau der Zonendatei</H4>
+
+Beispiel des Primary DNS "<i>aella.serverzwerge.de</i>":
+<pre>
+; Zonendatei fuer die Domaene serverzwerge.de
+;
+$TTL 1D
+@       in      SOA     aella.serverzwerge.de.  dnsadmin.aella.serverzwerge.de. (
+                2002051505        ; Seriennummer
+                10800   ; Refresh : 3 Stunden
+                3600    ; Retry   : 1 Stunde
+                604800  ; Expire  : 1 Woche
+                86400)  ; Min. TTL: 1 Tag
+                NS              aella.serverzwerge.de.
+                MX              10 aella.serverzwerge.de.
+                MX              50 mail.irgendeinprovider.de.
+ 
+aella           A       10.23.200.100
+snowwhite       A       10.23.200.17
+doc             A       10.23.200.18
+happy           A       10.23.200.19
+bashful         A       10.23.200.20
+sneezy          A       10.23.200.21
+sleepy          A       10.23.200.22
+grumpy          A       10.23.200.23
+dopey           A       10.23.200.24
+                HINFO   "Hexium 7.5" "Linux"
+ 
+beispiel        CNAME   aella
+</pre>
+<P>
+
+<H4>R&uuml;ckw&auml;rtsaufl&ouml;sung</H4>
+Beispiel des Primary DNS "<i>aella.serverzwerge.de</i>":
+<pre>
+; Reverse-Zonendatei fuer die Domaene serverzwerge.de
+;
+$TTL 1D
+@     in   SOA     aella.serverzwerge.de.     dnsadmin.aella.serverzwerge.de. (
+                2002051602      ; Seriennummer
+                10800   ; Refresh : 3 Stunden
+                3600    ; Retry   : 1 Stunde
+                604800  ; Expire  : 1 Woche
+                86400)  ; Min. TTL: 1 Tag
+                NS      aella.serverzwerge.de.
+ 
+100             PTR     aella.serverzwerge.de.
+17              PTR     snowwhite.serverzwerge.de.
+18              PTR     doc.serverzwerge.de.
+19              PTR     happy.serverzwerge.de.
+20              PTR     bashful.serverzwerge.de.
+21              PTR     sneezy.serverzwerge.de.
+22              PTR     sleepy.serverzwerge.de.
+23              PTR     grumpy.serverzwerge.de.
+24              PTR     dopey.serverzwerge.de.
+</pre>
+<P>
+
+<H4>Beispiel eines Cache-Only-Servers</H4>
+
+Datei "<i>/etc/named.conf</i>":
+<pre>
+// Beispiel fuer einen Cache-Only-Server
+//
+options {         // Arbeitsverzeichnis fuer die DNS-Daten
+          directory "/var/named";
+          forward only;   // nur weiterleiten, keinen Server selbst fragen
+          forwarders {    // Anfragen nur ueber diesen Server
+                10.23.200.100;
+          };
+};
+ 
+zone "." in {
+           type hint;
+           file "root.hint"; // Tabelle mit den Root-Servern
+};
+ 
+zone "localhost" in {
+           type master;
+           file "localhost.zone";
+};
+ 
+zone "0.0.127.in-addr.arpa" in { // fuer Reversed-Loopback
+           type master;
+           file "127.0.0.rev";
+};
+</pre>
+<p>
+Start des Servers &uuml;ber "<i>/etc/rc.d/named start</i>". Bei 
+SusE-Distributionen bis einschlie&szlig;lich 7.3 mu&szlig; vor dem Start 
+in der Datei "<i>/etc/rc.config</i>" die Variable "<i>START_NAMED="yes"</i> 
+gesetzt werden.
+<p>
+Kontrolle des Server-Starts dann mit:
+<pre>
+root@schrottsocke:/etc # tail -f /var/log/messages
+Jun  3 21:20:09 n6-lbs named[2037]: starting (/etc/named.conf).  named 
+ 8.2.4-REL Thu Sep 20 04:20:40 GMT 2001        root@knox:/usr/src/packages/
+  BUILD/bind8-8.2.4/bin/named
+Jun  3 21:20:09 n6-lbs named[2037]: hint zone "" (IN) loaded (serial 0)
+Jun  3 21:20:09 n6-lbs named[2037]: master zone "localhost" (IN) loaded 
+ (serial 42)
+Jun  3 21:20:09 n6-lbs named[2037]: master zone "0.0.127.in-addr.arpa" (IN) 
+ loaded (serial 42)
+Jun  3 21:20:09 n6-lbs named[2037]: listening on [127.0.0.1].53 (lo)
+Jun  3 21:20:09 n6-lbs named[2037]: listening on [10.23.200.22].53 (eth0)
+Jun  3 21:20:09 n6-lbs named[2037]: Forwarding source address is [0.0.0.0].32768
+Jun  3 21:20:09 n6-lbs named[2038]: group = named
+Jun  3 21:20:09 n6-lbs named[2038]: user = named
+Jun  3 21:20:09 n6-lbs named[2038]: Ready to answer queries.
+</pre>
+<P>
+
+<H4>Beispiel eines Secondary-Servers</H4>
+
+Datei "<i>/etc/named.conf</i>":
+<pre>
+// Beispiel: Secondary DNS fuer die Domain serverzwerge.de
+//
+ 
+// Access-Control-List fuer internes Netz definieren
+acl intern {
+  10.23.0.0/16;  // alle Rechner im Netz 10.23.0.0
+};
+options {         // Arbeitsverzeichnis fuer die DNS-Daten
+          directory "/var/named";
+          forwarders {    // Anfragen nur ueber diesen Server
+              10.23.200.100;
+          };
+          allow-transfer {
+             intern;  // Zonen-Transfer vom internen Netz
+        };
+};
+ 
+zone "." in {
+           type hint;
+           file "root.servers"; // Tabelle mit den Root-Servern
+};
+ 
+zone "0.0.127.in-addr.arpa" in { // fuer Reversed-Loopback
+           type master;
+           file "127.0.0.rev";
+};
+ 
+zone "serverzwerge.de" in { // Domaene serverzwerge.de, vorwaerts aufgeloest
+           type slave;   // sekundaerer Server
+           file "serverzwerge.zone"; // Name der Tabelle
+           masters {
+             10.23.200.100;     // IP-Adr. primaerer Server
+           };
+};
+ 
+zone "200.23.10.in-addr.arpa" in { // Domaene serverzwerge.de rueckwaerts
+           type slave;               // sekundaerer Server
+           file "10.23.200.rev";   // Name der Tabelle
+           masters {
+             10.23.200.100;        // IP-Adr. primaerer Server
+           };
+};
+</pre>
+<p>
+Start des Servers &uuml;ber "<i>/etc/rc.d/named start</i>". 
+Bei SusE-Distributionen bis einschlie&szlig;lich 7.3 mu&szlig; vor dem Start 
+in der Datei "<i>/etc/rc.config</i>" die Variable "<i>START_NAMED="yes"</i> 
+gesetzt werden.
+<p>
+Kontrolle des Server-Starts dann mit:
+<pre>
+root@schrottsocke:/etc # tail -f /var/log/messages
+Jun  3 21:58:50 n6-lbs named[2187]: starting (/etc/named.conf).  named 
+  8.2.4-REL Thu Sep 20 04:20:40 GMT 2001        root@knox:/usr/src/packages
+  /BUILD/bind8-8.2.4/bin/named
+Jun  3 21:58:50 n6-lbs named[2187]: hint zone "" (IN) loaded (serial 0)
+Jun  3 21:58:50 n6-lbs named[2187]: master zone "0.0.127.in-addr.arpa" (IN) 
+  loaded (serial 42)
+Jun  3 21:58:50 n6-lbs named[2187]: slave zone "serverzwerge.de" (IN) loaded 
+  (serial 2002051505)
+Jun  3 21:58:50 n6-lbs named[2187]: slave zone "200.23.10.in-addr.arpa" (IN) 
+  loaded (serial 2002051602)
+Jun  3 21:58:50 n6-lbs named[2187]: listening on [127.0.0.1].53 (lo)
+Jun  3 21:58:50 n6-lbs named[2187]: listening on [10.23.200.22].53 (eth0)
+Jun  3 21:58:50 n6-lbs named[2187]: Forwarding source address is [0.0.0.0].32768
+Jun  3 21:58:50 n6-lbs named[2188]: group = named
+Jun  3 21:58:50 n6-lbs named[2188]: user = named
+Jun  3 21:58:50 n6-lbs named[2188]: Ready to answer queries.
+</pre>
+<P>
+
+<H3>DNS-Tools</H3>
+
+<H4><TT>nslookup</TT></H4>
+
+Syntax: <TT>nslookup [-option ... ] [host-to-find] [-server]</TT>
+<P>
+Zum Beispiel:
+<pre>
+root@schrottsocke#nslookup www.netzmafia.de -10.23.200.100
+Server: 10.23.200.100
+Address: 10.23.64.1
+Non-authoritative answer:
+Name: www.netzmafia.de
+Address:  141.39.253.210
+</pre>
+Ruft man <TT>nslookup</TT> ohne Parameter auf, schaltet das Programm 
+in den interaktiven Modus. Um alle Rechner der Dom&auml;ne <TT>serverzwerge.de</TT> 
+anzuzeigen, gibt man der Reihe nach folgendes ein: 
+<pre>
+nslookup 
+>set q=any 
+>server 10.23.200.100 
+>ls -d serverzwerge.de.
+</pre>
+<P>
+
+<H4><TT>dig</TT> und <TT>host</TT></H4>
+Syntax: <TT>host [-l] [-v] [-w] [-r] [-d] [-t querytype] [-a] host [server]</TT>
+<P>
+Zum Beispiel wollen wir alle Rechner in der Dom&auml;ne <TT>serverzwerge.de</TT> 
+vom DNS-Server <TT>10.23.200.100</TT> holen:
+<pre>
+host -al serverzwerge.de. 10.23.200.100
+</pre>
+<P>
+
+Syntax: <TT>dig [@server] domain [] [] [+] [-] [%comment]</TT>
+<P>
+Tabelle aller Root-Name-Server in die Datei root.servers schreiben:
+<pre>
+dig ors.internic.net . ns»> root.server-s
+</pre>
+<P>
+
+
+<H3>DNS-Abfragen in Perl</H3>
+Das erste Script zeigt, wie mit der Funktion <TT>gethostbyname</TT> der Name-Service
+abgefragt wird. Die Funktion liefert im Listen-Kontext etliche Elemente zur&uuml;ck, 
+von uns die letzten interessieren: Das Array <TT>@addrs</TT> mit den im Bin&auml;rformat 
+vorliegenden IP-Adressen, die nur noch ausgepackt werden m&uuml;ssen.
+<PRE>
+#!/usr/bin/perl -w
+ 
+my $host = $ARGV[0] || die "usage: $0 hostname";
+
+my ($name, $aliases, $addrtype, $length, @addrs) = 
+    gethostbyname($host);
+
+foreach $i (@addrs) 
+  {
+  my ($a, $b, $c, $d) = unpack('C4', $i);
+  print "$a.$b.$c.$d\n";
+  }
+</PRE>
+<P>
+
+<H3>Reverse Lookup</H3>
+Manchmal kommt es vor, da&szlig; zwar die IP-Adresse eines Servers vorliegt, 
+zu der man den Namen sucht. Nachdem im Internet f&uuml;r ordnungsgem&auml;&szlig; 
+registrierte Server auch reverse-DNS-Eintr&auml;ge  existieren, ist das kein Problem. 
+Den Namen eines Rechners, dessen IP-Adresse gegeben ist, ermittelt das folgende Script.
+Die Perl-Funktion <TT>gethostbyaddr</TT> erwartet die umzuwandelnde IP-Adresse in einer
+C-Struktur, welche die Funktion <TT>inet_aton</TT> aus dem <TT>Socket</TT>-Modul 
+erzeugt. Als zweiten Parameter wird wieder das <TT>AF_INET</TT>-Makro verwendet. 
+<PRE>
+#!/usr/bin/perl -w
+
+use Socket;
+
+$ip_string = $ARGV[0] || die "usage: $0 ipaddr";
+
+$ip = inet_aton($ip_string);
+$host = (gethostbyaddr($ip, AF_INET))[0];
+print $host, "\n";
+</PRE>
+
+<P>
+<H3>MX-Records</H3>
+Das dritte Listing zeigt, wie man den MX-Record eines Eintrags in der DNS-Datenbank 
+anzapft. Das auf dem CPAN erh&auml;ltliche Modul <TT>Net::DNS</TT> von 
+Michael Fuhr vereinfacht den Zugriff. Es arbeitet dabei mit Resolver-Objekten vom Typ 
+<TT>Net::DNS::Resolver</TT>, die Anfragen an DNS-Server stellen 
+und Antworten liefern. Im Programm l&ouml;st der Aufruf der <TT>mx</TT>-Funktion, die 
+ein Resolver-Objekt und den Domain-Namen als Parameter erwartet, eine DNS-Anfrage aus. 
+<TT>mx</TT> liefert eine Liste von Objekten vom Typ <TT>Net::DNS::RR</TT> zur&uuml;ck, 
+deren Inhalte sich mit den Methoden <TT>preference</TT> (Priorit&auml;ts-Wert) und 
+<TT>exchange</TT> (Mail-Vermittlungsrechner) ermitteln lassen. Bei auftretenden 
+Fehlern ist die zur&uuml;ckgegebene Liste <TT>@mx</TT> leer.
+<P>
+<PRE>
+#!/usr/bin/perl -w
+
+use Net::DNS;
+
+my $domain = $ARGV[0] || die "usage: $0 domain";
+my $resolver = new Net::DNS::Resolver;
+
+# MX-Record abfragen 
+my @mxrecs = mx($resolver, $domain);
+if (@mxrecs) 
+  {
+  # Gefunden!
+  foreach $rec (@mxrecs) 
+    {
+    print $rec-&gt;preference, " ", 
+           $rec-&gt;exchange, "\n";
+    }
+  } 
+else 
+  {
+  # Leere Liste, Fehler!
+  print "Kein MX-Record f&uuml;r $domain: ", 
+          $resolver-&gt;errorstring, "\n";
+  }
+</PRE>
+<P>
+<H4><A HREF="http://www.isc.org/products/BIND/">DNS-Server BIND</A></H4>
+<P>
+
+
+<A NAME="5.5"></A>
+<H2>5.5 Proxy-Grundlagen</H2>
+
+Der Abruf externer WWW-Dokumente &uuml;ber das Internet kostet Zeit und Geld. 
+Einiges davon l&auml;&szlig;t sich durch einen Proxy-Cache einsparen. "Proxy" bedeutet
+"Stellvertreter", denn der Proxy-Server ruft die Dokumente stellvertretend
+f&uuml;r den Client im lokalen Netz ab. "Cache" bedeutet "Zwischenspeicher", da
+der Proxy abgerufene Dokumente auch f&uuml;r eine gewisse Zeit zwischenspeichert.
+<p>
+Die Anbindung eines lokalen Netzes an das Internet stellt immer auch ein
+gewisses Ma&szlig; an Risiko dar. Das liegt daran, da&szlig; nicht nur Stationen
+im eigenen Netz Verbindungen nach au&szlig;en aufbauen k&ouml;nnen, sondern der
+umgekehrte Weg ebenfalls m&ouml;glich ist und sich neben erw&uuml;nschten
+Besuchern auch ungebetene G&auml;ste im lokalen Netz tummeln
+k&ouml;nnen. Ein Proxy kann hier einen Schutzschild bilden, wenn er der einzige
+Rechner mit Verbindung nach au&szlig;en ist. Allen &uuml;brigen Rechnern bleibt allein der
+Inhouse-Datenverkehr &uuml;ber das lokale Netz.
+<p>
+M&ouml;chte ein Anwender ein Dokument von
+einem WWW-Server im Internet abrufen, auf den er von seinem Rechner
+aus keinen Zugriff hat, wendet er sich (beziehungsweise sein
+WWW-Client) an den Proxy. Dieser l&auml;uft auf der Internet-berechtigten
+Maschine im lokalen Netz und hat zwei Gesichter: Gegen&uuml;ber dem
+WWW-Client des Benutzers tritt er als WWW-Server auf und nimmt die
+Anforderung entgegeben. Um das Dokument zu besorgen, das er selbst
+nicht besitzt, fungiert er gegen&uuml;ber dem Originalserver als
+WWW-Client, ruft das Dokument ab und leitet es dann an den
+anfordernden Client weiter.
+<p>
+<center><img src="proxy1.gif"></center>
+<p>
+Der Proxy beherrscht also beide Seiten der Kommunikation, die eines
+Clients und die eines Servers. Zweckm&auml;&szlig;igerweise spricht er au&szlig;er HTTP
+die &uuml;brigen im WWW unterst&uuml;tzten Protokolle, so da&szlig; der Durchgriff
+etwa auf FTP etc. &uuml;ber den Proxy ebenfalls m&ouml;glich ist. Das folgende
+Bild zeigt einen &uuml;ber den Proxy laufenden FTP-Zugriff.
+<p>
+<center><img src="proxy2.gif"></center>
+<p>
+Eine per FTP vom Originalserver geholte Datei kapselt der Proxy in
+eine HTTP-Response ein, l&auml;&szlig;t sie aber im Übrigen unver&auml;ndert. 
+Verzeichnisse konvertiert er und stellt sie als Liste von Links dar.
+<p>
+Bevor der Proxy im Auftrag eines Client einen entfernten Zugriff
+ausf&uuml;hrt, kann er pr&uuml;fen, ob der Client berechtigt ist, die
+Proxy-Funktionalit&auml;t zu nutzen. Fein abgestufte Mechanismen erlauben
+dem Administrator, unterschiedlichen Benutzern unterschiedliche
+Rechte zu geben.
+<p>
+Noch interessanter wird es, wenn der Proxy-Server die von au&szlig;en
+geholten Daten nicht nur einfach an den Client weiterleitet, sondern
+sie zus&auml;tzlich in einem Plattencache zwischenspeichert und sie dort
+f&uuml;r k&uuml;nftige Zugriffe bereith&auml;lt. Die Abbildung zeigt den Zugriff auf
+ein entferntes Dokument durch Client 1. Der Proxy ruft die Seite ab,
+stellt sie zu und legt sie gleichzeitig im Cache ab. Ruft nun ein
+zweiter Client das gleiche Dokument ab, braucht der Proxy keine
+Au&szlig;enverbindung mehr aufzubauen, sondern kann die Anforderung
+unmittelbar aus dem Cache heraus befriedigen.
+<p>
+<center><img src="proxy3.gif"></center>
+<p>
+Das Caching bietet mehrere Vorteile:
+<ul>
+<li>Der Client erh&auml;lt das angeforderte Dokument sehr schnell, da
+lediglich eine lokale Verbindung zum Proxy n&ouml;tig ist.
+<li>Die Anfrage belastet die externe Anbindung nicht; die
+Leitungsbandbreite bleibt f&uuml;r andere Dienste frei.
+<li>F&uuml;r den Transport des Dokuments vom Proxy zum Client fallen
+keine Übertragungskosten an.
+</ul>
+Die Erfahrungen zeigen, da&szlig; die Trefferquoten im Cache im Durchschnitt bei 
+rund 40 bis 50 Prozent liegen, der Proxy-Cache also fast jeden zweiten Zugriff 
+erspart. Besonders beliebte WWW-Seiten weisen noch erheblich h&ouml;here Trefferquoten 
+auf. Voraussetzung f&uuml;r optimales Caching ist ein gen&uuml;gend gro&szlig;er Cache-Bereich. 
+Ein kleinerer Cache l&auml;uft schneller &uuml;ber, so da&szlig; der Garbage collector h&auml;ufiger 
+Dokumente entfernen mu&szlig;. Das macht ein h&auml;ufigeres Neuladen durch den Proxy
+erforderlich und l&auml;&szlig;t die Cache-Trefferquote entsprechend sinken. Da der Proxy 
+einem WWW-Server gegen&uuml;ber als ganz normaler Client auftritt, kann man zwei oder 
+mehr Proxies hintereinanderh&auml;ngen und eine Kaskade aufbauen. Den handfesten 
+Vorteilen des Proxy-Caching stehen aber auch einige Nachteile gegen&uuml;ber:
+<ul>
+<li>Der Cache enth&auml;lt m&ouml;glicherweise eine veraltete Fassung des
+Originaldokuments und liefert diese an den Client, anstatt die
+aktuelle Version auf dem WWW-Server zu ber&uuml;cksichtigen. 
+<li>Wenn die Inhouse-Klienten nicht h&auml;ufig auf dieselben Dokumente
+zugreifen, also eine geringe Lokalit&auml;t der Zugriffe vorliegt, ist
+Caching nutzlos.
+</ul>
+<p>
+Das einzige wirklich wichtige Problem beim Proxy-Einsatz ist
+das der nicht notwendigerweise aktuellen Dokumente. Verschiedene
+Strategien versuchen, es zu meistern und dem Benutzer soweit irgend
+m&ouml;glich aktuelle Dokumente zu liefern. Ziel dieser Strategien ist es,
+die Dokumente im Cache so h&auml;ufig wie n&ouml;tig zu aktualisieren, aber
+gleichzeitig so wenig wie m&ouml;glich externe Zugriffe
+durchzuf&uuml;hren. Ausnutzen lassen sich dazu zwei HTTP-Features:
+Last-Modified und Expires. Das Protokoll sieht in der Antwort des
+Servers Informationen dar&uuml;ber vor, wann das Dokument zuletzt ge&auml;ndert
+wurde (Header Last-Modified) und ab wann der Client (hier: der Proxy)
+ein Dokument als veraltet betrachten soll (Header Expires). Die zweite
+Information f&uuml;r sich genommen w&uuml;rde schon zur Probleml&ouml;sung reichen,
+weil man dank dieses Headers genau wei&szlig;, wann das Dokument
+veraltet. Aber leider sind sowohl Last-Modified als auch Expires
+lediglich optionale Header. In der Praxis kommt der Expires-Header 
+selten vor. Die meisten Dokumente besitzen kein vorher definiertes 
+Verfallsdatum; sie sind einfach solange g&uuml;ltig, bis der Autor eine 
+neue Version erstellt.
+<p>
+Die meisten Server liefern bei statischen Dokumenten meist den 
+Last-Modified-Header mit. Diesen Zeitstempel herauszufinden ist 
+nicht schwer, da jede Datei diese Information mit sich tr&auml;gt.
+Mit Hilfe von Last-Modified implementiert der Proxy ein heuristisches 
+Verfahren. Die zugrundeliegende Überlegung: Liegt die letzte Änderung 
+eines Dokuments schon Monate zur&uuml;ck, ist die Wahrscheinlichkeit recht 
+gering, da&szlig; ausgerechnet in den n&auml;chsten paar Stunden eine Modifikation
+erfolgt. Sofern das Dokument allerdings erst vor kurzem aktualisiert
+wurde, ist die n&auml;chste Ver&auml;nderung bestimmt nicht weit.
+Eine weitere Optimierung sorgt daf&uuml;r, da&szlig; der Server das Dokument
+nur dann schickt, wenn er eine neuere Version besitzt als der
+Cache. Dazu &uuml;bermittelt der Proxy dem Server den
+Last-Modified-Zeitstempel der Dokumentversion, die er im Cache
+h&auml;lt, so da&szlig; der Server entscheiden kann, ob er selbst &uuml;ber eine
+aktuellere Fassung verf&uuml;gt, z. B.:
+<pre>
+GET /index.html HTTP/1.0
+If-Modified-Since: Monday, 10-Jun-02 13:26:12 GMT
+</pre>
+Ist die alte Version noch immer die aktuelle, teilt der Server dem
+Proxy dies in einer kurzen, nur aus HTTP-Headern bestehenden Nachricht
+mit. 
+<p>
+Der HTTP-Header</p>
+<pre>
+Pragma: no-cache
+</pre>
+teilt dem Proxy den Wunsch des Clients mit, den Originalserver zu
+befragen. Die Optimierung mit If-Modified-Since kommt bei HTTP-Servern
+auch hier zum Tragen.
+<P>
+
+<H3>Sicherheitsaspekte</H3>
+Der Proxy-Betreiber will seinen Service in der Regel nur einer bestimmten 
+Benutzergruppe zur Verf&uuml;gung stellen. Der Anwender will durch den Proxy-Betrieb 
+auch keine Schwierigkeiten haben. Und schlie&szlig;lich m&ouml;chte der Anbieter von
+solchen Dokumenten, die eine Autorisierung verlangen, nicht, da&szlig; seine
+Seiten in irgendeinem Proxy-Cache herumliegen und wohlm&ouml;glich von
+jedem beliebigen Interessenten unkontrolliert gelesen werden k&ouml;nnen.
+<p>
+Stellt der Benutzer seinen Client auf Proxy-Betrieb um, kann
+er bei gesch&uuml;tzten Dokumenten durchaus Probleme bekommen. Es ist ja
+jetzt der Proxy, von dem der Server die HTTP-Anforderung empf&auml;ngt, und
+nicht mehr der Client. Und wenn ein Dokument nur an Rechner mit
+bestimmten IP- oder Domain-Adressen ausgeliefert wird, lehnt der
+Server die Anforderung ab, sofern der Proxy-Server in dieser Liste
+nicht registriert ist. Andererseits k&ouml;nnen s&auml;mtliche Kunden des
+Proxies das Dokument ebenfalls erhalten, wenn der Proxy-Server 
+zugriffsberechtigt ist.
+<p>
+Bei Dokumenten, die ohne R&uuml;cksicht auf die Rechneradresse durch "Basic 
+Authentication" gesichert sind, f&uuml;r die sich der Anwender also mittels 
+Benutzerkennung und Pa&szlig;wort ausweisen mu&szlig;, bereiten keine Probleme. Die Antwort 
+vom Originalserver enth&auml;lt bei unautorisiertem Zugriff den HTTP-Header 
+<pre>
+WWW-Authenticate: Basic realm="<em>name</em>"
+</pre>
+Der Client versieht Zugriffe auf derart gesch&uuml;tzte Dokumente mit dem Header 
+<pre>
+Authorization: Basic <em>user:password</em>
+</pre>
+Der Proxy-Server reicht diese Header in beide Richtungen unver&auml;ndert durch 
+und stellt daher kein Hindernis dar. Derart gesch&uuml;tzte Dokumente nimmt der 
+Proxy nicht in den Cache auf, um unberechtigten Abrufen vorzubeugen. 
+<p>
+Der Zugriff &uuml;ber den Proxy an Stelle des direkten Zugriffs tritt
+&uuml;brigens auch an einem anderen Punkt als Problem zutage, n&auml;mlich wenn
+ein CGI-Script auf dem Originalserver von den Environment-Variablen
+REMOTE_HOST oder REMOTE_ADDR Gebrauch macht. Beim Proxy-Zugriff 
+enthalten diese Variablen die Daten das Proxies und nicht die des 
+wirklichen Clients.
+<P>
+<H4><A HREF="http://www.squid-cache.org/">Proxy und Proxy-Cache SQUID</A></H4>
+<P>
+
+
+<H3>Port-Weiterleitung mit <TT>rinetd</TT></H3>
+<TT>rinetd</TT> ist ein einfacher TCP-Proxy, der auf Verbindungen zu IP-Ports lauscht 
+und die Datenpakete auf andere Rechner und Ports umleitet. Diese Zielrechner sind f&uuml;r 
+gew&ouml;hnlich Server innerhalb eines privaten (Masqueraded) Netzwerks, die zwar dem
+Gateway, nicht aber dem Rest der Welt bekannt sind. So k&ouml;nnen beispielsweise die 
+80er Ports verschiedener virtueller Netzwerkkarten auf bestimmte Ziel-Server umgeleitet 
+werden. In der aktuellen Version von inetd werden nur TCP-Verbindungen ber&uuml;cksichtigt.
+Auch Verbindungen, die mehrere Ports verwenden (z. B. FTP), werden nicht unterst&uuml;tzt. 
+Die Weiterleitungs- und Zugangsregeln werden in <TT>/etc/rinetd.conf</TT> festgelegt.
+<UL>
+<LI>Weiterleitungsregeln<BR>
+Diese Regeln bestimmen Verbindungen von einem Adress/Port-Paar zu einem anderen. 
+Das Format ist 
+<PRE>
+bindaddress bindport connectaddress connectport
+</PRE>
+Um zum Beispiel den Webserver mit der Adresse 10.1.1.1 auf jenen mit der Adresse
+10.1.1.2 umzuleiten, gen&uuml;gt die Regel:
+<PRE>
+10.1.1.1 80 10.1.1.2 80
+</PRE>
+Statt der IP-Adresse sind auch Domainnamen erlaubt. Sollen mehrere Adressen auf ein Ziel
+geleitet werden, mu&szlig; nicht f&uuml;r jeden Rechner eine eigene Weiterleitungsregel geschrieben
+werden. So wird durch
+<PRE>
+0.0.0.0 80 10.1.1.2 80
+</PRE>
+alles was von au&szlig;en an Port 80 geht auf 10.1.1.2 umgeleitet. So kann man auch tempor&auml;r
+schnell mal Dienste umleiten. 
+<P>
+<LI>Zugangregeln<BR>
+Weitere Regeln dienen zur Zugangskontrolle. Wenn die Adresse einer neuen Verbindung mit 
+einer "Deny"-Regel &uuml;bereinstimmt oder nicht in einer der "Allow"-Regeln zu finden ist, 
+wird die Verbindung verweigert. Sollen die Zugangsregeln global gelten, m&uuml;ssen sie
+am Anfang der Konfigurationsdatei stehen. Stehen Sie hinter einer bestimmten Weiterleitungsregel,
+gelten sie nur f&uuml;r diese spezielle Weiterleitung. Zum Beispiel wird mit:
+<PRE>
+allow 10.1.1.*
+
+10.1.1.1 80 10.1.1.2 80
+</PRE>
+so werden nur noch die Anfragen aus dem Netz 10.1.1.0 weitergeleitet. Im folgenden
+Beispiel gilt diese Einschr&auml;nkung nur f&uuml;r die erste Regel, nicht f&uuml;r die weiteren:
+<PRE>
+10.1.1.1 80 10.1.1.2 80
+allow 10.1.1.*
+10.1.1.3 80 10.1.1.2 80
+10.1.1.4 80 10.1.1.2 80
+</PRE>
+In diesen Regeln sind nur IP-Nummern und keine Hostnamen erlaubt.
+</UL>
+Bei den IP-Angaben k&ouml;nnen Muster verwendet werden, wobei "?" f&uuml;r eine beliebige Ziffer 
+steht und "*" f&uuml;r eine beliebige Ziffernfolge (auch Null).
+<P>
+Auf Wunsch erzeugt <TT>rinetd<TT> ein Logfile. Dazu mu&szlig; die Zeile
+<PRE>
+logfile /var/log/rinetd.log
+</PRE>
+den Pfad zum Logfile angeben. Voreinstellung ist ein tab-delimited Format, welches 
+folgende Informationen enth&auml;lt:<BR>
+-  Date and time<BR> 
+-  Client address<BR>
+-  Listening host<BR>
+-  Listening port<BR>
+-  Forwarded-to host<BR>
+-  Forwarded-to port<BR>
+-  Bytes received from client<BR>
+-  Bytes sent to client<BR>
+-  Result message<BR>
+<P>
+Durch die zus&auml;tzliche Zeile <TT>logcommon</TT> wird das Common Logfile Format (CLF)
+verwendet, das auch Apache und Squid erzeugen und das mit vielen Analysetools 
+ausgewertet werden kann.
+
+<P>
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server4.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server6.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+<H6><I>Letzte Aktualisierung: 07. Oct 2004</I></H6>
+</BODY>
+</HTML>

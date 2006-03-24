@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Geheimes Verzeichnis"
+AuthUserFile /opt/www/etc/.users
+require valid-user

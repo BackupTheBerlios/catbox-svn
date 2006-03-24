@@ -1,0 +1,793 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>2 Standard-Tools f&uuml;r Netzwerker</H1>
+
+<A NAME="2.1"></A>
+<H2>2.1 Client und Server</H2>
+Die meisten Anwendungen in TCP/IP-Netzenfunktionieren nach dem Client-Server-Prinzip. 
+Im einfachsten Fall kommunizieren dabei zwei Rechner miteinander, wobei auf dem einen 
+ein Client- und auf dem anderen der Serverproze&szlig; laufen. 
+Der Client interpretiert die Eingaben des Anwenders und f&uuml;hrt die Anweisung 
+entweder selbst aus oder setzt sie in Anweisungen um und schickt sie als Auftrag dem 
+Server. Von diesem erh&auml;lt er dann die Ergebnisse des Auftrags zur&uuml;ck (oder nur 
+eine Meldung &uuml;ber die erfolgreiche oder fehlerhafte Ausf&uuml;hrung).
+Der Server kann dabei weit entfernt sein, sich im gleichen lokalen Netz oder sogar auf 
+dem gleichen Rechner wie der Client befinden. Auf einem Rechner k&ouml;nnen mehrere 
+Server-Programme laufen - ein Rechner kann damit mehrere Server-Dienste zur 
+Verf&uuml;gung stellen. Wenn wir von Servern reden, sollten wir deshalb unterscheiden, 
+ob wir von einem Server-Rechner reden oder von einem Server-Dienst bzw. dem entsprechenden 
+Server-Programm. Der Client-Proze&szlig; wird in der Regel auch erst bei Bedarf 
+gestartet und versucht dann, Kontakt mit dem Serverproze&szlig; aufzunehmen.
+Dies setzt nat&uuml;rlich voraus, da&szlig; der Server schon 'wartet',
+d. h. st&auml;ndig an einem System l&auml;uft. 
+<P>
+Der Server (bzw. das Server-Programm) stellt also einen <B>Dienst</B> zur Verf&uuml;gung, 
+der vom Client angefordert werden kann. Client und Server unterhalten sich dabei in einer 
+speziellen Sprache - dem entsprechenden Dienstprotokoll. So gibt es ein Protokoll zwischen 
+dem Mail-Server und dem Mail-Client (z.B. SMTP, IMAP oder POP3), eines f&uuml;r den 
+Dateiaustausch zwischen FTP-Client und FFP-Server, ein weiteres f&uuml;r WWW u.s.w.
+<P>
+
+<A NAME="2.2"></A>
+<H2>2.2 Ports - Eing&auml;nge f&uuml;r Server</H2>
+Unterschiedliche Serverprogramme bzw. Serverdienste werden innerhalb eines Rechners 
+durch unterschiedliche Ports angesprochen, wobei ein Port eine Art logischer 
+Kommunikationseingang im Rechner bzw. Betriebssystem ist. Den verschiedenen Servern 
+(bzw. Diensten) sind im Standardfall feste Portnummern zugeordnet. Welcher 
+Port f&uuml;r welchen Dienst verwendet wird, braucht uns als Endbenutzer jedoch in 
+der Regel nicht k&uuml;mmern. Der Client sollte dies wissen. Nur in Ausnahmef&auml;llen, 
+wenn eine besondere Server-Variante oder ein anderer Port benutzt wird, gibt man im 
+Client den vom Standard abweichenden Port an.
+<P>
+
+<A NAME="2.3"></A>
+<H2>2.3 Dokumentation</H2>
+Alle Protokolle und Vereinbarungen &uuml;ber Internet-Protokolle sind in
+Dokumenten festgehalten, die den Namen 'Request for Comment', kurz RFC,
+tragen. Die Dokumente sind durchnumeriert und im Netz frei erh&auml;ltlich, 
+k&ouml;nnen aber auch auf CD-ROM erworben werden. Ein RFC wird auch nicht 
+ung&uuml;ltig, sondern bei &Auml;nderungen im Protokoll durch ein 
+Nachfolgedokument ('Son of RFC xxx') erg&auml;nzt
+oder ersetzt. Die RFCs enthalten nicht nur technische Dokumente,
+sondern auch f&uuml;r den technischen Laien geeignete
+Bedienungsanleitungen. Wer sich mit den RFCs zu gebr&auml;uchlichen
+Diensten besch&auml;ftigt, wird feststellen, da&szlig;
+viele Protokolle sehr einfach gehalten sind und daher die
+Implementierung auf verschiedenen Rechnern schnell m&ouml;glich ist.
+Die RFC werden vom InterNIC verwaltet.
+<P>
+
+<A NAME="2.4"></A>
+<H2>2.4 Standard-Tools</H2>
+Viele der gebr&auml;uchlichen Internet-Protokolle sind einfache Wechselgespr&auml;che,
+die man fast schon mit Shell-Skripten implementieren kann. Dieser Teil beschreibt 
+einige kleine Tools, die man zum Zuschauen und Mitmachen braucht, und zeigt,
+wie einfach FTP, HTTP und andere Protokolle tats&auml;chlich aufgebaut sind.
+<P>
+
+<H3>ping</H3>
+Ob man ein anderes System erreichen kann, untersucht man in der Regel mit
+ping. Das Programm ping erzeugt ICMP-Echo-Request-Pakete, die mit 
+ICMP-Echo-Response-Paketen beantwortet werden, wenn sie das angegebene 
+System erreichen. 
+<PRE>
+$ ping www.e-technik.fh-muenchen.de
+PING www.e-technik.fh-muenchen.de (129.187.206.140): 56 data bytes
+64 bytes from 129.187.206.140: icmp_seq=0 ttl=242 time=48.9 ms
+64 bytes from 129.187.206.140: icmp_seq=1 ttl=242 time=41.9 ms
+64 bytes from 129.187.206.140: icmp_seq=2 ttl=242 time=41.3 ms
+64 bytes from 129.187.206.140: icmp_seq=3 ttl=242 time=39.9 ms
+64 bytes from 129.187.206.140: icmp_seq=4 ttl=242 time=44.9 ms
+64 bytes from 129.187.206.140: icmp_seq=5 ttl=242 time=42.9 ms
+64 bytes from 129.187.206.140: icmp_seq=6 ttl=242 time=45.4 ms
+64 bytes from 129.187.206.140: icmp_seq=7 ttl=242 time=40.5 ms
+64 bytes from 129.187.206.140: icmp_seq=8 ttl=242 time=41.4 ms
+64 bytes from 129.187.206.140: icmp_seq=9 ttl=242 time=42.3 ms
+
+--- www.e-technik.fh-muenchen.de ping statistics ---
+10 packets transmitted, 10 packets received, 0% packet loss
+round-trip min/avg/max = 39.9/42.9/48.9 ms
+</PRE>
+<P>
+
+<H3>arp</H3>
+Bei einigen Netzproblemen kann es aufschlu&szlig;reich sein, einen Blick auf 
+die ARP-Tabelle des Kernels zu werfen oder sie sogar zu ver&auml;ndern. 
+Das "Address Resolution Protocol" dient der Zuordnung von Internet-Adressen zu 
+Ethernet-Adressen. Zu diesern Zwecke existiert eine Adre&szlig;umwandlungstabelle 
+(adress-translation table), die normalerweise vom ARP selbst&auml;ndig aktualisiert 
+wird. Die Kommandozeilenoptionen von ARP lauten:
+<pre>
+arp [-v] [-t hwtype] -a [hostname] 
+arp [-v] [-t hwtype] -s hostname hwaddr 
+</pre>
+Alle hostname-Argumente k&ouml;nnen als symbolische Hostnamen oder als IP-Adressen angegeben werden.
+<p>
+Der erste Aufruf gibt den ARP-Eintrag f&uuml;r die angegebene IP-Adresse bzw. Hostnamen aus. 
+Fehlt <tt>hostname</tt>, werden Informationen &uuml;ber alle bekannten Hosts ausgegeben. 
+Zum Beispiel ergibt die Ausgabe von <i>arp</i> auf <i>www.netzmafia.de</i> etwa folgendes:
+<pre>
+arp
+Address                  HWtype  HWaddress           Flags Mask  Iface
+129.187.206.254          ether   00:04:DE:FE:78:00   C           eth0
+ns.e-technik.fh-muenche  ether   00:07:E9:24:EC:15   C           eth0
+proxy1.e-technik.fh-mue  ether   00:07:E9:24:EC:15   C           eth0
+web1.e-technik.fh-muenc  ether   00:07:E9:24:EB:F5   C           eth0
+</pre>
+Die Ausgabe kann mit der <b>-t</b>-Option auch auf bestimmte Hardwaretypen beschr&auml;nkt werden.
+Als Argument geben Sie <i>ether</i>, <i>ax25</i> oder <i>pronet</i> an, was f&uuml;r 10 Mbps Ethernet, 
+AMPR AX.25 und IEEE 802.5 Token Ring steht.
+<p>
+Die Option <b>-s</b> dient dazu, die Hardwareadresse von <tt>hostname</tt> manuell in die 
+ARP-Tabelle einzutragen. Das Argument <tt>hwaddr</tt> spezifiziert die Hardwareadresse, 
+die normalerweise als Ethernet-Adresse aus sechs Byte in hexadezimaler Notation angegeben ist. 
+Sie k&ouml;nnen solche Adressen auch bei anderen Hardwaretypen verwenden, wenn Sie zus&auml;tzlich die 
+Option <b>-t</b> angeben.
+Die Festverdrahtung von Hardwareadressen im ARP-Cache ist eine drastische Ma&szlig;nahme, um Maschinen 
+aus Ihrem Ethernet daran zu hindern, sich als jemand anderes auszugeben.
+<p>
+Wenn Sie <i>arp</i> mit der Option <b>-d</b> aufrufen, entfernt es alle Eintr&auml;ge f&uuml;r einen bestimmten 
+Host. Es kann dazu benutzt werden, das Interface anzuweisen, eine bereits angeforderte Hardwareadresse 
+einer IP-Adresse nochmals anzufordern, und ist besonders dann n&uuml;tzlich, wenn ein fehlerhaft konfiguriertes 
+System falsche ARP-Informationen sendet (nat&uuml;rlich mu&szlig; zuerst das fehlerhafte System erneut konfiguriert 
+werden).
+<p>
+Mit der Option "-a" wird der aktuelle Inhalt der Tabelle ausgegeben, z.B.:
+<PRE>
+arp -a
+Net to Media Table
+Device   IP Address  -------             Mask      Flags   Phys Addr 
+------ --------------------------- --------------- ----- -----------------
+le0    brokrz.lrz-muenchen.de      255.255.255.255       00:00:a2:0f:76:97
+le0    infoserv.rz.fh-muenchen.de  255.255.255.255       00:e0:29:06:18:d3
+le0    flynt.rz.fh-muenchen.de     255.255.255.255       00:e0:29:08:49:f1
+le0    kobra.rz.fh-muenchen.de     255.255.255.255       00:08:c7:a9:6c:cc
+le0    netmon.rz.fh-muenchen.de    255.255.255.255       00:e0:29:0e:83:92
+le0    linux4.rz.fh-muenchen.de    255.255.255.255       00:00:c0:93:19:d3
+le0    linux5.rz.fh-muenchen.de    255.255.255.255       00:00:c0:37:19:d3
+le0    door2.rz.fh-muenchen.de     255.255.255.255       00:00:c0:3f:fb:a7
+le0    wapserv                     255.255.255.255 SP    08:00:20:23:02:88
+le0    sun10.rz.fh-muenchen.de     255.255.255.255       08:00:20:86:ce:5e
+le0    kiosk1.rz.fh-muenchen.de    255.255.255.255       00:00:c0:60:af:d7
+le0    satellit.rz.fh-muenchen.de  255.255.255.255       08:00:20:71:77:b4
+le0    kaputt.rz.fh-muenchen.de    255.255.255.255       00:50:56:82:f0:f0
+</PRE>
+<P>
+
+<H3>netstat</H3>
+Mit Hilfe des Programms netstat k&ouml;nnen Status-Information &uuml;ber TCP/IP ausgegeben 
+werden. Bei der Fehlersuche kann sich dieses Programm ebenfalls als durchaus 
+n&uuml;tzlich erweisen. 
+
+<h4>Anzeigen der Routing-Tabelle</h4>
+Wenn Sie <i>netstat</i> mit dem Flag <b>-r</b> aufrufen, gibt es die Routing-Tabellen 
+des Kernels aus; &auml;hnlich, wie Sie es oben bereits bei <i>route</i> gesehen haben. 
+Zum Beispiel:
+<pre>
+netstat -nr 
+
+Kernel IP Routentabelle
+Ziel            Router          Genmask         Flags   MSS Fenster irtt Iface
+129.187.206.0   0.0.0.0         255.255.255.0   U         0 0          0 eth0
+192.168.1.0     0.0.0.0         255.255.255.0   U         0 0          0 eth1
+0.0.0.0         129.187.206.254 0.0.0.0         UG        0 0          0 eth0
+</pre>
+<p>
+Die Option <b>-n</b> sorgt zus&auml;tzlich daf&uuml;r, da&szlig; <i>netstat</i> die Adressen statt als 
+symbolische Host- und Netzwerknamen direkt in dezimaler Notation ausgibt. Das ist dann 
+n&uuml;tzlich, wenn Sie verhindern wollen, da&szlig; langwierige Adre&szlig;aufl&ouml;sungsanfragen &uuml;ber das 
+Netzwerk ausgef&uuml;hrt werden, zum Beispiel beim DNS- oder NIS-Server.
+Die zweite Spalte der <i>netstat</i>-Ausgabe zeigt jeweils das Ziel der Route an. Die 
+zweite Spalte gibt das Gateway an, auf das der Routing-Eintrag zeigt. Wird kein Gateway 
+verwendet, wird statt dessen ein Sternchen ausgegeben. Die dritte Spalte gibt Auskunft 
+&uuml;ber die "Allgemeinheit" der Route, d.h. deren Netzmaske. Wenn der Kernel eine IP-Adresse
+erh&auml;lt, f&uuml;r die er eine angemessene Route finden soll, dann durchsucht er alle Eintr&auml;ge 
+in der Routing-Tabelle und f&uuml;hrt eine bitweise UND-Verkn&uuml;pfung mit der Adresse und der 
+Genmask durch, bevor er sie mit dem Ziel der Route vergleicht.
+Die vierte Spalte zeigt verschiedene Flags, die die Route n&auml;her charakterisieren.
+<p>
+<table border=1 cellpadding=3 cellspacing=0 width="80%"> 
+<tr><td><tt>G</tt></td><td>
+Die Route geht durch ein Gateway.
+</td></tr>
+
+<tr><td><tt>U</tt></td><td>
+Das zu verwendende Interface ist aktiv.
+</td></tr>
+
+<tr><td><tt>H</tt></td><td>
+Die Route zeigt auf einen einzelnen Host, wie das z.B. beim Loopback-Eintrag <i>127.0.0.1</i> der Fall ist.
+</td></tr>
+
+<tr><td><tt>D</tt></td><td>
+Diese Route wurde dynamisch erzeugt. Dieses Flag ist gesetzt, wenn der Tabelleneintrag von einem 
+Routing-D&auml;mon wie <i>gated</i> oder durch eine ICMP-Redirect-Nachricht generiert wurde.
+</td></tr>
+
+<tr><td><tt>M</tt></td><td>
+Dieses Flag ist gesetzt, wenn der entsprechende Tabelleneintrag durch eine ICMP-Redirect-Nachricht 
+ver&auml;ndert wurde. Der Tabelleneintrag wurde durch einen ICMP-Redirect modifiziert.
+</td></tr>
+
+<tr><td><tt>!</tt></td><td>
+Alle Datagramme werden verworfen.
+</td></tr>
+</table>
+<p>
+Die n&auml;chsten drei Spalten geben Auskunft &uuml;ber die maximale Segmentgr&ouml;&szlig;e (MSS, <i>Maximum 
+Segment Size</i>), das Fenster sowie &uuml;ber die Anfangsumlaufzeit (irtt, <i>initial round trip 
+time</i>), die auf die &uuml;ber diese Route etablierten TCP-Verbindungen anzuwenden sind. Die 
+MSS bezeichnet den Umfang des gr&ouml;&szlig;ten IP-Pakets, das der Kernel &uuml;ber diese Route verschickt. 
+Mit dem Fenster ist die maximale Datenmenge gemeint, die von einem Remote-Host auf einmal 
+empfangen werden kann. Das TCP-Protokoll stellt sicher, da&szlig; die Daten zwischen den Hosts 
+zuverl&auml;ssig &uuml;bertragen werden. Falls Datenpakete unterwegs verlorengehen, wird die &uuml;bertragung 
+dieser fehlenden Pakete automatisch wiederholt. Das TCP-Protokoll ermittelt am Anfang einer 
+&uuml;bertragung, wie lange das gesendete Datenpaket zum Remote-Host braucht, und ermittelt aus 
+der Zeit bis zur R&uuml;ckantwort einen Wert, der f&uuml;r die weitere Daten&uuml;bertragung als Ma&szlig; dient, 
+ob ein IP-Paket ggf. wiederholt werden mu&szlig;. Diese Zeit wird als <i>round trip time</i> bezeichnet. 
+Der Vorgabewert wird vom TCP-Protokoll beim erstmaligen Verbindungsaufbau benutzt.  
+Nullwerte in diesen Spalten bedeuten, da&szlig; Standardwerte benutzt werden.
+Schlie&szlig;lich gibt das letzte Feld die Netzwerkschnittstelle an, die die Route benutzt.
+<p>
+<h4>Anzeige der Interface-Statistiken</h4>
+Wenn Sie <i>netstat</i> mit dem Flag <b>-i</b> aufrufen, gibt es die Statistiken f&uuml;r die 
+gerade aktiven Netzwerkschnittstellen aus. Geben Sie au&szlig;erdem das Flag <b>-a</b> mit an, 
+werden <i>alle</i> im Kernel vorhandenen Schnittstellen ausgegeben, nicht nur die 
+konfigurierten.Zum Beispiel:
+<pre>
+netstat -i 
+Kernel Schnittstellentabelle
+Iface   MTU Met   RX-OK RX-ERR RX-DRP RX-OVR   TX-OK TX-ERR TX-DRP TX-OVR Flg
+eth0   1500   0   31746      0      0      0   14928      0      0      0 BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth0:  1500   0     - keine Statistiken verf&uuml;gbar -                    BMRU
+eth1   1500   0       0      0      0      0    8691      0      0      0 BMRU
+lo    16436   0     966      0      0      0     966      0      0      0 LRU
+</pre>
+Die Spalten <tt>MTU</tt> und <tt>Met</tt> geben die aktuelle MTU und Metrik des Interface 
+an. Die mit <tt>RX</tt> bzw. <tt>TX</tt> &uuml;berschriebenen Spalten geben an, wie viele Pakete 
+fehlerfrei empfangen bzw. gesendet wurden (<tt>RX-OK</tt>/<tt>TX-OK</tt>), wie viele 
+besch&auml;digt waren (<tt>RX-ERR</tt>/<tt>TX-ERR</tt>), wie viele verworfen werden mu&szlig;ten 
+(<tt>RX-DRP</tt>/<tt>TX-DRP</tt>) und wie viele aufgrund eines Overruns verlorengingen 
+(<tt>RX-OVR</tt>/<tt>TX-OVR</tt>).
+Die letzte Spalte zeigt wieder die Flags an, die f&uuml;r die Schnittstelle gesetzt sind. 
+Das sind einbuchstabige Versionen der langen Flag-Namen, die <i>ifconfig</i> ausgibt:
+<P>
+<table border=1 cellpadding=3 cellspacing=0> 
+<tr><td><tt>B</tt></td><td>
+Eine Broadcast-Adresse wurde gesetzt.
+</td></tr>
+
+<tr><td><tt>L</tt></td><td>
+Die Schnittstelle ist ein Loopback-Device.
+</td></tr>
+
+<tr><td><tt>M</tt></td><td>
+Alle Pakete werden empfangen (promisku&ouml;ser Modus).
+</td></tr>
+
+<tr><td><tt>O</tt></td><td>
+ARP ist an dieser Schnittstelle abgeschaltet.
+</td></tr>
+
+<tr><td><tt>P</tt></td><td>
+Es handelt sich um eine Punkt-zu-Punkt-Verbindung.
+</td></tr>
+
+<tr><td><tt>R</tt></td><td>
+Die Schnittstelle ist "running".
+</td></tr>
+
+<tr><td><tt>U</tt></td><td>
+Die Schnittstelle ist aktiv ("up").
+</td></tr>
+</table>
+<p>
+<h4>Anzeigen der Verbindungen</h4>
+<i>netstat</i> bietet eine Reihe von Optionen, mit denen Sie aktive und passive 
+Sockets auflisten k&ouml;nnen. Die Argumente <b>-t</b>, <b>-u</b>, <b>-w</b> und 
+<b>-x</b> zeigen aktive TCP-, UDP-, RAW- und UNIX-Sockets. Wenn Sie zus&auml;tzlich 
+<b>-a</b> angeben, sehen Sie au&szlig;erdem die Sockets, die gerade auf eine Verbindung 
+warten. Auf diese Weise erhalten Sie eine Liste aller Server, die derzeit auf 
+Ihrem System laufen.
+<pre>
+netstat -ta 
+Aktive Internetverbindungen (Server und stehende Verbindungen)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 *:imaps                 *:*                     LISTEN
+tcp        0      0 *:mysql                 *:*                     LISTEN
+tcp        0      0 vweb1.ee.fhm.edu:7788   *:*                     LISTEN
+tcp        0      0 *:pop3                  *:*                     LISTEN
+tcp        0      0 *:imap                  *:*                     LISTEN
+tcp        0      0 *:sunrpc                *:*                     LISTEN
+tcp        0      0 *:www-http              *:*                     LISTEN
+tcp        0      0 *:bpcd                  *:*                     LISTEN
+tcp        0      0 *:vopied                *:*                     LISTEN
+tcp        0      0 *:smtp                  *:*                     LISTEN
+tcp        0      0 *:bpjava-msvc           *:*                     LISTEN
+tcp        0      0 ehg.e-technik.fh-m:smtp mailrelay2.rz.fh-:48063 VERBUNDEN
+tcp        0      0 *:ssh                   *:*                     LISTEN
+tcp        0   1208 vweb.e-technik.fh-m:ssh diale071.ppp.lrz-:58198 VERBUNDEN
+tcp        0      0 vweb.e-technik.fh-m:ssh menetekel.e-techn:32862 VERBUNDEN
+</pre>
+Man sieht, da&szlig; die meisten Server einfach auf eine eingehende Verbindung warten, 
+da sie sich im Zustand <tt>LISTEN</tt> befinden. 
+<p>
+Wenn Sie <i>netstat</i> nur mit der Option <b>-a</b> aufrufen, zeigt es eine 
+Liste aller Sockets aus allen Familien:
+<PRE>
+Active Internet connections (including servers)
+Proto Recv-Q Send-Q Local Address          Foreign Address        (State)       User
+tcp        0      0 *:netbios-ssn          *:*                    LISTEN        root       
+tcp        0      0 *:nntp                 *:*                    LISTEN        root       
+tcp        0      0 *:auth                 *:*                    LISTEN        root       
+tcp        0      0 *:sunrpc               *:*                    LISTEN        root       
+tcp        0      0 *:pop3                 *:*                    LISTEN        root       
+tcp        0      0 *:www                  *:*                    LISTEN        root       
+tcp        0      0 *:finger               *:*                    LISTEN        root       
+tcp        0      0 *:midinet              *:*                    LISTEN        root       
+tcp        0      0 *:http-rman            *:*                    LISTEN        root       
+tcp        0      0 *:btx                  *:*                    LISTEN        root       
+tcp        0      0 *:smtp                 *:*                    LISTEN        root       
+tcp        0      0 *:telnet               *:*                    LISTEN        root       
+tcp        0      0 *:ftp                  *:*                    LISTEN        root       
+tcp        0      0 *:netstat              *:*                    LISTEN        root       
+tcp        0      0 *:systat               *:*                    LISTEN        root       
+tcp        0      0 *:printer              *:*                    LISTEN        root       
+tcp        0      0 *:shell                *:*                    LISTEN        root       
+tcp        0      0 *:login                *:*                    LISTEN        root       
+tcp        0      0 *:exec                 *:*                    LISTEN        root       
+udp        0      0 *:rplay                *:*                    
+udp        0      0 *:netbios-ns           *:*                    
+udp        0      0 *:sunrpc               *:*                    
+udp        0      0 *:ntalk                *:*                    
+udp        0      0 *:talk                 *:*                    
+udp        0      0 *:syslog               *:*                    
+raw        0      0 *:1                    *:*                    
+Active UNIX domain sockets
+Proto RefCnt Flags      Type            State           Inode Path
+unix  1      [ ACC ]    SOCK_STREAM     LISTENING         417 /dev/log
+unix  2      [ ]        SOCK_STREAM     CONNECTED         440 
+unix  2      [ ]        SOCK_STREAM     UNCONNECTED       441 /dev/log
+unix  2      [ ]        SOCK_STREAM     CONNECTED         499 
+unix  2      [ ]        SOCK_STREAM     UNCONNECTED       500 /dev/log
+unix  2      [ ]        SOCK_STREAM     CONNECTED         517 
+unix  2      [ ]        SOCK_STREAM     UNCONNECTED       518 /dev/log
+</PRE>
+Die erste Spalte enth&auml;lt das Transportprotokoll. Die zweite und dritte Spalte sagen 
+etwas &uuml;ber die Anzahl der Bytes in der Empfangs- bzw. Sende-Warteschlange aus. Die 
+n&auml;chsten beiden Spalten geben lokale und ferne Adressen einer Verbindung an. Diese 
+Adressen bestehen aus der Internet-Adresse und der Portnummer der Kommunikationspartner.
+Ist der Rechner in der /etc/hosts bzw. der Dienst in der /etc/services eingetragen, so 
+werden statt der Adressen Rechnername bzw. der Name des Services aus gegeben. Dies 
+l&auml;&szlig;t sich durch den Aufruf von <TT>netstat -in</TT> verhindern. Handelt es sich
+4611 um einen Eintrag f&uuml;r einen aktiven Server, so wird die lokale Adresse in der Form
+"*.&lt;portnummer&gt;" und ferne Adressen in der Form "*.*" angegeben. Diese Art der
+Ausgabe zeigt an, da&szlig; der entsprechende Dienst bereit ist. Bei TCP-Diensten zeigt
+zus&auml;tzlich die letzte Spalte an, da&szlig; der Server auf LISTEN aesetzt ist. Kommt
+f&uuml;r einen speziellen Dienst keine Verbindung zustande, obwohl andere Programme 
+(z.B. ping) funktionieren. so kann man mittels <TT>netstat -a</TT> auf dem 
+Zielsystem &uuml;berpr&uuml;fen, ob der Server dort aktiv ist. Nur dann kann eine entsprechende  
+Verbindung &uuml;berhaupt aufgebaut werden.
+<P>
+
+<H3>traceroute</H3>
+Um festzustellen, welchen Weg die Datenpakete zu einem fernen Rechner 
+nehmen und wie &quot;gut&quot; die Verbindung dorthin ist, kann man 'traceroute' 
+einsetzen. Das Programm schickt UDP-Pakete mit unterschiedlicher &quot;Lebensdauer&quot; 
+an einen unbenutzten Port und wertet so die Fehlermeldungen der einzelnen 
+Router und Gateways aus. Dem Kommando wird wie bei Ping nur der Rechnername 
+oder eine IP-Nummer als Parameter &uuml;bergeben. F&uuml;r jeden Gateway wird 
+dann auf dem Bildschirm eine Zeile ausgegeben:<BR>
+<pre>
+Z&auml;hler Gateway-Name Gateway-IP-Nummer &quot;round-trip&quot;-Zeit (3 Werte)<BR>
+</pre>
+Traceroute sendet jeweils drei Datenpakete. Wenn auf ein Paket keine 
+Antwort erfolgt, wird ein Sternchen (*) ausgegeben. Ist ein Gateway 
+nicht erreichbar, wird statt einer Zeitangabe '!N' (network unreachable) 
+oder '!H' (host unreachable) ausgegeben. Man kann so feststellen, wo 
+eine Verbindung unterbrochen ist, und auch, welchen Weg die Daten nehmen 
+- wo also der Zielrechner in etwa steht. Bei grafischen Benutzerschnittstellen 
+erfolgt die Parameterangabe &uuml;ber Dialogfelder und nicht in der Kommandozeile.
+<PRE>
+$ traceroute www.linux.org
+traceroute to www.linux.org (198.182.196.56), 30 hops max, 40 byte packets
+ 1  space-gw2m (194.97.64.8)  2.758 ms  3.637 ms  2.491 ms
+ 2  Cisco-M-IV.Space.Net (195.30.0.123)  6.413 ms  4.118 ms  4.107 ms
+ 3  Cisco-M-Fe0-0.Space.Net (195.30.0.126)  4.826 ms  4.508 ms  5.53 ms
+ 4  Cisco-ECRC-H1-0.Space.Net (193.149.44.2)  5.977 ms  6.273 ms  20.832 ms
+ 5  munich-ebs2-s0-0-0.ebone.net (192.121.158.189)  14.415 ms  17.018 ms  8.575 ms
+ 6  newyork-ebs1-s5-0-0.ebone.net (195.158.224.21)  137.35 ms  139.103 ms  138.14 ms
+ 7  serial0-0-1.br1.nyc4.ALTER.NET (137.39.23.81)  137.132 ms  141.742 ms  141.207 ms
+ 8  134.ATM2-0.XR1.NYC4.ALTER.NET (146.188.177.178)  135.375 ms  128.12 ms  165.913 ms
+ 9  189.ATM3-0.TR1.EWR1.ALTER.NET (146.188.179.54)  141.83 ms  144.798 ms  362.469 ms
+10  105.ATM4-0.TR1.DCA1.ALTER.NET (146.188.136.185)  145.321 ms  147.889 ms  152.43 ms
+11  299.ATM6-0.XR1.TCO1.ALTER.NET (146.188.161.169)  354.577 ms  133.535 ms  348.647 ms
+12  193.ATM8-0-0.GW2.TCO1.ALTER.NET (146.188.160.49)  152.444 ms  369.313 ms  150.106 ms
+13  uu-peer.oc12-core.ai.net (205.134.160.2)  365.008 ms  509.81 ms  144.898 ms
+14  border-ai.invlogic.com (205.134.175.254)  270.065 ms  341.586 ms  153.441 ms
+15  router.invlogic.com (198.182.196.1)  356.496 ms  506.371 ms  532.983 ms
+16  www.linux.org (198.182.196.56)  584.957 ms  300.612 ms  380.004 ms
+</PRE>
+<P>
+
+<H3>Netcat</H3>
+Netcat ist das "Schweizer Taschenmesser" f&uuml;r Netzwerker. Es handelt sich um
+ein einfaches Werkzeug, das Daten von einer Netzverbindung liest und auf die
+Standardausgabe ausgibt oder Daten von der Standardeingabe auf eine Netzverbindung 
+schreibt. Es ist also ein "Back-End"-Tool f&uuml;r andere Software. Das Programm
+hat folgende Optionen:
+<UL>
+<LI><TT>-g gateway</TT>: Source-Routing hop points (bis zu 8)
+<LI><TT>-G num</TT>: Source-Routing-Pointer: 4, 8, 12, ...
+<LI><TT>-h</TT>: Hilfe
+<LI><TT>-i secs</TT>: Delay-Intervall f&uuml;r gesendete Zeilen und gescannte Ports
+<LI><TT>-l</TT>: "Listen"-Modus
+<LI><TT>-n</TT>: Nur numerische IP-Adressen (kein DNS)
+<LI><TT>-o file</TT>: Hexdump des Netzverkehrs
+<LI><TT>-p port</TT>: lokale Portnummer (Einzelport oder Bereich (lo-hi))
+<LI><TT>-q secs</TT>: Wartezeit bis zum Programmende nach einen EOF
+<LI><TT>-b</TT>: UDP-Broadcasts erlauben
+<LI><TT>-r</TT>: Zuf&auml;llige lokale und ferne Ports
+<LI><TT>-s addr</TT>: lokale Quelladresse
+<LI><TT>-t</TT>: Telnet-Negotiation freigeben
+<LI><TT>-u</TT>: UDP-Modus
+<LI><TT>-v</TT>: Geschw&auml;tzig (-vv, wenn das immer noch nicht reicht)
+<LI><TT>-w secs</TT>: Timeout f&uuml;r Verbindungsende
+<LI><TT>-z</TT>: Zero-I/O-Mode (f&uuml;r Scanning)
+</UL>
+Zum besseren Verst&auml;ndnis sollte man auf jeden Fall
+<A HREF="netcat.html">die README-Datei</A> durchlesen.
+<P>
+Beispiel: Webserver abfragen:<br>
+(Benutzereingaben fett)
+<pre>
+echo -e 'GET / HTTP/1.0\n\n'  | netcat -w 10 www.ee.fhm.edu 80
+
+HTTP/1.1 200 OK
+Date: Wed, 15 Sep 2004 07:07:35 GMT
+Server: Apache/1.3.28 (Linux/SuSE) mod_ssl/2.8.15 OpenSSL/0.9.7b PHP/4.3.3
+X-Powered-By: PHP/4.3.3
+Connection: close
+Content-Type: text/html
+
+&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"&gt;
+&lt;html&gt;
+
+...
+
+</pre>
+netcat beendet sich erst, wenn die Verbindung abbricht. Der Parameter <tt>-w 10</tt>
+bewirkt, da&szlig; sp&auml;testens 10 Sekunden nach dem Ende der Eingabe das Programm abbricht.
+<P>
+Mit <tt>netcat</tt> und <tt>inetd</tt> kann man lokale Ports an andere Hosts umleiten.
+Die folgende Zeile in <tt>/etc/inetd.conf</tt> auf <i>sleepy</i> stellt den Port 80 
+von <i>grumpy</i> lokal zur Verf&uuml;gung:
+<pre>
+80 stream tcp nowait nobody /usr/bin/nc /usr/bin/nc -w 3 grumpy 80
+</pre>
+beziehungsweise mit dem <tt>tcpd</tt>:
+<pre>
+80 stream tcp nowait nobody /usr/sbin/tcpd /usr/bin/nc -w 3 grumpy 80
+</pre>
+<p>
+
+<H4>Aufruf als Server</H4>
+Durch den Aufruf
+<pre>
+PROGRAM | nc -l -p PORT -w TIMEOUT
+</pre>
+oder
+<pre>
+nc -l -p PORT -w TIMEOUT | PROGRAM
+</pre>
+<ol>
+<li>erwartet <tt>netcat</tt> genau eine Verbindung auf Port <tt>PORT</tt>,
+<li>verbindet <tt>netcat</tt> diese mit der Aus- oder Eingabe von <tt>PROGRAM</tt> und
+<li>wartet maximal <tt>TIMEOUT</tt> Sekunden darauf, da&szlig; die Verbindung abgebrochen wird.
+</ol>
+Soll der Port bidirektional sein (Ein- und Ausgabe), lautet der Aufruf:
+<pre>
+nc -l -p PORT -e PROGRAM
+</pre>
+Leider kann <tt>netcat</tt> keine Parameter an PROGRAM &uuml;bergeben, daher wird 
+man hier h&auml;ufig ein Shellscript angeben.
+<p>
+Da <tt>netcat</tt> beim Ende der Verbindung beendet wird, kann es nur eine 
+einzige Verbindung bedienen. 
+
+<H4>Verzeichnisb&auml;ume &uuml;ber ein Internet kopieren</H4>
+Mit Hilfe von von <tt>netcat</tt>, <tt>tar</tt> und <tt>bash</tt> kann man 
+Verzeichnisb&auml;ume von einem Host auf einen anderen kopieren. Die
+Dateien werden komprimiert und mit ihren Attributen (Zugriffsrechte/&auml;nderungsdatum) 
+&uuml;bertragen. Hierzu l&auml;&szlig;t man auf dem empfangenden Host <tt>netcat</tt> auf Port 4711 
+lauschen und leitet seine Ausgabe in <tt>tar</tt> um:
+<pre>
+$ nc -vlp 4711 | tar xvpf -
+listening on [any] 4711 ...
+</pre>
+Auf der sendenden Seite ruft man eine Shellfunktion auf, welche die 
+&uuml;bergebenen Dateien und Verzeichnisse zusammentart und
+an den Port 4711 des empfangenden Rechners sendet:
+<pre>
+$ ( cd QUELLDIR ; tar cvpf - * | nc -w 1 ZIELHOST 4711 )
+</pre>
+<P>
+
+<H3>Wget</H3>
+Wget ist ein Download-Tool, das gleicherma&szlig;en mit WWW- wie FTP-Servern umgehen 
+kann und dank zahlreicher Optionen genau die Dateien holt, die Sie brauchen.
+Zugleich ist es aber auch ein n&uuml;tzliches Kommandozeilentool f&uuml;r
+den Servermanager, um den Zugriff zu testen.
+<p>
+Auf HTTP und FTP aufsetzend kann man beispielsweise ganze Archive oder Homepages 
+spiegeln. Auch mit einer schlechten Anbindung ans Internet
+eignet sich das Programm hervorragend zum Download im Hintergrund: Nicht
+nur ein "Ankn&uuml;pfen" an eine abgebrochene &uuml;bertragung, sondern auch ein
+Update ist m&ouml;glich -- Wget kann aufgrund von Timestamps erkennen, ob es
+eine aktuelle Version einer Datei schon heruntergeladen hat. Zu finden ist es unter
+<a href="http://www.gnu.org/software/wget/wget.html">http://www.gnu.org/software/wget/wget.html</a>.
+<P>
+Der Standardaufruf von Wget ist <tt>wget [options] URL</tt>. 
+Wget ist ein GNU-Tool, d. h. alle Parameter haben eine
+lange (<TT>wget --version</TT>) und eine kurze Form (<TT>wget -V</TT>). Mit
+<TT>wget -h</TT> (oder <TT>--help</TT>) bekommen Sie eine ausf&uuml;hrliche
+Kommando&uuml;bersicht. Ein erstes Beispiel:
+<pre>
+<b>wget http://www.netzmafia.de/</b>
+--16:15:16--  http://www.netzmafia.de:80/
+           =&gt; `index.html'
+Connecting to www.netzmafia.de:80... connected!
+HTTP request sent, awaiting response... 200 OK
+Length: 8,208 [text/html]
+
+    0K -&gt; ........                             [100%]
+
+12:15:18 (9.01 KB/s) - `index.html' saved [8208/8208]
+</pre> 
+Auf den lokalen Computer wird die Datei <TT>index.html</TT> heruntergeladen. 
+Bilder und Unterverzeichnisse sind nicht mit eingeschlossen. M&ouml;chten Sie eine 
+Stufe tiefer gehen, probieren Sie die Option <TT>-r</TT> (f&uuml;r
+<TT>--recursive</TT>). Jetzt folgt Wget den Links und der
+Verzeichnisstruktur der zu spiegelnden Seiten. Wichtig ist in diesem
+Zusammenhang der Parameter <TT>-l num</TT> (<TT>--level=num</TT>), bei dem
+<TT>num</TT> die Anzahl der Level festlegt.<BR>
+Ein Aufruf der Form <TT>wget -r --level=1 http://www.netzmafia.de/</TT>
+bewirkt etwa, da&szlig; die Unterverzeichnisse der ersten Ebene einbezogen werden.
+Es wird dabei ein Verzeichnis <TT>www.netzmafia.de</TT> angelegt, in dem die
+geladenen Unterverzeichnisse eingerichtet werden.
+Als Standard-Level f&uuml;r die Rekursion ist 5 vorgegeben.
+<p>
+Ist ein Download unterbrochen worden, kann mit Hilfe des Parameters 
+<TT>-c</TT> (<TT>--continue</TT>) der Ladevorgang wieder aufgenommen werden.
+Um bestimmte Seiten in regelm&auml;&szlig;igen Abst&auml;nden immer wieder zu sichern, gibt es 
+die Option <TT>-N</TT> (<TT>--timestamping</TT>): 
+Es wird bei jeder Datei der Zeitstempel mit dem der lokalen Datei verglichen und
+nur geladen, wenn die ferne Datei neuer ist als die lokale.
+<p>
+Mit dem Aufruf <TT>wget -nd</TT> (<TT>--no-directories</TT>) wird die
+Verzeichnisstruktur der fernen Site nicht &uuml;bernommen. Vorsicht ist hier
+jedoch geboten bei Dateien mit gleichen Namen: sie werden einfach
+&uuml;berschrieben. Umgekehrt wird mit der Option <TT>-x</TT> 
+(<TT>--force-directories</TT>) die Verzeichnisstruktur der fernen Site auf jeden
+Fall komplett &uuml;bernommen. Die Option <TT>-nH</TT> (<TT>--no-host-directories</TT>)
+&uuml;bernimmt die Verzeichnisstruktur vom Server, aber der Hostname wird nicht
+mit ber&uuml;cksichtigt, es wird ins aktuelle Verzeichnis gespiegelt.
+<p>
+Wildcards sind unter Wget nicht m&ouml;glich. Die Option <TT>-A "liste"</TT> 
+(<TT>--accept</TT>) schafft Abhilfe. In der "liste" definieren Sie die 
+zu ladenden Dateitypen, zum Beispiel:
+<pre>
+wget -r -l1 -A jpg,gif,png http://www.netzmafia.de
+</pre>
+Danach finden sich im Verzeichnis nur noch diese Bilddateien und eine Datei 
+<TT>index.html</TT>, die Wget braucht, um die Bilder zu finden. Hinter den
+Kulissen saugt Wget eigentlich alle Dateien, entfernt dann aber nicht ben&ouml;tigte.
+<pre>
+...
+13:03:19 (8.73 KB/s) - `bla.html' saved [8584/8584]
+
+Removing bla.html since it should be rejected.
+...
+</pre>
+
+Mit <TT>-R liste</TT> (<TT>--reject</TT>) k&ouml;nnen Sie Dateierweiterungen
+ausschlie^&szlig;en. Der Aufruf <TT>wget -r -l1 -R doc,avi,mpg,mp3 
+http://www.netzmafia.de</TT> w&uuml;rde die angegebenen Dateitypen aussparen. 
+Ein Download-Limit k&ouml;nnen Sie dar&uuml;ber 
+hinaus mit dem Parameter <TT>-Q</TT> (<TT>--quota</TT>) setzen. Die Begrenzung 
+bezieht sich auf die Gesamtmenge der Daten und wird standardm&auml;^&szlig;ig in Bytes
+angegeben. Eine Begrenzung in Kilobytes oder Megabytes ist auch
+m&ouml;glich - dazu wird <TT>k</TT> oder <TT>m</TT> an die Zahl angeh&auml;ngt.
+<p>
+Fast alle Parameter, die Sie <TT>wget</TT> beim Start mitgegeben haben,
+k&ouml;nnen Sie in eine Konfigurationsdatei  mit dem Namen <TT>.wgetrc</TT> 
+im Heimatverzeichnis eintragen. Zum Beispiel:
+<pre>
+tries = 20
+reclevel = 8
+timestamping = on
+dirstruct = on
+</pre>
+<P>
+Weitere Informationen liefert die <A HREF="wget.html">Wget-Beschreibung</A>.
+<P>
+
+<A NAME="2.5"></A>
+<H2>2.5 Triviale Anfragen an h&ouml;here Protokolle</H2>
+Auch auf den h&ouml;heren Protokollebenen gibt es triviale Anfragen,
+mit denen man untersuchen kann, ob ein Partner &uuml;berhaupt antwortet.
+Das Hauptwerkzeug ist hier das ganz normale Telnet-Programm, das f&uuml;r 
+nahezu jede Platform verf&uuml;gbar ist.
+<P>
+"<TT>echo</TT>" bezeichnet beispielsweise einen Service, n&auml;mlich TCP-Port 7,
+der ankommende Meldungen schlicht zur&uuml;ckschickt (siehe unten).
+Das kann man direkt mit <TT>telnet</TT> ausprobieren:
+<PRE>
+$ telnet localhost echo
+Trying 127.0.0.1...
+     Connected to localhost.
+Escape character is '^]'.
+hello world
+hello world
+^]
+
+telnet&gt; quit
+Connection closed.
+</PRE>
+Auch eine Webserverabfrage mach kein Problem. Nach Aufbau der Telnet-Verbindung gibt 
+man den gew&uuml;nschten Dateipfad (genauer, ein Kommando des HTTP-Protokolls, im 
+Beispiel unten "<TT>GET / HTTP/1.0</TT>") und anschliessend eine Leerzeile ein, z.B.:
+<PRE>
+telnet www.netzmafia.de 80
+Trying 129.187.206.160...
+Connected to www.netzmafia.de.
+Escape character is '^]'.
+GET / HTTP/1.0
+
+HTTP/1.1 200 OK
+Date: Wed, 15 Sep 2004 07:46:45 GMT
+Server: Apache/1.3.26 (Unix) Debian GNU/Linux mod_ssl/2.8.9 OpenSSL/0.9.6c
+Last-Modified: Wed, 12 May 2004 13:47:57 GMT
+ETag: "1f7078-797-40a22b0d"
+Accept-Ranges: bytes
+Content-Length: 1943
+Connection: close
+Content-Type: text/html; charset=iso-8859-1
+
+&lt;html&gt;
+
+...
+
+&lt;/html&gt;
+
+
+Connection closed by foreign host.
+</PRE>
+<P>
+
+<A NAME="2.6"></A>
+<H2>2.6 Einfache Protokolle</H2>
+Die folgenden Protokoll eignen sich gut, um bei den ersten Versuchen mit
+der Netzwerkprogrammierung die eigenen Programme zu testen (oder auch den unter
+2.5. geschilderten Zugriff). Normalerweise sind die entsprechenden Ports gesperrt, 
+man muss sie auf dem Zielrechner meist erst freigeben.
+
+<H4>Das chargen-Protokol</H4>
+<TT>Chargen</TT> ist ein auf Telnet basierendes Protokoll, das zu Testzwecken
+Ascii-Zeichen auf den aufrufenden Port sendet. Der Service l&auml;uft &uuml;ber 
+den TCP- bzw. UDP-Port 19. Sobald eine Verbindung aufgebaut ist, sendet der 
+Server eine ASCII-Folge bzw. unter UDP ein Datagramm, in dem Zeichen eines 
+Zeichengenerators enthalten sind. Alle weiteren eingehenden Daten werden vom 
+Server nicht verarbeitet, die Verbindung mu&szlig; vom aufrufenden Host geschlossen 
+werden. Beispiel:
+<PRE>
+telnet 129.187.206.160 19 
+Trying 129.187.206.160... 
+Connected to 129.187.206.160.
+Escape character is '^]'.
+ !"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefg
+!"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefgh
+"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghi
+#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghij
+$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijk
+%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijkl
+&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklm
+'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmn
+()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmno
+)*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnop
+*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopq
++,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqr
+,-./012   
+^]
+
+telnet&gt; quit
+Connection closed.
+</PRE> 
+
+Das chargen-Protokoll ist somit eine einfache M&ouml;glichkeit, Verbindungen 
+und gegebenenfalls Terminal-Einstellungen zu &uuml;berpr&uuml;fen.     
+Der Datenflu&szlig;  wird bei chargen-TCP-Verbindungen durch den normalen
+TCP-Datenflu&szlig;-Kontrollmechanismus gesteuert, so da&szlig; Pakete nicht
+schneller verschickt als empfangen werden k&ouml;nnen.
+Dasselbe gilt f&uuml;r UDP, Datagramme werden nur verschickt, wenn die
+Empfangsbest&auml;tigung des letzten Datagramms eingetroffen ist. 
+<P>
+
+<H4>Das echo-Protokoll</H4>
+<TT>Echo</TT> ist ein auf Telnet basierendes Protokoll, das nichts weiter
+tut, als die empfangenen Daten an den Erzeuger
+zur&uuml;ckzuschicken. Dies l&auml;uft sowohl unter TCP als auch unter UDP
+auf Port 7. Sobald der Server Daten unter TCP bzw. Datagramme unter
+UDP empf&auml;ngt, sendet er diese unverz&uuml;glich zur&uuml;ck.
+Dies erfolgt solange, bis der anrufende Rechner die Verbindung
+unterbricht. Beispiel:
+<PRE>
+telnet 129.187.206.160 7
+Trying 129.187.206.160...
+Connected to 129.187.206.160.
+Escape character is '^]'.
+Hallo
+Hallo
+^]
+
+telnet&gt; quit
+Connection closed.
+</PRE>
+<P>
+Mit dem <TT>echo-</TT>Protokoll lassen sich auf sehr einfache Weise
+speziell Terminaleinstellungen testen, z.B. kann man so einen
+&#220;berblick &uuml;ber die verwendeten Codetables der eingesetzten
+Terminals erlangen.
+Dieser Dienst erzeugt ebenfalls wenig Datenverkehr, so da&szlig; sich die
+Verbindung auch durch langsame Leitungen sehr gut testen l&auml;&szlig;t.
+<P>
+
+<H4>Das daytime-Protokoll</H4>
+<TT>daytime</TT> ist ein auf Telnet basierendes Protokoll, das zur
+Abfrage der Zeit und des Datums eines entfernt liegenden Rechners 
+dient. Der Service l&auml;uft &uuml;ber den TCP- bzw. UDP-Port 13.
+Sobald eine Verbindung aufgebaut ist, sendet der Server eine ASCII-Zeichenfolge 
+bzw. unter UDP ein Datagramm, in dem das aktuelle Datum und die Zeit des 
+angesprochenen Systems enthalten sind. Alle weiteren eingehenden Daten 
+werden vom Server nicht verarbeitet, und die Verbindung wird nach dem Senden 
+geschlossen. Beispiel:
+<PRE>
+telnet 129.187.206.160 13
+Trying 129.187.206.160...
+Connected to 129.187.206.160.
+Escape character is '^]'.
+Wed Sep 15 15:03:23 2004
+Connection closed by foreign host.
+</PRE>
+Das daytime-Protokoll ist somit eine einfache M&ouml;glichkeit, 
+Verbindungen und die Systemzeit vernetzter Rechner zu &uuml;berpr&uuml;fen.
+Beim Zeitabgleich ist die Zeit, die die Nachricht im Netz verbringt, zu
+ber&uuml;cksichtigen. 
+<P>
+
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="../perl/index.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server3.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+<H6><I>Letzte Aktualisierung: 30. Oct 2004</I></H6>
+</BODY>
+</HTML>

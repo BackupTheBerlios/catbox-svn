@@ -1,0 +1,799 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<A NAME="4"></A>
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>Portnummern</H1>
+
+<TABLE BORDER=1 CELLPADDING=2 WIDTH="90%">
+<TR><TD>tcpmux</TD><TD>1/tcp</TD><TD>TCP Port Service Multiplexer</TD></TR>
+<TR><TD>tcpmux</TD><TD>1/udp</TD><TD>TCP Port Service Multiplexer</TD></TR>
+<TR><TD>compressnet</TD><TD>2/tcp</TD><TD>Management Utility</TD></TR>
+<TR><TD>compressnet</TD><TD>2/udp</TD><TD>Management Utility</TD></TR>
+<TR><TD>compressnet</TD><TD>3/tcp</TD><TD>Compression Process</TD></TR>
+<TR><TD>compressnet</TD><TD>3/udp</TD><TD>Compression Process</TD></TR>
+<TR><TD>rje</TD><TD>5/tcp</TD><TD>Remote Job Entry</TD></TR>
+<TR><TD>rje</TD><TD>5/udp</TD><TD>Remote Job Entry</TD></TR>
+<TR><TD>echo </TD><TD>7/tcp</TD><TD>Echo</TD></TR>
+<TR><TD>echo </TD><TD>7/udp</TD><TD>Echo</TD></TR>
+<TR><TD>discard</TD><TD>9/tcp</TD><TD>sink null Discard</TD></TR>
+<TR><TD>discard</TD><TD>9/udp</TD><TD>sink null Discard</TD></TR>
+<TR><TD>systat</TD><TD>11/tcp</TD><TD>Active Users</TD></TR>
+<TR><TD>systat</TD><TD>11/udp</TD><TD>Active Users</TD></TR>
+<TR><TD>daytime</TD><TD>13/tcp</TD><TD>Daytime</TD></TR>
+<TR><TD>daytime</TD><TD>13/udp</TD><TD>Daytime</TD></TR>
+<TR><TD>netstat</TD><TD>15/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>qotd </TD><TD>17/tcp</TD><TD>Quote of the Day</TD></TR>
+<TR><TD>qotd </TD><TD>17/udp</TD><TD>Quote of the Day</TD></TR>
+<TR><TD>msp</TD><TD>18/tcp</TD><TD>Message Send Protocol</TD></TR>
+<TR><TD>msp</TD><TD>18/udp</TD><TD>Message Send Protocol</TD></TR>
+<TR><TD>chargen</TD><TD>19/tcp</TD><TD> ttytst source Character Generator</TD></TR>
+<TR><TD>chargen</TD><TD>19/udp</TD><TD> ttytst source Character Generator</TD></TR>
+<TR><TD>ftp-data </TD><TD>20/tcp</TD><TD>File Transfer [Default Data]</TD></TR>
+<TR><TD>ftp-data </TD><TD>20/udp</TD><TD>File Transfer [Default Data]</TD></TR>
+<TR><TD>ftp</TD><TD>21/tcp</TD><TD>File Transfer [Control]</TD></TR>
+<TR><TD>ftp</TD><TD>21/udp</TD><TD>File Transfer [Control]</TD></TR>
+<TR><TD>telnet</TD><TD>23/tcp</TD><TD>Telnet</TD></TR>
+<TR><TD>telnet</TD><TD>23/udp</TD><TD>Telnet</TD></TR>
+<TR><TD>&nbsp;</TD><TD>24/tcp</TD><TD>any private mail system</TD></TR>
+<TR><TD>&nbsp;</TD><TD>24/udp</TD><TD>any private mail system</TD></TR>
+<TR><TD>smtp </TD><TD>25/tcp</TD><TD>Simple Mail Transfer</TD></TR>
+<TR><TD>smtp </TD><TD>25/udp</TD><TD>Simple Mail Transfer</TD></TR>
+<TR><TD>nsw-fe</TD><TD>27/tcp</TD><TD>NSW User System FE</TD></TR>
+<TR><TD>nsw-fe</TD><TD>27/udp</TD><TD>NSW User System FE</TD></TR>
+<TR><TD>msg-icp</TD><TD>29/tcp</TD><TD>MSG ICP</TD></TR>
+<TR><TD>msg-icp</TD><TD>29/udp</TD><TD>MSG ICP</TD></TR>
+<TR><TD>msg-auth </TD><TD>31/tcp</TD><TD>MSG Authentication</TD></TR>
+<TR><TD>msg-auth </TD><TD>31/udp</TD><TD>MSG Authentication</TD></TR>
+<TR><TD>dsp</TD><TD>33/tcp</TD><TD>Display Support Protocol</TD></TR>
+<TR><TD>dsp</TD><TD>33/udp</TD><TD>Display Support Protocol</TD></TR>
+<TR><TD>&nbsp;</TD><TD>35/tcp</TD><TD>any private printer server</TD></TR>
+<TR><TD>&nbsp;</TD><TD>35/udp</TD><TD>any private printer server</TD></TR>
+<TR><TD>time </TD><TD>37/tcp</TD><TD>Timeserver</TD></TR>
+<TR><TD>time </TD><TD>37/udp</TD><TD>Timeserver</TD></TR>
+<TR><TD>rap</TD><TD>38/tcp</TD><TD>Route Access Protocol</TD></TR>
+<TR><TD>rap</TD><TD>38/udp</TD><TD>Route Access Protocol</TD></TR>
+<TR><TD>rlp</TD><TD>39/tcp</TD><TD>Resource Location Protocol</TD></TR>
+<TR><TD>rlp</TD><TD>39/udp</TD><TD>Resource Location Protocol</TD></TR>
+<TR><TD>graphics </TD><TD>41/tcp</TD><TD>Graphics</TD></TR>
+<TR><TD>graphics </TD><TD>41/udp</TD><TD>Graphics</TD></TR>
+<TR><TD>nameserver </TD><TD>42/tcp</TD><TD>Host Name Server</TD></TR>
+<TR><TD>nameserver </TD><TD>42/udp</TD><TD>Host Name Server</TD></TR>
+<TR><TD>nicname</TD><TD>43/tcp</TD><TD>Who Is</TD></TR>
+<TR><TD>nicname</TD><TD>43/udp</TD><TD>Who Is</TD></TR>
+<TR><TD>mpm-flags</TD><TD>44/tcp</TD><TD>MPM FLAGS Protocol</TD></TR>
+<TR><TD>mpm-flags</TD><TD>44/udp</TD><TD>MPM FLAGS Protocol</TD></TR>
+<TR><TD>mpm</TD><TD>45/tcp</TD><TD>Message Processing Module [recv]</TD></TR>
+<TR><TD>mpm</TD><TD>45/udp</TD><TD>Message Processing Module [recv]</TD></TR>
+<TR><TD>mpm-snd</TD><TD>46/tcp</TD><TD>MPM [default send]</TD></TR>
+<TR><TD>mpm-snd</TD><TD>46/udp</TD><TD>MPM [default send]</TD></TR>
+<TR><TD>ni-ftp</TD><TD>47/tcp</TD><TD>NI FTP</TD></TR>
+<TR><TD>ni-ftp</TD><TD>47/udp</TD><TD>NI FTP</TD></TR>
+<TR><TD>auditd</TD><TD>48/tcp</TD><TD>Digital Audit Daemon</TD></TR>
+<TR><TD>auditd</TD><TD>48/udp</TD><TD>Digital Audit Daemon</TD></TR>
+<TR><TD>login</TD><TD>49/tcp</TD><TD>Login Host Protocol</TD></TR>
+<TR><TD>login</TD><TD>49/udp</TD><TD>Login Host Protocol</TD></TR>
+<TR><TD>re-mail-ck </TD><TD>50/tcp</TD><TD>Remote Mail Checking Protocol</TD></TR>
+<TR><TD>re-mail-ck </TD><TD>50/udp</TD><TD>Remote Mail Checking Protocol</TD></TR>
+<TR><TD>la-maint </TD><TD>51/tcp</TD><TD>IMP Logical Address Maintenance</TD></TR>
+<TR><TD>la-maint </TD><TD>51/udp</TD><TD>IMP Logical Address Maintenance</TD></TR>
+<TR><TD>xns-time </TD><TD>52/tcp</TD><TD>XNS Time Protocol</TD></TR>
+<TR><TD>xns-time </TD><TD>52/udp</TD><TD>XNS Time Protocol</TD></TR>
+<TR><TD>domain</TD><TD>53/tcp</TD><TD>Domain Name Server</TD></TR>
+<TR><TD>domain</TD><TD>53/udp</TD><TD>Domain Name Server</TD></TR>
+<TR><TD>xns-ch</TD><TD>54/tcp</TD><TD>XNS Clearinghouse</TD></TR>
+<TR><TD>xns-ch</TD><TD>54/udp</TD><TD>XNS Clearinghouse</TD></TR>
+<TR><TD>isi-gl</TD><TD>55/tcp</TD><TD>ISI Graphics Language</TD></TR>
+<TR><TD>isi-gl</TD><TD>55/udp</TD><TD>ISI Graphics Language</TD></TR>
+<TR><TD>xns-auth </TD><TD>56/tcp</TD><TD>XNS Authentication</TD></TR>
+<TR><TD>xns-auth </TD><TD>56/udp</TD><TD>XNS Authentication</TD></TR>
+<TR><TD>mtp</TD><TD>57/tcp</TD><TD>any private terminal access</TD></TR>
+<TR><TD>&nbsp;</TD><TD>57/udp</TD><TD>any private terminal access</TD></TR>
+<TR><TD>xns-mail </TD><TD>58/tcp</TD><TD>XNS Mail</TD></TR>
+<TR><TD>xns-mail </TD><TD>58/udp</TD><TD>XNS Mail</TD></TR>
+<TR><TD>&nbsp;</TD><TD>59/tcp</TD><TD>any private file service</TD></TR>
+<TR><TD>&nbsp;</TD><TD>59/udp</TD><TD>any private file service</TD></TR>
+<TR><TD>&nbsp;</TD><TD>60/tcp</TD><TD>Unassigned</TD></TR>
+<TR><TD>&nbsp;</TD><TD>60/udp</TD><TD>Unassigned</TD></TR>
+<TR><TD>ni-mail</TD><TD>61/tcp</TD><TD>NI MAIL</TD></TR>
+<TR><TD>ni-mail</TD><TD>61/udp</TD><TD>NI MAIL</TD></TR>
+<TR><TD>acas </TD><TD>62/tcp</TD><TD>ACA Services</TD></TR>
+<TR><TD>acas </TD><TD>62/udp</TD><TD>ACA Services</TD></TR>
+<TR><TD>covia</TD><TD>64/tcp</TD><TD>Communications Integrator (CI)</TD></TR>
+<TR><TD>covia</TD><TD>64/udp</TD><TD>Communications Integrator (CI)</TD></TR>
+<TR><TD>tacacs-ds</TD><TD>65/tcp</TD><TD>TACACS-Database Service</TD></TR>
+<TR><TD>tacacs-ds</TD><TD>65/udp</TD><TD>TACACS-Database Service</TD></TR>
+<TR><TD>sql*net</TD><TD>66/tcp</TD><TD>Oracle SQL*NET</TD></TR>
+<TR><TD>sql*net</TD><TD>66/udp</TD><TD>Oracle SQL*NET</TD></TR>
+<TR><TD>bootps</TD><TD>67/tcp</TD><TD>sbootp Bootstrap Protocol Server</TD></TR>
+<TR><TD>bootps</TD><TD>67/udp</TD><TD> dhcps sbootp Bootstrap Protocol Server</TD></TR>
+<TR><TD>bootpc</TD><TD>68/tcp</TD><TD> cbootp Bootstrap Protocol Client</TD></TR>
+<TR><TD>bootpc</TD><TD>68/udp</TD><TD> dhcpc cbootp Bootstrap Protocol Client</TD></TR>
+<TR><TD>tftp </TD><TD>69/tcp</TD><TD>Trivial File Transfer</TD></TR>
+<TR><TD>tftp </TD><TD>69/udp</TD><TD>Trivial File Transfer</TD></TR>
+<TR><TD>gopher</TD><TD>70/tcp</TD><TD>Gopher</TD></TR>
+<TR><TD>gopher</TD><TD>70/udp</TD><TD>Gopher</TD></TR>
+<TR><TD>netrjs-1 </TD><TD>71/tcp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-1 </TD><TD>71/udp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-2 </TD><TD>72/tcp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-2 </TD><TD>72/udp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-3 </TD><TD>73/tcp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-3 </TD><TD>73/udp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-4 </TD><TD>74/tcp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>netrjs-4 </TD><TD>74/udp</TD><TD>Remote Job Service</TD></TR>
+<TR><TD>&nbsp;</TD><TD>75/tcp</TD><TD>any private dial out service</TD></TR>
+<TR><TD>&nbsp;</TD><TD>75/udp</TD><TD>any private dial out service</TD></TR>
+<TR><TD>deos </TD><TD>76/tcp</TD><TD>Distributed External Object Store</TD></TR>
+<TR><TD>deos </TD><TD>76/udp</TD><TD>Distributed External Object Store</TD></TR>
+<TR><TD>rje</TD><TD>77/tcp</TD><TD>any private RJE service (netrjs)</TD></TR>
+<TR><TD>&nbsp;</TD><TD>77/udp</TD><TD>any private RJE service</TD></TR>
+<TR><TD>vettcp</TD><TD>78/tcp</TD><TD>vettcp</TD></TR>
+<TR><TD>vettcp</TD><TD>78/udp</TD><TD>vettcp</TD></TR>
+<TR><TD>finger</TD><TD>79/tcp</TD><TD>Finger</TD></TR>
+<TR><TD>finger</TD><TD>79/udp</TD><TD>Finger</TD></TR>
+<TR><TD>www-http </TD><TD>80/tcp</TD><TD>World Wide Web HTTP</TD></TR>
+<TR><TD>www-http </TD><TD>80/udp</TD><TD>World Wide Web HTTP</TD></TR>
+<TR><TD>hosts2-ns</TD><TD>81/tcp</TD><TD>HOSTS2 Name Server</TD></TR>
+<TR><TD>hosts2-ns</TD><TD>81/udp</TD><TD>HOSTS2 Name Server</TD></TR>
+<TR><TD>xfer </TD><TD>82/tcp</TD><TD>XFER Utility</TD></TR>
+<TR><TD>xfer </TD><TD>82/udp</TD><TD>XFER Utility</TD></TR>
+<TR><TD>mit-ml-dev </TD><TD>83/tcp</TD><TD>MIT ML Device</TD></TR>
+<TR><TD>mit-ml-dev </TD><TD>83/udp</TD><TD>MIT ML Device</TD></TR>
+<TR><TD>ctf</TD><TD>84/tcp</TD><TD>Common Trace Facility</TD></TR>
+<TR><TD>ctf</TD><TD>84/udp</TD><TD>Common Trace Facility</TD></TR>
+<TR><TD>mit-ml-dev </TD><TD>85/tcp</TD><TD>MIT ML Device</TD></TR>
+<TR><TD>mit-ml-dev </TD><TD>85/udp</TD><TD>MIT ML Device</TD></TR>
+<TR><TD>mfcobol</TD><TD>86/tcp</TD><TD>Micro Focus Cobol</TD></TR>
+<TR><TD>mfcobol</TD><TD>86/udp</TD><TD>Micro Focus Cobol</TD></TR>
+<TR><TD>link </TD><TD>87/tcp</TD><TD>any private terminal link</TD></TR>
+<TR><TD>&nbsp;</TD><TD>87/udp</TD><TD>any private terminal link</TD></TR>
+<TR><TD>kerberos </TD><TD>88/tcp</TD><TD>Kerberos</TD></TR>
+<TR><TD>kerberos </TD><TD>88/udp</TD><TD>Kerberos</TD></TR>
+<TR><TD>su-mit-tg</TD><TD>89/tcp</TD><TD>SU/MIT Telnet Gateway</TD></TR>
+<TR><TD>su-mit-tg</TD><TD>89/udp</TD><TD>SU/MIT Telnet Gateway</TD></TR>
+<TR><TD>dnsix</TD><TD>90/tcp</TD><TD>DNSIX Securit Attribute Token Map</TD></TR>
+<TR><TD>dnsix</TD><TD>90/udp</TD><TD>DNSIX Securit Attribute Token Map</TD></TR>
+<TR><TD>mit-dov</TD><TD>91/tcp</TD><TD>MIT Dover Spooler</TD></TR>
+<TR><TD>mit-dov</TD><TD>91/udp</TD><TD>MIT Dover Spooler</TD></TR>
+<TR><TD>npp</TD><TD>92/tcp</TD><TD>Network Printing Protocol</TD></TR>
+<TR><TD>npp</TD><TD>92/udp</TD><TD>Network Printing Protocol</TD></TR>
+<TR><TD>dcp</TD><TD>93/tcp</TD><TD>Device Control Protocol</TD></TR>
+<TR><TD>dcp</TD><TD>93/udp</TD><TD>Device Control Protocol</TD></TR>
+<TR><TD>objcall</TD><TD>94/tcp</TD><TD>Tivoli Object Dispatcher</TD></TR>
+<TR><TD>objcall</TD><TD>94/udp</TD><TD>Tivoli Object Dispatcher</TD></TR>
+<TR><TD>supdup</TD><TD>95/tcp</TD><TD>SUPDUP</TD></TR>
+<TR><TD>supdup</TD><TD>95/udp</TD><TD>SUPDUP</TD></TR>
+<TR><TD>dixie</TD><TD>96/tcp</TD><TD>DIXIE Protocol Specification</TD></TR>
+<TR><TD>dixie</TD><TD>96/udp</TD><TD>DIXIE Protocol Specification</TD></TR>
+<TR><TD>swift-rvf</TD><TD>97/tcp</TD><TD>Swift Remote Vitural File Protocol</TD></TR>
+<TR><TD>swift-rvf</TD><TD>97/udp</TD><TD>Swift Remote Vitural File Protocol</TD></TR>
+<TR><TD>tacnews</TD><TD>98/tcp</TD><TD>TAC News</TD></TR>
+<TR><TD>tacnews</TD><TD>98/udp</TD><TD>TAC News</TD></TR>
+<TR><TD>metagram </TD><TD>99/tcp</TD><TD>Metagram Relay</TD></TR>
+<TR><TD>metagram </TD><TD>99/udp</TD><TD>Metagram Relay</TD></TR>
+<TR><TD>newacct</TD><TD>100/tcp</TD><TD>[unauthorized use]</TD></TR>
+<TR><TD>hostname </TD><TD>101/tcp</TD><TD>NIC Host Name Server</TD></TR>
+<TR><TD>hostname </TD><TD>101/udp</TD><TD>NIC Host Name Server</TD></TR>
+<TR><TD>iso-tsap </TD><TD>102/tcp</TD><TD>ISO-TSAP</TD></TR>
+<TR><TD>iso-tsap </TD><TD>102/udp</TD><TD>ISO-TSAP</TD></TR>
+<TR><TD>gppitnp</TD><TD>103/tcp</TD><TD>Genesis Point-to-Point Trans Net</TD></TR>
+<TR><TD>gppitnp</TD><TD>103/udp</TD><TD>Genesis Point-to-Point Trans Net</TD></TR>
+<TR><TD>acr-nema </TD><TD>104/tcp</TD><TD>ACR-NEMA Digital Imag. & Comm. 300</TD></TR>
+<TR><TD>acr-nema </TD><TD>104/udp</TD><TD>ACR-NEMA Digital Imag. & Comm. 300</TD></TR>
+<TR><TD>csnet-ns </TD><TD>105/tcp</TD><TD>Mailbox Name Nameserver</TD></TR>
+<TR><TD>csnet-ns </TD><TD>105/udp</TD><TD>Mailbox Name Nameserver</TD></TR>
+<TR><TD>3com-tsmux </TD><TD>106/tcp</TD><TD>3COM-TSMUX</TD></TR>
+<TR><TD>3com-tsmux </TD><TD>106/udp</TD><TD>3COM-TSMUX</TD></TR>
+<TR><TD>rtelnet</TD><TD>107/tcp</TD><TD>Remote Telnet Service</TD></TR>
+<TR><TD>rtelnet</TD><TD>107/udp</TD><TD>Remote Telnet Service</TD></TR>
+<TR><TD>snagas</TD><TD>108/tcp</TD><TD>SNA Gateway Access Server</TD></TR>
+<TR><TD>snagas</TD><TD>108/udp</TD><TD>SNA Gateway Access Server</TD></TR>
+<TR><TD>pop2 </TD><TD>109/tcp</TD><TD>Post Office Protocol - Version 2</TD></TR>
+<TR><TD>pop2 </TD><TD>109/udp</TD><TD>Post Office Protocol - Version 2</TD></TR>
+<TR><TD>pop3 </TD><TD>110/tcp</TD><TD>Post Office Protocol - Version 3</TD></TR>
+<TR><TD>pop3 </TD><TD>110/udp</TD><TD>Post Office Protocol - Version 3</TD></TR>
+<TR><TD>sunrpc</TD><TD>111/tcp</TD><TD>SUN Remote Procedure Call</TD></TR>
+<TR><TD>sunrpc</TD><TD>111/udp</TD><TD>SUN Remote Procedure Call</TD></TR>
+<TR><TD>mcidas</TD><TD>112/tcp</TD><TD>McIDAS Data Transmission Protocol</TD></TR>
+<TR><TD>mcidas</TD><TD>112/udp</TD><TD>McIDAS Data Transmission Protocol</TD></TR>
+<TR><TD>auth </TD><TD>113/tcp</TD><TD>Authentication Service</TD></TR>
+<TR><TD>auth </TD><TD>113/udp</TD><TD>Authentication Service</TD></TR>
+<TR><TD>audionews</TD><TD>114/tcp</TD><TD>Audio News Multicast</TD></TR>
+<TR><TD>audionews</TD><TD>114/udp</TD><TD>Audio News Multicast</TD></TR>
+<TR><TD>sftp </TD><TD>115/tcp</TD><TD>Simple File Transfer Protocol</TD></TR>
+<TR><TD>sftp </TD><TD>115/udp</TD><TD>Simple File Transfer Protocol</TD></TR>
+<TR><TD>ansanotify </TD><TD>116/tcp</TD><TD>ANSA REX Notify</TD></TR>
+<TR><TD>ansanotify </TD><TD>116/udp</TD><TD>ANSA REX Notify</TD></TR>
+<TR><TD>uucp-path</TD><TD>117/tcp</TD><TD>UUCP Path Service</TD></TR>
+<TR><TD>uucp-path</TD><TD>117/udp</TD><TD>UUCP Path Service</TD></TR>
+<TR><TD>sqlserv</TD><TD>118/tcp</TD><TD>SQL Services</TD></TR>
+<TR><TD>sqlserv</TD><TD>118/udp</TD><TD>SQL Services</TD></TR>
+<TR><TD>nntp </TD><TD>119/tcp</TD><TD>Network News Transfer Protocol</TD></TR>
+<TR><TD>nntp </TD><TD>119/udp</TD><TD>Network News Transfer Protocol</TD></TR>
+<TR><TD>cfdptkt</TD><TD>120/tcp</TD><TD>CFDPTKT</TD></TR>
+<TR><TD>cfdptkt</TD><TD>120/udp</TD><TD>CFDPTKT</TD></TR>
+<TR><TD>erpc </TD><TD>121/tcp</TD><TD>Encore Expedited Remote Pro.Call</TD></TR>
+<TR><TD>erpc </TD><TD>121/udp</TD><TD>Encore Expedited Remote Pro.Call</TD></TR>
+<TR><TD>smakynet </TD><TD>122/tcp</TD><TD>SMAKYNET</TD></TR>
+<TR><TD>smakynet </TD><TD>122/udp</TD><TD>SMAKYNET</TD></TR>
+<TR><TD>ntp</TD><TD>123/tcp</TD><TD>Network Time Protocol</TD></TR>
+<TR><TD>ntp</TD><TD>123/udp</TD><TD>Network Time Protocol</TD></TR>
+<TR><TD>ansatrader </TD><TD>124/tcp</TD><TD>ANSA REX Trader</TD></TR>
+<TR><TD>ansatrader </TD><TD>124/udp</TD><TD>ANSA REX Trader</TD></TR>
+<TR><TD>locus-map</TD><TD>125/tcp</TD><TD>Locus PC-Interface Net Map Ser</TD></TR>
+<TR><TD>locus-map</TD><TD>125/udp</TD><TD>Locus PC-Interface Net Map Ser</TD></TR>
+<TR><TD>unitary</TD><TD>126/tcp</TD><TD>Unisys Unitary Login</TD></TR>
+<TR><TD>unitary</TD><TD>126/udp</TD><TD>Unisys Unitary Login</TD></TR>
+<TR><TD>locus-con</TD><TD>127/tcp</TD><TD>Locus PC-Interface Conn Server</TD></TR>
+<TR><TD>locus-con</TD><TD>127/udp</TD><TD>Locus PC-Interface Conn Server</TD></TR>
+<TR><TD>gss-xlicen </TD><TD>128/tcp</TD><TD>GSS X License Verification</TD></TR>
+<TR><TD>gss-xlicen </TD><TD>128/udp</TD><TD>GSS X License Verification</TD></TR>
+<TR><TD>pwdgen</TD><TD>129/tcp</TD><TD>Password Generator Protocol</TD></TR>
+<TR><TD>pwdgen</TD><TD>129/udp</TD><TD>Password Generator Protocol</TD></TR>
+<TR><TD>cisco-fna</TD><TD>130/tcp</TD><TD>cisco FNATIVE</TD></TR>
+<TR><TD>cisco-fna</TD><TD>130/udp</TD><TD>cisco FNATIVE</TD></TR>
+<TR><TD>cisco-tna</TD><TD>131/tcp</TD><TD>cisco TNATIVE</TD></TR>
+<TR><TD>cisco-tna</TD><TD>131/udp</TD><TD>cisco TNATIVE</TD></TR>
+<TR><TD>cisco-sys</TD><TD>132/tcp</TD><TD>cisco SYSMAINT</TD></TR>
+<TR><TD>cisco-sys</TD><TD>132/udp</TD><TD>cisco SYSMAINT</TD></TR>
+<TR><TD>statsrv</TD><TD>133/tcp</TD><TD>Statistics Service</TD></TR>
+<TR><TD>statsrv</TD><TD>133/udp</TD><TD>Statistics Service</TD></TR>
+<TR><TD>ingres-net </TD><TD>134/tcp</TD><TD>INGRES-NET Service</TD></TR>
+<TR><TD>ingres-net </TD><TD>134/udp</TD><TD>INGRES-NET Service</TD></TR>
+<TR><TD>loc-srv</TD><TD>135/tcp</TD><TD>Location Service</TD></TR>
+<TR><TD>loc-srv</TD><TD>135/udp</TD><TD>Location Service</TD></TR>
+<TR><TD>profile</TD><TD>136/tcp</TD><TD>PROFILE Naming System</TD></TR>
+<TR><TD>profile</TD><TD>136/udp</TD><TD>PROFILE Naming System</TD></TR>
+<TR><TD>netbios-ns </TD><TD>137/tcp</TD><TD>NETBIOS Name Service</TD></TR>
+<TR><TD>netbios-ns </TD><TD>137/udp</TD><TD>NETBIOS Name Service</TD></TR>
+<TR><TD>netbios-dgm</TD><TD>138/tcp</TD><TD>NETBIOS Datagram Service</TD></TR>
+<TR><TD>netbios-dgm</TD><TD>138/udp</TD><TD>NETBIOS Datagram Service</TD></TR>
+<TR><TD>netbios-ssn</TD><TD>139/tcp</TD><TD>NETBIOS Session Service</TD></TR>
+<TR><TD>netbios-ssn</TD><TD>139/udp</TD><TD>NETBIOS Session Service</TD></TR>
+<TR><TD>emfis-data </TD><TD>140/tcp</TD><TD>EMFIS Data Service</TD></TR>
+<TR><TD>emfis-data </TD><TD>140/udp</TD><TD>EMFIS Data Service</TD></TR>
+<TR><TD>emfis-cntl </TD><TD>141/tcp</TD><TD>EMFIS Control Service</TD></TR>
+<TR><TD>emfis-cntl </TD><TD>141/udp</TD><TD>EMFIS Control Service</TD></TR>
+<TR><TD>bl-idm</TD><TD>142/tcp</TD><TD>Britton-Lee IDM</TD></TR>
+<TR><TD>bl-idm</TD><TD>142/udp</TD><TD>Britton-Lee IDM</TD></TR>
+<TR><TD>imap2</TD><TD>143/tcp</TD><TD>Interim Mail Access Protocol v2</TD></TR>
+<TR><TD>imap2</TD><TD>143/udp</TD><TD>Interim Mail Access Protocol v2</TD></TR>
+<TR><TD>news </TD><TD>144/tcp</TD><TD>NewS</TD></TR>
+<TR><TD>news </TD><TD>144/udp</TD><TD>NewS</TD></TR>
+<TR><TD>uaac </TD><TD>145/tcp</TD><TD>UAAC Protocol</TD></TR>
+<TR><TD>uaac </TD><TD>145/udp</TD><TD>UAAC Protocol</TD></TR>
+<TR><TD>iso-tp0</TD><TD>146/tcp</TD><TD>ISO-IP0</TD></TR>
+<TR><TD>iso-tp0</TD><TD>146/udp</TD><TD>ISO-IP0</TD></TR>
+<TR><TD>iso-ip</TD><TD>147/tcp</TD><TD>ISO-IP</TD></TR>
+<TR><TD>iso-ip</TD><TD>147/udp</TD><TD>ISO-IP</TD></TR>
+<TR><TD>cronus</TD><TD>148/tcp</TD><TD>CRONUS-SUPPORT</TD></TR>
+<TR><TD>cronus</TD><TD>148/udp</TD><TD>CRONUS-SUPPORT</TD></TR>
+<TR><TD>aed-512</TD><TD>149/tcp</TD><TD>AED 512 Emulation Service</TD></TR>
+<TR><TD>aed-512</TD><TD>149/udp</TD><TD>AED 512 Emulation Service</TD></TR>
+<TR><TD>sql-net</TD><TD>150/tcp</TD><TD>SQL-NET</TD></TR>
+<TR><TD>sql-net</TD><TD>150/udp</TD><TD>SQL-NET</TD></TR>
+<TR><TD>hems </TD><TD>151/tcp</TD><TD>HEMS</TD></TR>
+<TR><TD>hems </TD><TD>151/udp</TD><TD>HEMS</TD></TR>
+<TR><TD>bftp </TD><TD>152/tcp</TD><TD>Background File Transfer Program</TD></TR>
+<TR><TD>bftp </TD><TD>152/udp</TD><TD>Background File Transfer Program</TD></TR>
+<TR><TD>sgmp </TD><TD>153/tcp</TD><TD>SGMP</TD></TR>
+<TR><TD>sgmp </TD><TD>153/udp</TD><TD>SGMP</TD></TR>
+<TR><TD>netsc-prod </TD><TD>154/tcp</TD><TD>NETSC</TD></TR>
+<TR><TD>netsc-prod </TD><TD>154/udp</TD><TD>NETSC</TD></TR>
+<TR><TD>netsc-dev</TD><TD>155/tcp</TD><TD>NETSC</TD></TR>
+<TR><TD>netsc-dev</TD><TD>155/udp</TD><TD>NETSC</TD></TR>
+<TR><TD>sqlsrv</TD><TD>156/tcp</TD><TD>SQL Service</TD></TR>
+<TR><TD>sqlsrv</TD><TD>156/udp</TD><TD>SQL Service</TD></TR>
+<TR><TD>knet-cmp </TD><TD>157/tcp</TD><TD>KNET/VM Command/Message Protocol</TD></TR>
+<TR><TD>knet-cmp </TD><TD>157/udp</TD><TD>KNET/VM Command/Message Protocol</TD></TR>
+<TR><TD>pcmail-srv </TD><TD>158/tcp</TD><TD>PCMail Server</TD></TR>
+<TR><TD>pcmail-srv </TD><TD>158/udp</TD><TD>PCMail Server</TD></TR>
+<TR><TD>nss-routing</TD><TD>159/tcp</TD><TD>NSS-Routing</TD></TR>
+<TR><TD>nss-routing</TD><TD>159/udp</TD><TD>NSS-Routing</TD></TR>
+<TR><TD>sgmp-traps </TD><TD>160/tcp</TD><TD>SGMP-TRAPS</TD></TR>
+<TR><TD>sgmp-traps </TD><TD>160/udp</TD><TD>SGMP-TRAPS</TD></TR>
+<TR><TD>snmp </TD><TD>161/tcp</TD><TD>SNMP</TD></TR>
+<TR><TD>snmp </TD><TD>161/udp</TD><TD>SNMP</TD></TR>
+<TR><TD>snmptrap </TD><TD>162/tcp</TD><TD>SNMPTRAP</TD></TR>
+<TR><TD>snmptrap </TD><TD>162/udp</TD><TD>SNMPTRAP</TD></TR>
+<TR><TD>cmip-man </TD><TD>163/tcp</TD><TD>CMIP/TCP Manager</TD></TR>
+<TR><TD>cmip-man </TD><TD>163/udp</TD><TD>CMIP/TCP Manager</TD></TR>
+<TR><TD>cmip-agent </TD><TD>164/tcp</TD><TD>CMIP/TCP Agent</TD></TR>
+<TR><TD>smip-agent </TD><TD>164/udp</TD><TD>CMIP/TCP Agent</TD></TR>
+<TR><TD>xns-courier</TD><TD>165/tcp</TD><TD>Xerox</TD></TR>
+<TR><TD>xns-courier</TD><TD>165/udp</TD><TD>Xerox</TD></TR>
+<TR><TD>s-net</TD><TD>166/tcp</TD><TD>Sirius Systems</TD></TR>
+<TR><TD>s-net</TD><TD>166/udp</TD><TD>Sirius Systems</TD></TR>
+<TR><TD>namp </TD><TD>167/tcp</TD><TD>NAMP</TD></TR>
+<TR><TD>namp </TD><TD>167/udp</TD><TD>NAMP</TD></TR>
+<TR><TD>rsvd </TD><TD>168/tcp</TD><TD>RSVD</TD></TR>
+<TR><TD>rsvd </TD><TD>168/udp</TD><TD>RSVD</TD></TR>
+<TR><TD>send </TD><TD>169/tcp</TD><TD>SEND</TD></TR>
+<TR><TD>send </TD><TD>169/udp</TD><TD>SEND</TD></TR>
+<TR><TD>print-srv</TD><TD>170/tcp</TD><TD>Network PostScript</TD></TR>
+<TR><TD>print-srv</TD><TD>170/udp</TD><TD>Network PostScript</TD></TR>
+<TR><TD>multiplex</TD><TD>171/tcp</TD><TD>Network Innovations Multiplex</TD></TR>
+<TR><TD>multiplex</TD><TD>171/udp</TD><TD>Network Innovations Multiplex</TD></TR>
+<TR><TD>cl/1 </TD><TD>172/tcp</TD><TD>Network Innovations CL/1</TD></TR>
+<TR><TD>cl/1 </TD><TD>172/udp</TD><TD>Network Innovations CL/1</TD></TR>
+<TR><TD>xyplex-mux </TD><TD>173/tcp</TD><TD>Xyplex</TD></TR>
+<TR><TD>xyplex-mux </TD><TD>173/udp</TD><TD>Xyplex</TD></TR>
+<TR><TD>mailq</TD><TD>174/tcp</TD><TD>MAILQ</TD></TR>
+<TR><TD>mailq</TD><TD>174/udp</TD><TD>MAILQ</TD></TR>
+<TR><TD>vmnet</TD><TD>175/tcp</TD><TD>VMNET</TD></TR>
+<TR><TD>vmnet</TD><TD>175/udp</TD><TD>VMNET</TD></TR>
+<TR><TD>genrad-mux </TD><TD>176/tcp</TD><TD>GENRAD-MUX</TD></TR>
+<TR><TD>genrad-mux </TD><TD>176/udp</TD><TD>GENRAD-MUX</TD></TR>
+<TR><TD>xdmcp</TD><TD>177/tcp</TD><TD>X Display Manager Control Protocol</TD></TR>
+<TR><TD>xdmcp</TD><TD>177/udp</TD><TD>X Display Manager Control Protocol</TD></TR>
+<TR><TD>nextstep </TD><TD>178/tcp</TD><TD>NextStep Window Server</TD></TR>
+<TR><TD>NextStep </TD><TD>178/udp</TD><TD>NextStep Window Server</TD></TR>
+<TR><TD>bgp</TD><TD>179/tcp</TD><TD>Border Gateway Protocol</TD></TR>
+<TR><TD>bgp</TD><TD>179/udp</TD><TD>Border Gateway Protocol</TD></TR>
+<TR><TD>ris</TD><TD>180/tcp</TD><TD>Intergraph</TD></TR>
+<TR><TD>ris</TD><TD>180/udp</TD><TD>Intergraph</TD></TR>
+<TR><TD>unify</TD><TD>181/tcp</TD><TD>Unify</TD></TR>
+<TR><TD>unify</TD><TD>181/udp</TD><TD>Unify</TD></TR>
+<TR><TD>audit</TD><TD>182/tcp</TD><TD>Unisys Audit SITP</TD></TR>
+<TR><TD>audit</TD><TD>182/udp</TD><TD>Unisys Audit SITP</TD></TR>
+<TR><TD>ocbinder </TD><TD>183/tcp</TD><TD>OCBinder</TD></TR>
+<TR><TD>ocbinder </TD><TD>183/udp</TD><TD>OCBinder</TD></TR>
+<TR><TD>ocserver </TD><TD>184/tcp</TD><TD>OCServer</TD></TR>
+<TR><TD>ocserver </TD><TD>184/udp</TD><TD>OCServer</TD></TR>
+<TR><TD>remote-kis </TD><TD>185/tcp</TD><TD>Remote-KIS</TD></TR>
+<TR><TD>remote-kis </TD><TD>185/udp</TD><TD>Remote-KIS</TD></TR>
+<TR><TD>kis</TD><TD>186/tcp</TD><TD>KIS Protocol</TD></TR>
+<TR><TD>kis</TD><TD>186/udp</TD><TD>KIS Protocol</TD></TR>
+<TR><TD>aci</TD><TD>187/tcp</TD><TD>Application Communication Interface</TD></TR>
+<TR><TD>aci</TD><TD>187/udp</TD><TD>Application Communication Interface</TD></TR>
+<TR><TD>mumps</TD><TD>188/tcp</TD><TD>Plus Five's MUMPS</TD></TR>
+<TR><TD>mumps</TD><TD>188/udp</TD><TD>Plus Five's MUMPS</TD></TR>
+<TR><TD>qft</TD><TD>189/tcp</TD><TD>Queued File Transport</TD></TR>
+<TR><TD>qft</TD><TD>189/udp</TD><TD>Queued File Transport</TD></TR>
+<TR><TD>gacp </TD><TD>190/tcp</TD><TD>Gateway Access Control Protocol</TD></TR>
+<TR><TD>cacp </TD><TD>190/udp</TD><TD>Gateway Access Control Protocol</TD></TR>
+<TR><TD>prospero </TD><TD>191/tcp</TD><TD>Prospero Directory Service</TD></TR>
+<TR><TD>prospero </TD><TD>191/udp</TD><TD>Prospero Directory Service</TD></TR>
+<TR><TD>osu-nms</TD><TD>192/tcp</TD><TD>OSU Network Monitoring System</TD></TR>
+<TR><TD>osu-nms</TD><TD>192/udp</TD><TD>OSU Network Monitoring System</TD></TR>
+<TR><TD>srmp </TD><TD>193/tcp</TD><TD>Spider Remote Monitoring Protocol</TD></TR>
+<TR><TD>srmp </TD><TD>193/udp</TD><TD>Spider Remote Monitoring Protocol</TD></TR>
+<TR><TD>irc</TD><TD>194/tcp</TD><TD>Internet Relay Chat Protocol</TD></TR>
+<TR><TD>irc</TD><TD>194/udp</TD><TD>Internet Relay Chat Protocol</TD></TR>
+<TR><TD>dn6-nlm-aud</TD><TD>195/tcp</TD><TD>DNSIX Network Level Module Audit</TD></TR>
+<TR><TD>dn6-nlm-aud</TD><TD>195/udp</TD><TD>DNSIX Network Level Module Audit</TD></TR>
+<TR><TD>dn6-smm-red</TD><TD>196/tcp</TD><TD>DNSIX Session Mgt Module Audit Redir</TD></TR>
+<TR><TD>dn6-smm-red</TD><TD>196/udp</TD><TD>DNSIX Session Mgt Module Audit Redir</TD></TR>
+<TR><TD>dls</TD><TD>197/tcp</TD><TD>Directory Location Service</TD></TR>
+<TR><TD>dls</TD><TD>197/udp</TD><TD>Directory Location Service</TD></TR>
+<TR><TD>dls-mon</TD><TD>198/tcp</TD><TD>Directory Location Service Monitor</TD></TR>
+<TR><TD>dls-mon</TD><TD>198/udp</TD><TD>Directory Location Service Monitor</TD></TR>
+<TR><TD>smux </TD><TD>199/tcp</TD><TD>SMUX</TD></TR>
+<TR><TD>smux </TD><TD>199/udp</TD><TD>SMUX</TD></TR>
+<TR><TD>src</TD><TD>200/tcp</TD><TD>IBM System Resource Controller</TD></TR>
+<TR><TD>src</TD><TD>200/udp</TD><TD>IBM System Resource Controller</TD></TR>
+<TR><TD>at-rtmp</TD><TD>201/tcp</TD><TD>AppleTalk Routing Maintenance</TD></TR>
+<TR><TD>at-rtmp</TD><TD>201/udp</TD><TD>AppleTalk Routing Maintenance</TD></TR>
+<TR><TD>at-nbp</TD><TD>202/tcp</TD><TD>AppleTalk Name Binding</TD></TR>
+<TR><TD>at-nbp</TD><TD>202/udp</TD><TD>AppleTalk Name Binding</TD></TR>
+<TR><TD>at-3 </TD><TD>203/tcp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-3 </TD><TD>203/udp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-echo</TD><TD>204/tcp</TD><TD>AppleTalk Echo</TD></TR>
+<TR><TD>at-echo</TD><TD>204/udp</TD><TD>AppleTalk Echo</TD></TR>
+<TR><TD>at-5 </TD><TD>205/tcp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-5 </TD><TD>205/udp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-zis</TD><TD>206/tcp</TD><TD>AppleTalk Zone Information</TD></TR>
+<TR><TD>at-zis</TD><TD>206/udp</TD><TD>AppleTalk Zone Information</TD></TR>
+<TR><TD>at-7 </TD><TD>207/tcp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-7 </TD><TD>207/udp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-8 </TD><TD>208/tcp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>at-8 </TD><TD>208/udp</TD><TD>AppleTalk Unused</TD></TR>
+<TR><TD>tam</TD><TD>209/tcp</TD><TD>Trivial Authenticated Mail Protocol</TD></TR>
+<TR><TD>tam</TD><TD>209/udp</TD><TD>Trivial Authenticated Mail Protocol</TD></TR>
+<TR><TD>z39.50</TD><TD>210/tcp</TD><TD>ANSI Z39.50</TD></TR>
+<TR><TD>z39.50</TD><TD>210/udp</TD><TD>ANSI Z39.50</TD></TR>
+<TR><TD>914c/g</TD><TD>211/tcp</TD><TD>Texas Instruments 914C/G Terminal</TD></TR>
+<TR><TD>914c/g</TD><TD>211/udp</TD><TD>Texas Instruments 914C/G Terminal</TD></TR>
+<TR><TD>anet </TD><TD>212/tcp</TD><TD>ATEXSSTR</TD></TR>
+<TR><TD>anet </TD><TD>212/udp</TD><TD>ATEXSSTR</TD></TR>
+<TR><TD>ipx</TD><TD>213/tcp</TD><TD>IPX</TD></TR>
+<TR><TD>ipx</TD><TD>213/udp</TD><TD>IPX</TD></TR>
+<TR><TD>vmpwscs</TD><TD>214/tcp</TD><TD>VM PWSCS</TD></TR>
+<TR><TD>vmpwscs</TD><TD>214/udp</TD><TD>VM PWSCS</TD></TR>
+<TR><TD>softpc</TD><TD>215/tcp</TD><TD>Insignia Solutions</TD></TR>
+<TR><TD>softpc</TD><TD>215/udp</TD><TD>Insignia Solutions</TD></TR>
+<TR><TD>atls </TD><TD>216/tcp</TD><TD>Access Technology License Server</TD></TR>
+<TR><TD>atls </TD><TD>216/udp</TD><TD>Access Technology License Server</TD></TR>
+<TR><TD>dbase</TD><TD>217/tcp</TD><TD>dBASE Unix</TD></TR>
+<TR><TD>dbase</TD><TD>217/udp</TD><TD>dBASE Unix</TD></TR>
+<TR><TD>mpp</TD><TD>218/tcp</TD><TD>Netix Message Posting Protocol</TD></TR>
+<TR><TD>mpp</TD><TD>218/udp</TD><TD>Netix Message Posting Protocol</TD></TR>
+<TR><TD>uarps</TD><TD>219/tcp</TD><TD>Unisys ARPs</TD></TR>
+<TR><TD>uarps</TD><TD>219/udp</TD><TD>Unisys ARPs</TD></TR>
+<TR><TD>imap3</TD><TD>220/tcp</TD><TD>Interactive Mail Access Protocol v3</TD></TR>
+<TR><TD>imap3</TD><TD>220/udp</TD><TD>Interactive Mail Access Protocol v3</TD></TR>
+<TR><TD>fln-spx</TD><TD>221/tcp</TD><TD>Berkeley rlogind with SPX auth</TD></TR>
+<TR><TD>fln-spx</TD><TD>221/udp</TD><TD>Berkeley rlogind with SPX auth</TD></TR>
+<TR><TD>rsh-spx</TD><TD>222/tcp</TD><TD>Berkeley rshd with SPX auth</TD></TR>
+<TR><TD>rsh-spx</TD><TD>222/udp</TD><TD>Berkeley rshd with SPX auth</TD></TR>
+<TR><TD>cdc</TD><TD>223/tcp</TD><TD>Certificate Distribution Center</TD></TR>
+<TR><TD>cdc</TD><TD>223/udp</TD><TD>Certificate Distribution Center</TD></TR>
+<TR><TD>sur-meas </TD><TD>243/tcp</TD><TD>Survey Measurement</TD></TR>
+<TR><TD>sur-meas </TD><TD>243/udp</TD><TD>Survey Measurement</TD></TR>
+<TR><TD>link </TD><TD>245/tcp</TD><TD>LINK</TD></TR>
+<TR><TD>link </TD><TD>245/udp</TD><TD>LINK</TD></TR>
+<TR><TD>dsp3270</TD><TD>246/tcp</TD><TD>Display Systems Protocol</TD></TR>
+<TR><TD>dsp3270</TD><TD>246/udp</TD><TD>Display Systems Protocol</TD></TR>
+<TR><TD>pdap </TD><TD>344/tcp</TD><TD>Prospero Data Access Protocol</TD></TR>
+<TR><TD>pdap </TD><TD>344/udp</TD><TD>Prospero Data Access Protocol</TD></TR>
+<TR><TD>pawserv</TD><TD>345/tcp</TD><TD>Perf Analysis Workbench</TD></TR>
+<TR><TD>pawserv</TD><TD>345/udp</TD><TD>Perf Analysis Workbench</TD></TR>
+<TR><TD>zserv</TD><TD>346/tcp</TD><TD>Zebra server</TD></TR>
+<TR><TD>zserv</TD><TD>346/udp</TD><TD>Zebra server</TD></TR>
+<TR><TD>fatserv</TD><TD>347/tcp</TD><TD>Fatmen Server</TD></TR>
+<TR><TD>fatserv</TD><TD>347/udp</TD><TD>Fatmen Server</TD></TR>
+<TR><TD>csi-sgwp </TD><TD>348/tcp</TD><TD>Cabletron Management Protocol</TD></TR>
+<TR><TD>csi-sgwp </TD><TD>348/udp</TD><TD>Cabletron Management Protocol</TD></TR>
+<TR><TD>clearcase</TD><TD>371/tcp</TD><TD>Clearcase</TD></TR>
+<TR><TD>clearcase</TD><TD>371/udp</TD><TD>Clearcase</TD></TR>
+<TR><TD>ulistserv</TD><TD>372/tcp</TD><TD>Unix Listserv</TD></TR>
+<TR><TD>ulistserv</TD><TD>372/udp</TD><TD>Unix Listserv</TD></TR>
+<TR><TD>legent-1 </TD><TD>373/tcp</TD><TD>Legent Corporation</TD></TR>
+<TR><TD>legent-1 </TD><TD>373/udp</TD><TD>Legent Corporation</TD></TR>
+<TR><TD>legent-2 </TD><TD>374/tcp</TD><TD>Legent Corporation</TD></TR>
+<TR><TD>legent-2 </TD><TD>374/udp</TD><TD>Legent Corporation</TD></TR>
+<TR><TD>hassle</TD><TD>375/tcp</TD><TD>Hassle</TD></TR>
+<TR><TD>hassle</TD><TD>375/udp</TD><TD>Hassle</TD></TR>
+<TR><TD>nip</TD><TD>376/tcp</TD><TD>Amiga Envoy Network Inquiry Proto</TD></TR>
+<TR><TD>nip</TD><TD>376/udp</TD><TD>Amiga Envoy Network Inquiry Proto</TD></TR>
+<TR><TD>tnETOS</TD><TD>377/tcp</TD><TD>NEC Corporation</TD></TR>
+<TR><TD>tnETOS</TD><TD>377/udp</TD><TD>NEC Corporation</TD></TR>
+<TR><TD>dsETOS</TD><TD>378/tcp</TD><TD>NEC Corporation</TD></TR>
+<TR><TD>dsETOS</TD><TD>378/udp</TD><TD>NEC Corporation</TD></TR>
+<TR><TD>is99c</TD><TD>379/tcp</TD><TD>TIA/EIA/IS-99 modem client</TD></TR>
+<TR><TD>is99c</TD><TD>379/udp</TD><TD>TIA/EIA/IS-99 modem client</TD></TR>
+<TR><TD>is99s</TD><TD>380/tcp</TD><TD>TIA/EIA/IS-99 modem server</TD></TR>
+<TR><TD>is99s</TD><TD>380/udp</TD><TD>TIA/EIA/IS-99 modem server</TD></TR>
+<TR><TD>hp-collector</TD><TD>381/tcp</TD><TD>hp performance data collector</TD></TR>
+<TR><TD>hp-collector</TD><TD>381/udp</TD><TD>hp performance data collector</TD></TR>
+<TR><TD>hp-managed-node </TD><TD>382/tcp</TD><TD>hp performance data managed node</TD></TR>
+<TR><TD>hp-managed-node </TD><TD>382/udp</TD><TD>hp performance data managed node</TD></TR>
+<TR><TD>hp-alarm-mgr</TD><TD>383/tcp</TD><TD>hp performance data alarm manager</TD></TR>
+<TR><TD>hp-alarm-mgr</TD><TD>383/udp</TD><TD>hp performance data alarm manager</TD></TR>
+<TR><TD>arns </TD><TD>384/tcp</TD><TD>A Remote Network Server System</TD></TR>
+<TR><TD>arns </TD><TD>384/udp</TD><TD>A Remote Network Server System</TD></TR>
+<TR><TD>ibm-app</TD><TD>385/tcp</TD><TD>IBM Application</TD></TR>
+<TR><TD>ibm-app</TD><TD>385/tcp</TD><TD>IBM Application</TD></TR>
+<TR><TD>asa</TD><TD>386/tcp</TD><TD>ASA Message Router Object Def.</TD></TR>
+<TR><TD>asa</TD><TD>386/udp</TD><TD>ASA Message Router Object Def.</TD></TR>
+<TR><TD>aurp </TD><TD>387/tcp</TD><TD>Appletalk Update-Based Routing Pro.</TD></TR>
+<TR><TD>aurp </TD><TD>387/udp</TD><TD>Appletalk Update-Based Routing Pro.</TD></TR>
+<TR><TD>unidata-ldm</TD><TD>388/tcp</TD><TD>Unidata LDM Version 4</TD></TR>
+<TR><TD>unidata-ldm</TD><TD>388/udp</TD><TD>Unidata LDM Version 4</TD></TR>
+<TR><TD>ldap </TD><TD>389/tcp</TD><TD>Lightweight Directory Access Protocol</TD></TR>
+<TR><TD>ldap </TD><TD>389/udp</TD><TD>Lightweight Directory Access Protocol</TD></TR>
+<TR><TD>uis</TD><TD>390/tcp</TD><TD>UIS</TD></TR>
+<TR><TD>uis</TD><TD>390/udp</TD><TD>UIS</TD></TR>
+<TR><TD>synotics-relay</TD><TD>391/tcp</TD><TD>SynOptics SNMP Relay Port</TD></TR>
+<TR><TD>synotics-relay</TD><TD>391/udp</TD><TD>SynOptics SNMP Relay Port</TD></TR>
+<TR><TD>synotics-broker </TD><TD>392/tcp</TD><TD>SynOptics Port Broker Port</TD></TR>
+<TR><TD>synotics-broker </TD><TD>392/udp</TD><TD>SynOptics Port Broker Port</TD></TR>
+<TR><TD>dis</TD><TD>393/tcp</TD><TD>Data Interpretation System</TD></TR>
+<TR><TD>dis</TD><TD>393/udp</TD><TD>Data Interpretation System</TD></TR>
+<TR><TD>embl-ndt </TD><TD>394/tcp</TD><TD>EMBL Nucleic Data Transfer</TD></TR>
+<TR><TD>embl-ndt </TD><TD>394/udp</TD><TD>EMBL Nucleic Data Transfer</TD></TR>
+<TR><TD>netcp</TD><TD>395/tcp</TD><TD>NETscout Control Protocol</TD></TR>
+<TR><TD>netcp</TD><TD>395/udp</TD><TD>NETscout Control Protocol</TD></TR>
+<TR><TD>netware-ip </TD><TD>396/tcp</TD><TD>Novell Netware over IP</TD></TR>
+<TR><TD>netware-ip </TD><TD>396/udp</TD><TD>Novell Netware over IP</TD></TR>
+<TR><TD>mptn </TD><TD>397/tcp</TD><TD>Multi Protocol Trans. Net.</TD></TR>
+<TR><TD>mptn </TD><TD>397/udp</TD><TD>Multi Protocol Trans. Net.</TD></TR>
+<TR><TD>kryptolan</TD><TD>398/tcp</TD><TD>Kryptolan</TD></TR>
+<TR><TD>kryptolan</TD><TD>398/udp</TD><TD>Kryptolan</TD></TR>
+<TR><TD>work-sol </TD><TD>400/tcp</TD><TD>Workstation Solutions</TD></TR>
+<TR><TD>work-sol </TD><TD>400/udp</TD><TD>Workstation Solutions</TD></TR>
+<TR><TD>ups</TD><TD>401/tcp</TD><TD>Uninterruptible Power Supply</TD></TR>
+<TR><TD>ups</TD><TD>401/udp</TD><TD>Uninterruptible Power Supply</TD></TR>
+<TR><TD>genie</TD><TD>402/tcp</TD><TD>Genie Protocol</TD></TR>
+<TR><TD>genie</TD><TD>402/udp</TD><TD>Genie Protocol</TD></TR>
+<TR><TD>decap</TD><TD>403/tcp</TD><TD>decap</TD></TR>
+<TR><TD>decap</TD><TD>403/udp</TD><TD>decap</TD></TR>
+<TR><TD>nced </TD><TD>404/tcp</TD><TD>nced</TD></TR>
+<TR><TD>nced </TD><TD>404/udp</TD><TD>nced</TD></TR>
+<TR><TD>ncld </TD><TD>405/tcp</TD><TD>ncld</TD></TR>
+<TR><TD>ncld </TD><TD>405/udp</TD><TD>ncld</TD></TR>
+<TR><TD>imsp </TD><TD>406/tcp</TD><TD>Interactive Mail Support Protocol</TD></TR>
+<TR><TD>imsp </TD><TD>406/udp</TD><TD>Interactive Mail Support Protocol</TD></TR>
+<TR><TD>timbuktu </TD><TD>407/tcp</TD><TD>Timbuktu</TD></TR>
+<TR><TD>timbuktu </TD><TD>407/udp</TD><TD>Timbuktu</TD></TR>
+<TR><TD>prm-sm</TD><TD>408/tcp</TD><TD>Prospero Resource Manager Sys. Man.</TD></TR>
+<TR><TD>prm-sm</TD><TD>408/udp</TD><TD>Prospero Resource Manager Sys. Man.</TD></TR>
+<TR><TD>prm-nm</TD><TD>409/tcp</TD><TD>Prospero Resource Manager Node Man.</TD></TR>
+<TR><TD>prm-nm</TD><TD>409/udp</TD><TD>Prospero Resource Manager Node Man.</TD></TR>
+<TR><TD>decladebug </TD><TD>410/tcp</TD><TD>DECLadebug Remote Debug Protocol</TD></TR>
+<TR><TD>decladebug </TD><TD>410/udp</TD><TD>DECLadebug Remote Debug Protocol</TD></TR>
+<TR><TD>rmt</TD><TD>411/tcp</TD><TD>Remote MT Protocol</TD></TR>
+<TR><TD>rmt</TD><TD>411/udp</TD><TD>Remote MT Protocol</TD></TR>
+<TR><TD>synoptics-trap</TD><TD>412/tcp</TD><TD>Trap Convention Port</TD></TR>
+<TR><TD>synoptics-trap</TD><TD>412/udp</TD><TD>Trap Convention Port</TD></TR>
+<TR><TD>smsp </TD><TD>413/tcp</TD><TD>SMSP</TD></TR>
+<TR><TD>smsp </TD><TD>413/udp</TD><TD>SMSP</TD></TR>
+<TR><TD>infoseek </TD><TD>414/tcp</TD><TD>InfoSeek</TD></TR>
+<TR><TD>infoseek </TD><TD>414/udp</TD><TD>InfoSeek</TD></TR>
+<TR><TD>bnet </TD><TD>415/tcp</TD><TD>BNet</TD></TR>
+<TR><TD>bnet </TD><TD>415/udp</TD><TD>BNet</TD></TR>
+<TR><TD>silverplatter </TD><TD>416/tcp</TD><TD>Silverplatter</TD></TR>
+<TR><TD>silverplatter </TD><TD>416/udp</TD><TD>Silverplatter</TD></TR>
+<TR><TD>onmux</TD><TD>417/tcp</TD><TD>Onmux</TD></TR>
+<TR><TD>onmux</TD><TD>417/udp</TD><TD>Onmux</TD></TR>
+<TR><TD>hyper-g</TD><TD>418/tcp</TD><TD>Hyper-G</TD></TR>
+<TR><TD>hyper-g</TD><TD>418/udp</TD><TD>Hyper-G</TD></TR>
+<TR><TD>ariel1</TD><TD>419/tcp</TD><TD>Ariel</TD></TR>
+<TR><TD>ariel1</TD><TD>419/udp</TD><TD>Ariel</TD></TR>
+<TR><TD>smpte</TD><TD>420/tcp</TD><TD>SMPTE</TD></TR>
+<TR><TD>smpte</TD><TD>420/udp</TD><TD>SMPTE</TD></TR>
+<TR><TD>ariel2</TD><TD>421/tcp</TD><TD>Ariel</TD></TR>
+<TR><TD>ariel2</TD><TD>421/udp</TD><TD>Ariel</TD></TR>
+<TR><TD>ariel3</TD><TD>422/tcp</TD><TD>Ariel</TD></TR>
+<TR><TD>ariel3</TD><TD>422/udp</TD><TD>Ariel</TD></TR>
+<TR><TD>opc-job-start </TD><TD>423/tcp</TD><TD>IBM Operations Planning and Control Start</TD></TR>
+<TR><TD>opc-job-start </TD><TD>423/udp</TD><TD>IBM Operations Planning and Control Start</TD></TR>
+<TR><TD>opc-job-track </TD><TD>424/tcp</TD><TD>IBM Operations Planning and Control Track</TD></TR>
+<TR><TD>opc-job-track </TD><TD>424/udp</TD><TD>IBM Operations Planning and Control Track</TD></TR>
+<TR><TD>icad-el</TD><TD>425/tcp</TD><TD>ICAD</TD></TR>
+<TR><TD>icad-el</TD><TD>425/udp</TD><TD>ICAD</TD></TR>
+<TR><TD>smartsdp </TD><TD>426/tcp</TD><TD>smartsdp</TD></TR>
+<TR><TD>smartsdp </TD><TD>426/udp</TD><TD>smartsdp</TD></TR>
+<TR><TD>svrloc</TD><TD>427/tcp</TD><TD>Server Location</TD></TR>
+<TR><TD>svrloc</TD><TD>427/udp</TD><TD>Server Location</TD></TR>
+<TR><TD>ocs_cmu</TD><TD>428/tcp</TD><TD>OCS_CMU</TD></TR>
+<TR><TD>ocs_cmu</TD><TD>428/udp</TD><TD>OCS_CMU</TD></TR>
+<TR><TD>ocs_amu</TD><TD>429/tcp</TD><TD>OCS_AMU</TD></TR>
+<TR><TD>ocs_amu</TD><TD>429/udp</TD><TD>OCS_AMU</TD></TR>
+<TR><TD>utmpsd</TD><TD>430/tdp</TD><TD>UTMPSD</TD></TR>
+<TR><TD>utmpsd</TD><TD>430/udp</TD><TD>UTMPSD</TD></TR>
+<TR><TD>utmpcd</TD><TD>431/tcp</TD><TD>UTMPCD</TD></TR>
+<TR><TD>utmpcd</TD><TD>431/udp</TD><TD>UTMPCD</TD></TR>
+<TR><TD>iasd </TD><TD>432/tcp</TD><TD>IASD</TD></TR>
+<TR><TD>iasd </TD><TD>432/udp</TD><TD>IASD</TD></TR>
+<TR><TD>nnsp </TD><TD>433/tcp</TD><TD>NNSP</TD></TR>
+<TR><TD>nnsp </TD><TD>433/udp</TD><TD>NNSP</TD></TR>
+<TR><TD>mobileip-agent</TD><TD>434/tcp</TD><TD>MobileIP-Agent</TD></TR>
+<TR><TD>mobileip-agent</TD><TD>434/udp</TD><TD>MobileIP-Agent</TD></TR>
+<TR><TD>mobilip-mn </TD><TD>435/tcp</TD><TD>MobilIP-MN</TD></TR>
+<TR><TD>mobilip-mn </TD><TD>435/udp</TD><TD>MobilIP-MN</TD></TR>
+<TR><TD>dna-cml</TD><TD>436/tcp</TD><TD>DNA-CML</TD></TR>
+<TR><TD>dna-cml</TD><TD>436/udp</TD><TD>DNA-CML</TD></TR>
+<TR><TD>comscm</TD><TD>437/tcp</TD><TD>comscm</TD></TR>
+<TR><TD>comscm</TD><TD>437/udp</TD><TD>comscm</TD></TR>
+<TR><TD>dsfgw</TD><TD>438/tcp</TD><TD>dsfgw</TD></TR>
+<TR><TD>dsfgw</TD><TD>438/udp</TD><TD>dsfgw</TD></TR>
+<TR><TD>dasp </TD><TD>439/tcp</TD><TD>dasp Thomas Obermair</TD></TR>
+<TR><TD>dasp </TD><TD>439/udp</TD><TD>dasp tommy@inlab.m.eunet.de</TD></TR>
+<TR><TD>sgcp </TD><TD>440/tcp</TD><TD>sgcp</TD></TR>
+<TR><TD>sgcp </TD><TD>440/udp</TD><TD>sgcp</TD></TR>
+<TR><TD>decvms-sysmgt </TD><TD>441/tcp</TD><TD>decvms-sysmgt</TD></TR>
+<TR><TD>decvms-sysmgt </TD><TD>441/udp</TD><TD>decvms-sysmgt</TD></TR>
+<TR><TD>cvc_hostd</TD><TD>442/tcp</TD><TD>cvc_hostd</TD></TR>
+<TR><TD>cvc_hostd</TD><TD>442/udp</TD><TD>cvc_hostd</TD></TR>
+<TR><TD>https</TD><TD>443/tcp</TD><TD>httpsMCom</TD></TR>
+<TR><TD>https</TD><TD>443/udp</TD><TD>httpsMCom</TD></TR>
+<TR><TD>snpp </TD><TD>444/tcp</TD><TD>Simple Network Paging Protocol</TD></TR>
+<TR><TD>snpp </TD><TD>444/udp</TD><TD>Simple Network Paging Protocol</TD></TR>
+<TR><TD>microsoft-ds</TD><TD>445/tcp</TD><TD>Microsoft-DS</TD></TR>
+<TR><TD>microsoft-ds</TD><TD>445/udp</TD><TD>Microsoft-DS</TD></TR>
+<TR><TD>ddm-rdb</TD><TD>446/tcp</TD><TD>DDM-RDB</TD></TR>
+<TR><TD>ddm-rdb</TD><TD>446/udp</TD><TD>DDM-RDB</TD></TR>
+<TR><TD>ddm-dfm</TD><TD>447/tcp</TD><TD>DDM-RFM</TD></TR>
+<TR><TD>ddm-dfm</TD><TD>447/udp</TD><TD>DDM-RFM</TD></TR>
+<TR><TD>ddm-byte </TD><TD>448/tcp</TD><TD>DDM-BYTE</TD></TR>
+<TR><TD>ddm-byte </TD><TD>448/udp</TD><TD>DDM-BYTE</TD></TR>
+<TR><TD>as-servermap</TD><TD>449/tcp</TD><TD>AS Server Mapper</TD></TR>
+<TR><TD>as-servermap</TD><TD>449/udp</TD><TD>AS Server Mapper</TD></TR>
+<TR><TD>tserver</TD><TD>450/tcp</TD><TD>TServer</TD></TR>
+<TR><TD>tserver</TD><TD>450/udp</TD><TD>TServer</TD></TR>
+<TR><TD>exec </TD><TD>512/tcp</TD><TD>remote process execution;</TD></TR>
+<TR><TD>biff </TD><TD>512/udp</TD><TD> comsat used by mail system to notify users</TD></TR>
+<TR><TD>login</TD><TD>513/tcp</TD><TD>remote login a la telnet;</TD></TR>
+<TR><TD>who</TD><TD>513/udp</TD><TD>maintains data bases showing who's</TD></TR>
+<TR><TD>cmd</TD><TD>514/tcp</TD><TD> shell like exec, but automatic</TD></TR>
+<TR><TD>syslog</TD><TD>514/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>printer</TD><TD>515/tcp</TD><TD>spooler</TD></TR>
+<TR><TD>printer</TD><TD>515/udp</TD><TD>spooler</TD></TR>
+<TR><TD>talk </TD><TD>517/tcp</TD><TD>like tenex link, but across</TD></TR>
+<TR><TD>talk </TD><TD>517/udp</TD><TD>like tenex link, but across</TD></TR>
+<TR><TD>ntalk</TD><TD>518/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>ntalk</TD><TD>518/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>utime</TD><TD>519/tcp</TD><TD>unixtime</TD></TR>
+<TR><TD>utime</TD><TD>519/udp</TD><TD>unixtime</TD></TR>
+<TR><TD>efs</TD><TD>520/tcp</TD><TD>extended file name server</TD></TR>
+<TR><TD>router</TD><TD>520/udp</TD><TD>routed local routing process (on site);</TD></TR>
+<TR><TD>timed</TD><TD>525/tcp</TD><TD>timeserver</TD></TR>
+<TR><TD>timed</TD><TD>525/udp</TD><TD>timeserver</TD></TR>
+<TR><TD>tempo</TD><TD>526/tcp</TD><TD>newdate</TD></TR>
+<TR><TD>tempo</TD><TD>526/udp</TD><TD>newdate</TD></TR>
+<TR><TD>courier</TD><TD>530/tcp</TD><TD>rpc</TD></TR>
+<TR><TD>courier</TD><TD>530/udp</TD><TD>rpc</TD></TR>
+<TR><TD>rvd-control</TD><TD>531/udp</TD><TD>rvd control port</TD></TR>
+<TR><TD>conference </TD><TD>531/tcp</TD><TD>chat</TD></TR>
+<TR><TD>conference </TD><TD>531/udp</TD><TD>chat</TD></TR>
+<TR><TD>netnews</TD><TD>532/tcp</TD><TD>readnews</TD></TR>
+<TR><TD>netnews</TD><TD>532/udp</TD><TD>readnews</TD></TR>
+<TR><TD>netwall</TD><TD>533/tcp</TD><TD>for emergency broadcasts</TD></TR>
+<TR><TD>netwall</TD><TD>533/udp</TD><TD>for emergency broadcasts</TD></TR>
+<TR><TD>apertus-ldp</TD><TD>539/tcp</TD><TD>Apertus Technologies Load Determination</TD></TR>
+<TR><TD>apertus-ldp</TD><TD>539/udp</TD><TD>Apertus Technologies Load Determination</TD></TR>
+<TR><TD>uucp </TD><TD>540/tcp</TD><TD>uucpd</TD></TR>
+<TR><TD>uucp </TD><TD>540/udp</TD><TD>uucpd</TD></TR>
+<TR><TD>uucp-rlogin</TD><TD>541/tcp</TD><TD>uucp-rloginStuart Lynne</TD></TR>
+<TR><TD>uucp-rlogin</TD><TD>541/udp</TD><TD>uucp-rloginsl@wimsey.com</TD></TR>
+<TR><TD>klogin</TD><TD>543/tcp</TD><TD>Kerberos aythenticated rlogin</TD></TR>
+<TR><TD>klogin</TD><TD>543/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>kshell</TD><TD>544/tcp</TD><TD>krcmd</TD></TR>
+<TR><TD>kshell</TD><TD>544/udp</TD><TD>krcmd</TD></TR>
+<TR><TD>new-rwho </TD><TD>550/tcp</TD><TD>new-who</TD></TR>
+<TR><TD>new-rwho </TD><TD>550/udp</TD><TD>new-who</TD></TR>
+<TR><TD>dsf</TD><TD>555/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>dsf</TD><TD>555/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>remotefs </TD><TD>556/tcp</TD><TD>rfs server</TD></TR>
+<TR><TD>remotefs </TD><TD>556/udp</TD><TD>rfs server</TD></TR>
+<TR><TD>rmonitor </TD><TD>560/tcp</TD><TD>rmonitord</TD></TR>
+<TR><TD>rmonitor </TD><TD>560/udp</TD><TD>rmonitord</TD></TR>
+<TR><TD>monitor</TD><TD>561/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>monitor</TD><TD>561/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>chshell</TD><TD>562/tcp</TD><TD>chcmd</TD></TR>
+<TR><TD>chshell</TD><TD>562/udp</TD><TD>chcmd</TD></TR>
+<TR><TD>9pfs </TD><TD>564/tcp</TD><TD>plan 9 file service</TD></TR>
+<TR><TD>9pfs </TD><TD>564/udp</TD><TD>plan 9 file service</TD></TR>
+<TR><TD>whoami</TD><TD>565/tcp</TD><TD>whoami</TD></TR>
+<TR><TD>whoami</TD><TD>565/udp</TD><TD>whoami</TD></TR>
+<TR><TD>reboot</TD><TD>570/tcp</TD><TD>reboot PS/2 (OS/2 extension)</TD></TR>
+<TR><TD>meter</TD><TD>570/tcp</TD><TD>demon</TD></TR>
+<TR><TD>meter</TD><TD>570/udp</TD><TD>demon</TD></TR>
+<TR><TD>write</TD><TD>571/udp</TD><TD>writePS/2 (OS/2 extension)</TD></TR>
+<TR><TD>meter</TD><TD>571/tcp</TD><TD>udemon</TD></TR>
+<TR><TD>meter</TD><TD>571/udp</TD><TD>udemon</TD></TR>
+<TR><TD>zephyr-clt </TD><TD>580/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>zephyr-hm</TD><TD>581/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>ipcserver</TD><TD>600/tcp</TD><TD>Sun IPC server</TD></TR>
+<TR><TD>ipcserver</TD><TD>600/udp</TD><TD>Sun IPC server</TD></TR>
+<TR><TD>urm</TD><TD>606/tcp</TD><TD>Cray Unified Resource Manager</TD></TR>
+<TR><TD>urm</TD><TD>606/udp</TD><TD>Cray Unified Resource Manager</TD></TR>
+<TR><TD>nqs</TD><TD>607/tcp</TD><TD>nqs</TD></TR>
+<TR><TD>nqs</TD><TD>607/udp</TD><TD>nqs</TD></TR>
+<TR><TD>sift-uft </TD><TD>608/tcp</TD><TD>Sender-Initiated/Unsolicited File Transfer</TD></TR>
+<TR><TD>sift-uft </TD><TD>608/udp</TD><TD>Sender-Initiated/Unsolicited File Transfer</TD></TR>
+<TR><TD>npmp-trap</TD><TD>609/tcp</TD><TD>npmp-trap</TD></TR>
+<TR><TD>npmp-trap</TD><TD>609/udp</TD><TD>npmp-trap</TD></TR>
+<TR><TD>npmp-local </TD><TD>610/tcp</TD><TD>npmp-local</TD></TR>
+<TR><TD>npmp-local </TD><TD>610/udp</TD><TD>npmp-local</TD></TR>
+<TR><TD>npmp-gui </TD><TD>611/tcp</TD><TD>npmp-gui</TD></TR>
+<TR><TD>npmp-gui </TD><TD>611/udp</TD><TD>npmp-gui</TD></TR>
+<TR><TD>ginad</TD><TD>634/tcp</TD><TD>ginad</TD></TR>
+<TR><TD>ginad</TD><TD>634/udp</TD><TD>ginad</TD></TR>
+<TR><TD>doom </TD><TD>666/tcp</TD><TD>doom Id Software</TD></TR>
+<TR><TD>doom </TD><TD>666/tcp</TD><TD>doom Id Software</TD></TR>
+<TR><TD>mdqs </TD><TD>666/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>mdqs </TD><TD>666/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>elcsd</TD><TD>704/tcp</TD><TD>errlog copy/server daemon</TD></TR>
+<TR><TD>elcsd</TD><TD>704/udp</TD><TD>errlog copy/server daemon</TD></TR>
+<TR><TD>entrustmanager</TD><TD>709/tcp</TD><TD>EntrustManager</TD></TR>
+<TR><TD>entrustmanager</TD><TD>709/udp</TD><TD>EntrustManager</TD></TR>
+<TR><TD>vexec</TD><TD>712/tcp</TD><TD>vice-exec</TD></TR>
+<TR><TD>vlogin</TD><TD>713/tcp</TD><TD>vice-login</TD></TR>
+<TR><TD>vshell</TD><TD>714/tcp</TD><TD>vice-shell</TD></TR>
+<TR><TD>netviewdm1 </TD><TD>729/tcp</TD><TD>IBM NetView DM/6000 Server/Client</TD></TR>
+<TR><TD>netviewdm1 </TD><TD>729/udp</TD><TD>IBM NetView DM/6000 Server/Client</TD></TR>
+<TR><TD>netviewdm2 </TD><TD>730/tcp</TD><TD>IBM NetView DM/6000 send/tcp</TD></TR>
+<TR><TD>netviewdm2 </TD><TD>730/udp</TD><TD>IBM NetView DM/6000 send/tcp</TD></TR>
+<TR><TD>netviewdm3 </TD><TD>731/tcp</TD><TD>IBM NetView DM/6000 receive/tcp</TD></TR>
+<TR><TD>netviewdm3 </TD><TD>731/udp</TD><TD>IBM NetView DM/6000 receive/tcp</TD></TR>
+<TR><TD>netgw</TD><TD>741/tcp</TD><TD>netGW</TD></TR>
+<TR><TD>netgw</TD><TD>741/udp</TD><TD>netGW</TD></TR>
+<TR><TD>netrcs</TD><TD>742/tcp</TD><TD>Network based Rev. Cont. Sys.</TD></TR>
+<TR><TD>netrcs</TD><TD>742/udp</TD><TD>Network based Rev. Cont. Sys.</TD></TR>
+<TR><TD>flexlm</TD><TD>744/tcp</TD><TD>Flexible License Manager</TD></TR>
+<TR><TD>flexlm</TD><TD>744/udp</TD><TD>Flexible License Manager</TD></TR>
+<TR><TD>fujitsu-dev</TD><TD>747/tcp</TD><TD>Fujitsu Device Control</TD></TR>
+<TR><TD>fujitsu-dev</TD><TD>747/udp</TD><TD>Fujitsu Device Control</TD></TR>
+<TR><TD>ris-cm</TD><TD>748/tcp</TD><TD>Russell Info Sci Calendar Manager</TD></TR>
+<TR><TD>ris-cm</TD><TD>748/udp</TD><TD>Russell Info Sci Calendar Manager</TD></TR>
+<TR><TD>kerberos-adm</TD><TD>749/tcp</TD><TD>kerberos administration</TD></TR>
+<TR><TD>kerberos-adm</TD><TD>749/udp</TD><TD>kerberos administration</TD></TR>
+<TR><TD>kerberos </TD><TD>750/tcp</TD><TD>Kerberos aythentication--tcp</TD></TR>
+<TR><TD>kerberos </TD><TD>750/udp</TD><TD>Kerberos aythentication--udp</TD></TR>
+<TR><TD>rfile</TD><TD>750/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>loadav</TD><TD>750/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>kerberos_master </TD><TD>751/tcp</TD><TD>Kerberos aythentication</TD></TR>
+<TR><TD>kerboros_master </TD><TD>751/udp</TD><TD>Kerberos aythentication</TD></TR>
+<TR><TD>pump </TD><TD>751/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>pump </TD><TD>751/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>passwd_server </TD><TD>752/udp</TD><TD>Kerberos passwd server</TD></TR>
+<TR><TD>qrh</TD><TD>752/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>qrh</TD><TD>752/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>userreg_server</TD><TD>753/tcp</TD><TD>Kerberos userreg serrver</TD></TR>
+<TR><TD>rrh</TD><TD>753/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rrh</TD><TD>753/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>krb_prop </TD><TD>754/tcp</TD><TD>Kerboros slpave propagation</TD></TR>
+<TR><TD>tell </TD><TD>754/tcp</TD><TD>send</TD></TR>
+<TR><TD>tell </TD><TD>754/udp</TD><TD>send</TD></TR>
+<TR><TD>nlogin</TD><TD>758/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>nlogin</TD><TD>758/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>con</TD><TD>759/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>con</TD><TD>759/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>ns </TD><TD>760/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>ns </TD><TD>760/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rxe</TD><TD>761/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rxe</TD><TD>761/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>quotad</TD><TD>762/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>quotad</TD><TD>762/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cycleserv</TD><TD>763/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cycleserv</TD><TD>763/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>omserv</TD><TD>764/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>omserv</TD><TD>764/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>webster</TD><TD>765/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>webster</TD><TD>765/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>phonebook</TD><TD>767/tcp</TD><TD>phone</TD></TR>
+<TR><TD>phonebook</TD><TD>767/udp</TD><TD>phone</TD></TR>
+<TR><TD>vid</TD><TD>769/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>vid</TD><TD>769/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cadlock</TD><TD>770/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cadlock</TD><TD>770/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rtip </TD><TD>771/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rtip </TD><TD>771/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cycleserv2 </TD><TD>772/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>cycleserv2 </TD><TD>772/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>submit</TD><TD>773/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>notify</TD><TD>773/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rpasswd</TD><TD>774/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>acmaint_dbd</TD><TD>774/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>entomb</TD><TD>775/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>acmaint_transd</TD><TD>775/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>wpages</TD><TD>776/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>wpages</TD><TD>776/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>wpgs </TD><TD>780/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>wpgs </TD><TD>780/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>concert</TD><TD>786/tcp</TD><TD>Concert</TD></TR>
+<TR><TD>concert</TD><TD>786/udp</TD><TD>Concert</TD></TR>
+<TR><TD>mdbs_daemon</TD><TD>800/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>mdbs_daemon</TD><TD>800/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>device</TD><TD>801/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>device</TD><TD>801/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>erlogin</TD><TD>888/tcp</TD><TD>Login and environment passing</TD></TR>
+<TR><TD>xtreelic </TD><TD>996/tcp</TD><TD>Central Point Software</TD></TR>
+<TR><TD>xtreelic </TD><TD>996/udp</TD><TD>Central Point Software</TD></TR>
+<TR><TD>maitrd</TD><TD>997/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>maitrd</TD><TD>997/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>busboy</TD><TD>998/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>puparp</TD><TD>998/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>garcon</TD><TD>999/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>puprouter</TD><TD>999/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>puprouter</TD><TD>999/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>applix</TD><TD>999/udp</TD><TD>Applix ac</TD></TR>
+<TR><TD>cadlock</TD><TD>1000/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>ock</TD><TD>1000/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>socks</TD><TD>1080/tcp</TD><TD>Firewall and gateway</TD></TR>
+<TR><TD>kpop </TD><TD>1109/tcp</TD><TD>Pop with Kerberos</TD></TR>
+<TR><TD>ingreslock </TD><TD>1524/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>filesrv</TD><TD>2001/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rauth2</TD><TD>2001/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rfilebulk</TD><TD>2002/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rfilesrv </TD><TD>2003/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>console</TD><TD>2018/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>client</TD><TD>2030/tcp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>knetd</TD><TD>2053/tcp</TD><TD>Kerberos de-multiplexor</TD></TR>
+<TR><TD>eklogin</TD><TD>2105/tcp</TD><TD>Kerberos encrypted rlogin</TD></TR>
+<TR><TD>venus.itc</TD><TD>2106/tcp</TD><TD>venus</TD></TR>
+<TR><TD>ropcons</TD><TD>2115/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rupdsrv</TD><TD>2131/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rupdbulk </TD><TD>2132/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rupdsrv1 </TD><TD>2133/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>rupdbulk1</TD><TD>2134/udp</TD><TD>&nbsp;</TD></TR>
+<TR><TD>alternate_www </TD><TD>8080/tcp</TD><TD>2nd Webserver</TD></TR>
+</TABLE>
+</BODY>
+</HTML>

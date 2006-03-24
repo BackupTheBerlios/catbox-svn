@@ -1,0 +1,258 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: Writing Client Applications (TCP/SOCK_STREAM)</TITLE>
+</HEAD>
+<BODY>
+<A HREF="unix-socket-faq-2.html">Previous</A>
+<A HREF="unix-socket-faq-4.html">Next</A>
+<A HREF="unix-socket-faq.html#toc3">Table of Contents</A>
+<HR>
+<H2><A NAME="s3">3. Writing Client Applications (TCP/SOCK_STREAM)</A></H2>
+
+<H2><A NAME="ss3.1">3.1 How do I convert a string into an internet address?</A></H2>
+
+<P>If you are reading a host's address from the command line, you may not 
+know if you have an aaa.bbb.ccc.ddd style address, or a host.domain.com 
+style address.  What I do with these, is first try to use it as a 
+aaa.bbb.ccc.ddd type address, and if that fails, then do a name lookup on 
+it.  Here is an example:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+/* Converts ascii text to in_addr struct.  NULL is returned if the 
+   address can not be found. */
+struct in_addr *atoaddr(char *address) {
+  struct hostent *host;
+  static struct in_addr saddr;
+
+  /* First try it as aaa.bbb.ccc.ddd. */
+  saddr.s_addr = inet_addr(address);
+  if (saddr.s_addr != -1) {
+    return &amp;saddr;
+  }
+  host = gethostbyname(address);
+  if (host != NULL) {
+    return (struct in_addr *) *host-&gt;h_addr_list;
+  }
+  return NULL;
+}
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss3.2">3.2 How can my client work through a firewall/proxy server?</A></H2>
+
+<P>If you are running through separate proxies for each service, you 
+shouldn't
+need to do anything.  If you are working through sockd, you will need to
+"socksify" your application.  Details for doing this can be found in the
+package itself, which is available at:</P>
+<P>
+<BLOCKQUOTE>
+<A HREF="ftp://ftp.net.com/socks.cstc/socks.cstc.4.2.tar.gz">ftp://ftp.net.com/socks.cstc/socks.cstc.4.2.tar.gz</A></BLOCKQUOTE>
+</P>
+<P>you can get the socks faq at:</P>
+<P>
+<BLOCKQUOTE>
+<A HREF="ftp://coast.cs.purdue.edu/pub/tools/unix/socks/FAQ">ftp://coast.cs.purdue.edu/pub/tools/unix/socks/FAQ</A></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss3.3">3.3 Why does connect() succeed even before my server did an accept()?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Once you have done a <CODE>listen()</CODE> call on your socket, the kernel is 
+primed to
+accept connections on it. The usual UNIX implementation of this works by
+<EM>immediately</EM> completing the SYN handshake for any incoming valid SYN
+segments (connection attempts), creating the socket for the new connection,
+and keeping this new socket on an internal queue ready for the <CODE>accept()</CODE>
+call. So the socket is fully open <EM>before</EM> the accept is done.</P>
+<P>The other factor in this is the 'backlog' parameter for <CODE>listen()</CODE>; that
+defines how many of these completed connections can be queued at one time.
+If the specified number is exceeded, then new incoming connects are simply
+ignored (which causes them to be retried).</P>
+
+
+<H2><A NAME="ss3.4">3.4 Why do I sometimes lose a server's address when using more than one server? </A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Take a careful look at struct hostent. Notice that almost everything
+in it is a pointer? <EM>All</EM> these pointers will refer to statically
+allocated data.</P>
+<P>For example, if you do:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+    struct hostent *host = gethostbyname(hostname);
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>then (as you should know) a subsequent call to <CODE>gethostbyname()</CODE> will
+overwrite the structure pointed to by 'host'.</P>
+<P>But if you do:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+    struct hostent myhost;
+    struct hostent *hostptr = gethostbyname(hostname);
+    if (hostptr) myhost = *host;
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>to make a copy of the <CODE>hostent</CODE> before it gets overwritten, then it 
+<EM>still</EM>
+gets clobbered by a subsequent call to <CODE>gethostbyname()</CODE>, since although
+<CODE>myhost</CODE> won't get overwritten, all the data it is pointing to 
+will be. </P>
+<P>You can get round this by doing a proper 'deep copy' of the <CODE>hostent</CODE>
+structure, but this is tedious. My recommendation would be to extract
+the needed fields of the <CODE>hostent</CODE> and store them in your own way.</P>
+<P>Robin Paterson
+(
+<A HREF="mailto:etmrpat@etm.ericsson.se">etmrpat@etm.ericsson.se</A>) has added:</P>
+<P>It might be nice if you mention MT safe libraries provide complimentary 
+functions for multithreaded programming.  On the solaris machine 
+I'm typing at, we have <CODE>gethostbyname</CODE> and <CODE>gethostbyname_r</CODE>
+(<CODE>_r</CODE> for reentrant).
+The main difference is, <EM>you</EM> provide the storage for the hostent 
+struct so you always have a local copy and not just a pointer to the 
+static copy.</P>
+
+
+<H2><A NAME="ss3.5">3.5 How can I set the timeout for the connect() system call?</A></H2>
+
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>Normally you cannot change this.  Solaris does let you do this, on a
+per-kernel basis with the ndd <CODE>tcp_ip_abort_cinterval</CODE> parameter.</P>
+<P>The easiest way to shorten the connect time is with an <CODE>alarm()</CODE> around
+the call to <CODE>connect()</CODE>.  A harder way is to use <CODE>select()</CODE>, after 
+setting the socket nonblocking.  Also notice that you can only shorten the
+connect time, there's normally no way to lengthen it.</P>
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>First, create the socket and put it into non-blocking mode, then call
+connect(). There are three possibilities:</P>
+<P>
+<UL>
+<LI>connect succeeds: the connection has been successfully made (this
+usually only happens when connecting to the same machine)</LI>
+<LI>connect fails: obvious</LI>
+<LI>connect returns -1/EINPROGRESS. The connection attempt has begun,
+but not yet completed.</LI>
+</UL>
+</P>
+<P>If the connection succeeds:</P>
+<P>
+<UL>
+<LI>the socket will select() as writable (and will also select as readable
+if data arrives)</LI>
+</UL>
+</P>
+<P>If the connection fails:</P>
+<P>
+<UL>
+<LI>the socket will select as readable *and* writable, but either a read 
+or write will return the error code from the connection attempt. Also,
+you can use getsockopt(SO_ERROR) to get the error status - but be 
+careful; some systems return the error code in the result parameter of 
+getsockopt, but others (incorrectly) cause the getsockopt call *itself*
+to fail with the stored value as the error.</LI>
+</UL>
+</P>
+
+
+<H2><A NAME="ss3.6">3.6 Should I bind() a port number in my client program, or let the</A>system choose one for me on the connect() call?</H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P><B>** Let the system choose your client's port number **</B></P>
+<P>The exception to this, is if the server has been written to be picky about
+what client ports it will allow connections from. Rlogind and rshd are the
+classic examples. This is usually part of a Unix-specific (and rather weak)
+authentication scheme; the intent is that the server allows connections only
+from processes with root privilege. (The weakness in the scheme is that many
+O/Ss (e.g. MS-DOS) allow anyone to bind any port.)</P>
+<P>The <CODE>rresvport()</CODE> routine exists to help out clients that are using this
+scheme. It basically does the equivalent of <CODE>socket()</CODE> + <CODE>bind()</CODE>, 
+choosing a port number in the range 512..1023.</P>
+<P>If the server is not fussy about the <EM>client's</EM> port number, then 
+don't try
+and assign it yourself in the client, just let <CODE>connect()</CODE> pick it for 
+you.</P>
+<P>If, in a client, you use the naive scheme of starting at a fixed port number
+and calling <CODE>bind()</CODE> on consecutive values until it works, then you buy
+yourself a whole lot of trouble:</P>
+<P>The problem is if the server end of your connection does an active close.
+(E.G. client sends 'QUIT' command to server, server responds by closing the
+connection). That leaves the client end of the connection in CLOSED state,
+and the server end in TIME_WAIT state. So after the client exits, there is
+no trace of the connection on the client end.</P>
+<P>Now run the client again. It will pick the same port number, since as far as
+it can see, it's free. But as soon as it calls <CODE>connect()</CODE>, the server 
+finds
+that you are trying to duplicate an existing connection (although one in
+TIME_WAIT). It is perfectly entitled to refuse to do this, so you get, I
+suspect, <CODE>ECONNREFUSED</CODE> from <CODE>connect()</CODE>. (Some systems may sometimes 
+allow the connection anyway, but you <EM>can't</EM> rely on it.)</P>
+<P>This problem is <EM>especially</EM> dangerous because it doesn't show up 
+unless the
+client and server are on <EM>different</EM> machines. (If they are the same 
+machine,
+then the client <EM>won't</EM> pick the same port number as before). So you 
+can get
+bitten well into the development cycle (if you do what I suspect most people
+do, and test client &amp; server on the same box initially).</P>
+<P>Even if your protocol has the client closing first, there are still ways to
+produce this problem (e.g. kill the server).</P>
+
+
+<H2><A NAME="ss3.7">3.7 Why do I get "connection refused" when the server isn't running?</A></H2>
+
+<P>The <CODE>connect()</CODE> call will only block while it is waiting to establish a
+connection.  When there is no server waiting at the other end, it gets
+notified that the connection can not be established, and gives up with the
+error message you see.  This is a good thing, since if it were not the
+case clients might wait for ever for a service which just doesn't exist. 
+Users would think that they were only waiting for the connection to be
+established, and then after a while give up, muttering something about
+crummy software under their breath. </P>
+
+
+<H2><A NAME="ss3.8">3.8 What does one do when one does not know how much information is comming</A>over the socket ? Is there a way to have a dynamic buffer ?</H2>
+
+<P>This question asked by Niranjan Perera
+(
+<A HREF="mailto:perera@mindspring.com">perera@mindspring.com</A>).</P>
+<P>When the size of the incoming data is unknown, you can either make the
+size of the buffer as big as the largest possible (or likely) buffer, or
+you can re-size the buffer on the fly during your read.  When you 
+<CODE>malloc()</CODE>
+a large buffer, most (if not all) varients of unix will only allocate
+address space, but not physical pages of ram.  As more and more of the
+buffer is used, the kernel allocates physical memory.  This means that
+malloc'ing a large buffer will not waste resources unless that memory is
+used, and so it is perfectly acceptable to ask for a meg of ram when you
+expect only a few K.</P>
+<P>On the other hand, a more elegant solution that does not depend on the
+inner workings of the kernel is to use realloc() to expand the buffer as
+required in say 4K chunks (since 4K is the size of a page of ram on most
+systems).  I may add something like this to sockhelp.c in the example
+code one day.</P>
+
+
+<HR>
+<A HREF="unix-socket-faq-2.html">Previous</A>
+<A HREF="unix-socket-faq-4.html">Next</A>
+<A HREF="unix-socket-faq.html#toc3">Table of Contents</A>
+</BODY>
+</HTML>

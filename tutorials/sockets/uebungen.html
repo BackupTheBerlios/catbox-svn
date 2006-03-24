@@ -1,0 +1,455 @@
+<HTML>
+<HEAD>
+	<TITLE>Internet-Technologie - Praktikum</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H2>Praktikum Internet-Technologie</H2>
+<B><I>von Prof. J&uuml;rgen Plate</I><BR>und J&ouml;g Holzmann</B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1 ALIGN=CENTER>Praktikum Internet-Technologie</H1>
+Anmerkung: Es werden je nach Anzahl der Teilnehmer nicht alle Aufgaben bearbeitet
+oder einzelne Aufgaben auf verschiedene Gruppen verteilt. Au&szlig;erdem wird
+in der Regel zus&auml;tzlich ein gemeinsames Projekt entwickelt und bearbeitet.
+<P>
+
+<H2>Vorbereitung</H2>
+<IMG SRC="zwerge.jpg" ALIGN=LEFT HSPACE=20>
+Informieren Sie sich &uuml;ber den Namen Ihres Rechners. Die Praktikumsrechner
+haben folgende Namen:
+<TT>snowwhite</TT>, <TT>doc</TT>, <TT>happy</TT>, 
+<TT>bashful</TT>, <TT>sneezy</TT>, <TT>sleepy</TT>, 
+<TT>grumpy</TT>, <TT>dopey</TT>, <TT>gimli</TT>, 
+<TT>albarich</TT> (wobei die letzten beiden nicht zu
+Schneewittchen geh&ouml;ren).
+<P>
+Ausserdem spielt der Server <TT>blackhole</TT> bei einigen 
+Aufgaben eine Rolle. Als Printserver dient <TT>talos</TT>.
+Die o.g. Namen verwenden Sie f&uuml;r alle Aufgaben. 
+<P>
+Die Domain f&uuml;r alle Rechner ist <TT>da.private.fhm.edu</TT>.
+Dabei steht "da" f&uuml;r den Standort Dachauerstr. und "private"
+bedeutet, da&szlig; der Rechner im privaten (von aussen nicht
+erreichbaren) Netz steht.
+<P>
+Das Einloggen erfolgt in der grafischen Benutzeroberfl&auml;che GNOME
+mit dem XDM. &Uuml;ber Ihre Benutzeraccounts werden Sie im Praktikum 
+informiert. F&uuml;r einige Aufgaben ist die Root-Berechtigung notwendig.
+Der Wechsel in die Rolle des Superusers erfolgt mit dem Kommando
+<TT>sudo</TT>. Um eine Root-Shell zu erlangen, geben Sie demnach
+<TT>sudo bash</TT> ein. Der Login af anderen Rechnern erfolgt mittels
+der Secure Shell (<TT>ssh &lt;user&gt;@&lt;rechner&gt;</TT>) und 
+zum Kopieren wird Secure Copy (<TT>scp</TT>) verwendet. Das Drucken
+erfolgt &uuml;ber <TT>lp</TT> (nicht &uuml;ber <TT>lpr</TT>). Beim
+Mozilla-Browser ist "<i>Standard-Postscript-Drucker</i>" und als 
+Druckservice "<i>lp</i>" einzustellen.
+<P>
+Das Abmelden erfolgt bei GNOME &uuml;ber das Men&uuml; <i>Aktionen</i>
+am oberen Bildschirmrand: <i>Aktionen --&gt; Abmelden</i>. Das Herunterfahren
+des Rechners erfolgt im Login-Bildschirm (XDM), allso nach vorherigem
+Abmelden, &uuml;ber <i>Aktionen --&gt; Herunterfahren</i>.
+<BR CLEAR=ALL>
+<P>
+
+<H2>Erste Schritte in Perl</H2>
+Gegeben ist folgendes Perl-Programm, das einen angegebenen Dateipfad rekursiv 
+durchl&auml;ft und f&uuml;r jede Datei die Funktion <TT>process_file()</TT>
+aufruft. &Uuml;bernehmen Sie das Programm mit Cut-and-Paste in Ihren Editor und
+erweitern Sie es dahingehend, da&szlig;:
+  <UL>
+  <LI>in <TT>process_file()</TT> nur Dateien bestimmten Namens bearbeitet werden
+      (Angabe eines regul&auml;ren Musters f&uuml;r den Dateinamen als zweites
+      Kommandoargument ($ARGV[1]).
+  <LI>in <TT>process_file()</TT> zus&auml;tzlich zum Dateinamen noch die ersten drei 
+      Zeilen der Datei ausgegeben werden. Beachten Sie beim &Ouml;ffnen der Datei,
+      da&szlig; Sie den kompletten Pfad zur Datei brauchen.
+  </UL>
+<PRE>
+#!/usr/bin/perl
+# perl script to traverse a file-tree
+# Files beginning with a '.' are omitted
+
+my $path = $ARGV[0];
+
+&amp;scan_files($path);
+
+print "\n";
+exit(0);
+
+#--------------------------------------------------------------------------
+sub scan_files #($given_path) 
+  {
+  my (@scandirs,$scandir,@files,$file,$list);
+  $scandir = $_[0];
+  opendir(DIR,$scandir) || warn "can't open the directory $scandir: $!\n";
+  @scandirs = grep {!(/^\./) &amp;&amp; -d "$scandir/$_"} readdir(DIR);
+  rewinddir(DIR);
+  @files=grep {!(/^\./) &amp;&amp; -f "$scandir/$_"} readdir(DIR);
+  closedir (DIR);
+  for $list(0..$#scandirs) 
+    {
+    &amp;scan_files($scandir."/".$scandirs[$list]);
+    }
+  if ($#files &gt;= 0)
+    {
+    print "$scandir contains the following files:\n";
+    foreach $file(@files)
+      {
+      &amp;process_file($scandir, $file);
+      }
+    }
+  return 1;
+  }
+
+#--------------------------------------------------------------------------
+sub process_file #($actual_directory, $given_file) 
+  {
+  my $path = $_[0];
+  my $file = $_[1];
+  print "$path/$file\n";
+  }
+</PRE>
+<P>
+
+<H2><TT>fork</TT> und <TT>SIGCHILD</TT></H2>
+<TT>fork</TT> ist ein Perl-Wrapper
+f&uuml;r den Systemcall <TT>fork</TT>. <TT>fork</TT> erzeugt einen 
+neuen Prozess der dasselbe Perlscript ausf&uuml;hrt. Wenn <TT>fork</TT>
+erfolgreich war, kehren beide Prozesse (Eltern- und Kindprozess)
+aus dieser Funktion zur&uuml;ck. Als R&uuml;ckgabewert erh&auml;lt
+der (urspr&uuml;ngliche) Elternprozess die Prozess-ID des
+Kindprozesses, das Kind erh&auml;lt null. Schl&auml;gt <TT>fork</TT> 
+fehl, so wird <TT>undef</TT> zur&uuml;ckgegeben und <TT>$!</TT> 
+entsprechend gesetzt.
+
+<P>Sowohl Eltern- als auch Kindprozess arbeiten das Perlscript
+weiter ab, beginnend mit der Anweisung nach dem <TT>fork</TT>-Aufruf. 
+Klassischerweise ist dies eine
+Verzweigung, deren einer Zweig vom urspr&uuml;nglichen Prozess
+ausgef&uuml;hrt wird, der andere vom Kind. Damit sich das Kind
+beendet, wenn es seinen Teil erledigt hat (und die Programmteile
+des urspr&uuml;nglichen Prozesses weiter abarbeitet), muss am Ende
+<TT>exit</TT> aufgerufen werden.
+
+<P>Wenn sich Kindprozesse beenden bleiben sie in Unix-Umgebungen 
+zun&auml;chst im System, bis der Elternprozess diese wegr&auml;umt,
+indem er <TT>wait</TT> aufruft. <TT>wait</TT> wartet, bis ein 
+Kindprozess gestorben ist und liefert dann die Prozess-ID dieses 
+Kindes zur&uuml;ck. Falls es keine Kindprozesse gibt, kehrt 
+<TT>wait</TT> sofort mit dem R&uuml;ckgabewert <TT>-1</TT> zur&uuml;ck.
+
+<P>Erzeugt ein Prozess viele Kinder so ist es am
+geschicktesten, die Zombies automatisiert abzur&auml;umen. Dies
+l&auml;sst sich mit Hilfe eines Signalhandlers einrichten. Ein
+Signalhandler ist eine Funktion, die immer dann ausgef&uuml;hrt
+wird, wenn ein Signal eintrifft. Zu jedem Signal kann ein Prozess einen
+Signalhandler aufsetzen, der immer dann aufgerufen wird, wenn das
+Signal eintrifft. Um die Kinder automatisch abzur&auml;umen muss
+ein Signalhandler f&uuml;r das Signal <TT>SIGCHLD</TT> installiert 
+werden, der <TT>wait()</TT> aufruft:
+<PRE>
+sub sigchldHandler
+  {
+  wait();
+  $SIG{CHLD} = \&amp;sigchldHandler;
+  }
+</PRE>
+
+<P>Damit der Handler auch aufgerufen wird, muss er aufgesetzt
+werden. Bei Perl ist das aufsetzen von Signalhandlern sehr einfach:
+Eine Referenz auf die Funktion wird einfach zu dem entsprechenden
+Schl&uuml;ssel, dem Signalnamen, in den Hash <TT>%SIG</TT> eingetragen. 
+Sobald die Eintragung geschehen ist, wird der Signalhandler aufgerufen, 
+wenn das entsprechende Signal ankommt. Ein Handler f&uuml;r <TT>SIGCHLD</TT> 
+sollte also aufgesetzt werden, bevor Kindprozesse erzeugt werden! F&uuml;r 
+die Handlerfunktion <TT>sigchldHandler</TT> aus den obigen Beispielen
+sieht die Eintragung wie folgt aus:
+<PRE>
+$SIG{CHLD} = \&amp;sigchldHandler;
+</PRE>
+
+Schreiben Sie ein Perl-Programm, das zu Beginn die Anzahl der zu erzeugenden
+Kinder einliest, den Signalhandler installiert (wie oben beschrieben) und dann
+entsprechend viele Kindprozesse erzeugt. <BR>
+Jeder Kindprozess soll beim Starten die Zeile <TT>"Kind xx gestartet"</TT> 
+ausgeben, dann 5 Sekunden schlafen (<TT>sleep(5)</TT>) und zum Schluss 
+<TT>"Kind xx beendet"</TT> ausgeben. <BR>
+Die letzten zwei Zeilen des Programms sollten lauten:
+<PRE>
+print "Beenden? ";
+$input = &lt;STDIN&gt;
+</PRE>
+Sie bewirken, dass es sich nicht beendet, solange Sie nichts eingeben. 
+Dies gibt Ihnen Zeit, mit dem ps-Kommando zu &uuml;berpr&uuml;fen, ob 
+die Kinder tats&auml;chlich aufger&auml;umt wurden.
+Sobald Sie das Programm beenden, werden die von diesem Programm erzeugten 
+Kinder vom System aufger&auml;umt und Sie k&ouml;nnen nicht mehr feststellen, 
+ob der Signalhandler korrekt funktioniert hat.<br>
+Was f&auml;llt Ihnen dabei auf? Wann erscheint die Fertigmeldung?
+<P>
+
+<H2>Server und Client in Perl</H2>
+Schreiben Sie einen "Stafetten-Proxy" in Perl, der folgendes leistet:
+<P>
+  <OL>
+  <LI>Der Serverproze&szlig; lauscht auf Port 3333.
+  <LI>Nimmt ein Client Verbindung auf, nimmt der Server eine einzeilige
+       Nachricht entgegen.
+  <LI>Die Nachricht wird an die lokale Datei <TT>/tmp/motd</TT> angeh&auml;ngt.
+  <LI>Weiterhin wird die Nachricht an einen anderen Rechner weitergegeben, und zwar:
+       <P>
+       <TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0 WIDTH="50%">
+       <TR><TH>Von</TH><TH>An</TH></TR>
+       <TR><TD><TT>Snowwhite</TT></TD><TD><TT>Doc</TT></TD></TR>
+       <TR><TD><TT>Doc    </TT></TD><TD><TT>Happy  </TT></TD></TR>
+       <TR><TD><TT>Happy  </TT></TD><TD><TT>Bashful</TT></TD></TR>
+       <TR><TD><TT>Bashful</TT></TD><TD><TT>Sneezy </TT></TD></TR>
+       <TR><TD><TT>Sneezy </TT></TD><TD><TT>Sleepy </TT></TD></TR>
+       <TR><TD><TT>Sleepy </TT></TD><TD><TT>Grumpy </TT></TD></TR>
+       <TR><TD><TT>Grumpy </TT></TD><TD><TT>Dopey  </TT></TD></TR>
+       <TR><TD><TT>Dopey </TT></TD><TD><TT>Gimli   </TT></TD></TR>
+       <TR><TD><TT>Gimli </TT></TD><TD><TT>Albarich</TT></TD></TR>
+       </TABLE>
+       <P>
+  <LI>Initiiert wird die Nachricht somit von <TT>Snowwhite</TT>.
+  </OL>       
+  <P>
+Verwenden Sie als Grundlage die in der Vorlesung behandelten Perl-Programme,
+insbesondere den Mini-Proxy.
+<P>
+Was geschieht, wenn einer der Empf&auml;nger nicht reagiert? Wie kann man
+Abhilfe schaffen? &Uuml;berlegen Sie einige M&ouml;glichkeiten.
+<P>
+Erweitern Sie den "Stafetten-Proxy" so, da&szlig; er bei einem
+Mi&szlig;erfolg das Senden im Abstand von 5 Minuten wiederholt, bis er seine
+Nachricht los geworden ist oder es 10 Stunden versucht wurde.
+<P>
+Wie k&ouml;nnte man ein System der Form "jeder sendet an jeden" realisieren?
+Wie stellt man sicher, da&szlig; eine Nachricht nicht mehrfach gespeichert wird?
+Skizzieren Sie ein Konzept dieser L&ouml;sung.
+<P>
+
+<H2>Apache konfigurieren</H2>
+Der Webserver "Apache" ist bereits installiert, aber noch nicht konfiguriert.
+Stellen Sie fest, wo sich die Konfigurationsdatei <TT>httpd.conf</TT> befindet.
+Konfigurieren Sie Ihren Webserver so, da&szlig; sich alle Dateien unterhalb
+von <TT>/opt/www/</TT> befinden (sofern dies nicht schon so ist).
+<P>
+Tragen Sie die richtigen Werte f&uuml;r <TT>ServerType, ServerRoot, Port, 
+ServerAdmin, ServerName, DirectoryIndex</TT> und <TT>DocumentRoot</TT> ein.
+<P>
+&Uuml;berschl&auml;gig braucht ein Serverproze&szlig; 200 - 300 KByte Speicher.
+Stellen Sie den verf&uuml;gbaren freien Speicher fest und modifizieren Sie
+die Angaben von <TT>MaxClients, StartServers, MaxSpareServers</TT>
+und <TT>MinSpareServers</TT>so, da&szlig; der Rechner keinen Swap-Space ben&ouml;tigt.
+<P>
+F&uuml;r die Fehler 401, 402, 403, 404 und 500 sollen Error-Dokumente bereitgestellt
+werden. Orientieren Sie sich dazu an folgendem Muster f&uuml;r den Fehler 404. Die
+Dateien sollen einheitlich "<TT>error-xxx.html</TT>" hei&szlig;en, wobei "xxx"
+f&uuml;r die Fehlernummer steht.
+<PRE>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;error!&lt;/title&gt;&lt;/head&gt;
+
+&lt;body bgcolor="White" text="Black"&gt;
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+&lt;table align=center cellspacing=2 cellpadding=6 width="90%" border=2&gt;
+&lt;tr&gt;
+&lt;td align=center&gt;
+&lt;font face="Verdana, Helvetica, sans-serif" size="5" color="Red"&gt;
+&lt;b&gt;error 404: Datei nicht gefunden!&lt;/b&gt;
+&lt;/font&gt;
+&lt;P&gt;
+&lt;font face="Verdana, Helvetica, sans-serif" size="2" color="Black"&gt;
+Das angegebene Dokument konnte auf diesem Server leider nicht gefunden werden.
+&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</PRE>
+<P>
+Testen Sie Ihren Webserver und die der anderen Teilnehmer.
+<P>
+
+<H2>Anwendung von Systemdiensten</H2>
+Es gibt zwei Rechner, die Webcam-Bilder (Aufl&ouml;sung: 640 x 480 Pixel) erzeugen. 
+Sofern er nicht anderweit benötigt wird, liefert der Laabor-PC "Balin" Bilder mit
+Blick auf die Dachauerstrasse. Er ist ansprechbar &uuml;ber:
+<P>
+<A HREF="http://balin.da.private.fhm.edu/">http://balin.da.private.fhm.edu/</A>
+<P>
+Der zweite Rechner liefert ein Bild des Fernsehturms (352 x 240 Pixel):
+<P>
+<A HREF="http://141.39.245.118/jpg/image.jpg">http://141.39.245.118/jpg/image.jpg</A>
+<P>
+oder in h&ouml;herer Aufl&ouml;sung (704 x 480 Pixel):
+<P>
+<A HREF="http://141.39.245.118/jpg/hugesize.jpg">http://141.39.245.118/jpg/hugesize.jpg</A>
+<P>
+Wem M&uuml;nchen zu langweilig ist, der kann einen Blick auf den Rathausplatz
+in Kopenhagen werfen:
+<P>
+<A HREF="http://politiken.dk/webcam/webcam1.asp">http://politiken.dk/webcam/webcam1.asp</A>
+<P>
+Oder mal sehen, was am Zugspitzgletscher abgeht:
+<P>
+<A HREF="http://www.zugspitze.de//livecamsdata/k3bildww.jpg">http://www.zugspitze.de//livecamsdata/k3bildww.jpg</A>
+<P>
+Mit dem Perl-Modul <TT>LWP::Simple</TT> ist es m&ouml;glich, innerhalb eines Programms
+mit dem Befehl <TT>getstore $url, $file;</TT> eine durch <TT>$url</TT> spezifizierte
+Datei von einem fernen Server zu holen und unter dem Dateinamen <TT>$file</TT> (ggf.
+mit Pfadangabe im Dateinamen) auf dem lokalen Rechner abzuspeichern. Ein Programmfragment
+sieht dann etwa folgenderma&szlig;en aus:
+<PRE>
+#!/usr/bin/perl
+use LWP::Simple;
+  .
+  .
+  .
+getstore $url, $file; 
+  .
+  .
+  .
+</PRE>
+Schreiben Sie ein Perl-Programm, das ein Labor-Bild von balin holt
+und lokal abspeichert. Dabei sollen rotierend immer 4 Bilder (<TT>labor1.jpg -
+labor4.jpg</TT>) zur Verf&uuml;gung stehen, wobei immer <TT>labor1.jpg</TT> das 
+&auml;lteste und <TT>labor4.jpg</TT> das j&uuml;ngste Bild ist. Die Bilder m&uuml;ssen
+in der "Document-Root" des Servers abgelegt werden.
+<P>
+Erzeugen Sie eine einfache HTML-Seite (ebenfalls in der "Document-Root" des Servers),
+in der alle 4 Bilder untereinander dargestellt werden und testen Sie damit die Funktion
+Ihres Programms.
+<P>
+Das Programm soll nun nicht manuell, sondern per <TT>crontab</TT> aufgerufen werden - 
+und zwar jede Minute. Erzeugen Sie einen entsprechenden Crontab-Eintrag und testen Sie
+die Funktion des Gesamtsystems.
+<P>
+
+<H2>CGI-Schnittstelle</H2>
+Schreiben Sie ein CGI-Programm in C oder Perl.
+Das Programm soll die Eingaben des unten aufgef&uuml;hrten Formulars entgegennehmen, 
+die Formulardaten an eine Log-Datei anh&auml;ngen und
+den folgenden dynamisch erzeugten Text ausgeben:
+<p>
+<table border=2 width="60%" cellpadding=3 cellspacing=0 bgcolor=#CCCCCC>
+<tr><td>
+<H2>Best&auml;tigung</H2>
+&lt;Vorname&gt; &lt;Name&gt;, Matrikelnummer &lt;Matrikelnr.&gt;, hat
+am Praktikum zur Vorlesung <B>Internet Technologie</B> teilgenommen.
+Er hat &lt;Punkte&gt; erreicht. Die Mindestpunktzahl f&uuml;r den
+Schein wurde &lt;[nicht] erreicht&gt;.
+<P>
+M&uuml;nchen, den &lt;Datum&gt;
+<BR><BR><BR><BR>
+Unterschrift <TT>__________________________________</TT>
+</td></tr></table>
+<P>
+Installieren Sie Formular und Script auf einem der Zwerge-Server.
+<P>
+Das Formular verwendet die HTTP-Methode POST zur Daten&uuml;bermittlung.<BR>
+Die Mindestpunktzahl (20) wird als Konstante im Programm gespeichert.
+Die aktuelle Punktzahl wird damit verglichen und dementsprechend
+die Ausgabe gesteuert.<BR>
+Die Maximalpunktzahl betr&auml;gt 50 und das Programm soll pr&uuml;fen,
+ob die eingegebene Punktzahl im Bereich 0..50 liegt.
+<P>
+Das Formular zur Aufgabe:
+<PRE>
+&lt;table border=2 width="40%" cellpadding=3 cellspacing=0 bgcolor=#CCCCCC&gt;
+&lt;tr&gt;&lt;td&gt;
+&lt;form action=/cgi-bin/prakt.pl method=post&gt;
+&lt;table border=0 cellpadding=3&gt;
+&lt;tr&gt;&lt;td&gt;Name: &lt;/td&gt;&lt;td&gt;&lt;input type=text name="Name" size=30 maxlength=60&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Vorname: &lt;/td&gt;&lt;td&gt;&lt;input type=text name="Vorname" size=30 maxlength=60&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Matrikelnummer: &lt;/td&gt;&lt;td&gt;&lt;input type=text name="MatNr" size=15 maxlength=15&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Punkte: &lt;/td&gt;&lt;td&gt;&lt;input type=text name="Punkte" size=15 maxlength=15&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&nbsp;&lt;/td&gt;&lt;td&gt;&lt;input type=submit name="submit" value="Absenden"&gt;
+    &lt;input type=reset name="reset" value="R&uuml;cksetzen"&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/form&gt;
+
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+</PRE>
+<P>
+<table border=2 width="40%" cellpadding=3 cellspacing=0 bgcolor=#CCCCCC>
+<tr><td>
+<form action=/cgi-bin/prakt.pl method=post>
+<table border=0 cellpadding=3>
+<tr><td>Name: </td><td><input type=text name="Name" size=30 maxlength=60></td></tr>
+<tr><td>Vorname: </td><td><input type=text name="Vorname" size=30 maxlength=60></td></tr>
+<tr><td>Matrikelnummer: </td><td><input type=text name="MatNr" size=15 maxlength=15></td></tr>
+<tr><td>Punkte: </td><td><input type=text name="Punkte" size=15 maxlength=15></td></tr>
+<tr><td>&nbsp;</td><td><input type=submit name="submit" value="Absenden">
+    <input type=reset name="reset" value="R&uuml;cksetzen"></td></tr>
+</table>
+</form>
+</td></tr></table>
+<P>
+Beachten Sie, da&szlig; das Formular noch in eine korrekte HTML-Seite
+eingebettet werden mu&szlig;.
+<P>
+
+<H2>Semesterprojekt</H2>
+Inhalt und Umfang des Semesterprojekts wird in der Vorlesung bekannt gegeben. Das
+Projekt wird in kleineren Teams bearbeitet. Je nach Art der Aufgabenstellung 
+werden Teilaufgaben auf einzelne Teams verteilt. Die Teams m&uuml;ssen zur 
+Bearbeitung gemeinsame Schnittstellen definieren und bei Test/Integration 
+kooperieren.
+<P>
+Gegebenenfalls m&uuml;ssen Sie f&uuml;r das Projekt weitere Software 
+installieren. Das kann auf mehrere Weisen geschehen:
+<UL>
+<LI>Unter Debian gibt es das "Advanced Package Tool" (apt) zum
+Installieren und Deinstallieren von Software. Normalerweise reicht
+der Befehl <TT>apt-get install &lt;Programmname&gt;</TT>. Mittels
+<TT>apt-cache search &lt;Stichwort&gt;</TT> kann man nach Programmen suchen.
+<LI>Perl-Module lassen sich (als "root") mittels <TT>perl -MCPAN -e shell</TT>
+installieren. Man bekommt dann eine interaktive CPAN-Shell und kann mit
+<TT>get &lt;Modul&gt;</TT> Module herunterladen oder mit 
+<TT>install &lt;Modul&gt;</TT> installieren.
+<LI>Schliesslich bleibt noch das &Uuml;bersetzen und Installieren eines
+Quellpakets, das unten etwas genauer beschrieben wird.
+</UL>
+<P>
+Mit "Quellpaket installieren" ist das Verfahren gemeint, aus einem 
+Source-Archiv (auch "tarball" genannt) eine lauff&auml;hige Version 
+auf dem Rechner zu erstellen und zu installieren.
+Die Schritte zum Erfolg:
+<ol>
+<li>Gegebenfalls dekomprimieren (Endung ".tar.gz" oder ".tgz") mit
+dem gunzip-Kommando (das GNU-tar kann sogar das gleich mit).
+<li>Nach dem Wechsel in ein passendes Verzeichnis (z. B. <I>/$HOME/src</I>),
+in dem sich nun auch das tar-Archiv befinden sollte, wird es mit dem
+Kommando
+<PRE>
+tar xvf dateiname.tar
+</PRE>
+ausgepackt. Anschliessend finden Sie in der Regel ein Verzeichnis vor, in
+dem sich alle notwendigen Dateien befinden.
+<li>In das gerade erzeugte Verzeichnis wechseln. Dateien wie <I>README</I>,
+<I>INSTALLATION</I>, etc. lesen. Danach wissen Sie, wie's weitergeht.
+Je nach Programm beginnt es mit
+<PRE>
+./configure
+</PRE>
+oder auch mit
+<PRE>
+perl Configure.PL
+</PRE>
+oder es geht gleich beim n&auml;chsten Schritt weiter. Gegebenfalls muss
+beim configure-Kommando auch ein Pfad-Pr&auml;fix f&uuml;r die sp&auml;tere
+Installation angegeben werden.
+<li>Dann geht es meist immer nach folgenden Schema weiter:
+<PRE>
+make
+make test      # nur manchmal
+make install   # oft nur als 'root' moeglich
+</PRE>
+<li>Nun sollte es gehen (so glaubt zumindest der Programmautor).
+</ol>
+<H6><I>Letzte Aktualisierung: 08. Oct 2004</I></H6>
+</BODY>
+</HTML>

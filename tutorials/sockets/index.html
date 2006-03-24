@@ -1,0 +1,205 @@
+<html>
+<head>
+<meta NAME="robots" CONTENT="all">
+<meta NAME="revisit-after" CONTENT="10 days">
+<meta NAME="Reply-To" CONTENT="webmaster@netmafia.de">
+
+<meta NAME="keywords" CONTENT="UNIX Linux Internet Server Konfiguration Programmierung">
+<meta NAME="description" CONTENT="Installation, Konfiguration und Ueberwachung von Serverdiensten unter Linux/UNIX, Internet-Technologie, Perl-Programmierung.">
+
+<title>Internet-Technologie</title>
+</head>
+<body TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" ALINK="#FF0000" VLINK="#FF00FF">
+<center><table BORDER=0 WIDTH="90%" >
+<tr><td ALIGN=LEFT><img SRC="netzwerk.gif"></td>
+<td ALIGN=RIGHT><h3>Internet-Technologie</h3>
+
+<b><i>Prof. J&uuml;rgen Plate</i></b></td></tr>
+</table></center>
+<hr>
+<p>
+<h1 ALIGN=CENTER>Internet-Technologie</h1>
+<table border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr><td valign=top align=left>
+<i>Any sufficiently advanced technology is indistinguishable from magic.<br>
+ -- Arthur C. Clarke</i>
+<br><br><br>
+Ziel der Vorlesung ist es, Kenntnisse &uuml;ber Aufbau, Funktionsweise und Programmierung
+von Internet- und Intranetservern sowie &uuml;ber Protokolle der h&ouml;heren Schichten zu
+vermitteln. Weiterhin werden Sicherheitma&szlig;nahmen zum Schutz der Server und Grundlagen
+der Planung, Lastberechnung, Lastmessung und Serverstatistik behandelt.
+</td>
+<td valign=middle align=right>
+<img SRC="dm-rz.jpg" align=right hspace=50>
+</td></tr></table>
+<br CLEAR=ALL>
+<p>
+
+<h2>Inhalt</h2>
+
+<h3>1 Vorkenntnisse</h3>
+<table border=0 width="70%" cellpadding=4 cellspacing=0 bgcolor="#FFCC99"><tr><td>
+<ol>
+<li>Vorausgesetzt werden Kenntnisse &uuml;ber die Funktionsweise von Computernetzen
+(LAN, WAN), insbesondere die Kapitel <a HREF="../netze/netz8.html">"Die TCP/IP-Protokolle"</a>
+und <a HREF="../netze/netz9.html">"H&ouml;here Protokolle"</a> aus dem Skript
+<a HREF="../netze/index.html">"Computernetze"</a>. 
+<p>
+<li>Grundlegende praktische Erfahrungen mit dem Betriebssystem UNIX/Linux, das die 
+Basis der Serveranwendungen in der Vorlesung und in der Praxis darstellt. Zur Wiederholung 
+und Einstimmung kann das Skript <a HREF="../unix/index.html">"Betriebssystem UNIX"</a> 
+herangezogen werden.
+<p>
+<li>Die Programmiersprache Perl
+wird f&uuml;r Beispiele verwendet, weil sich mit dieser C-&auml;hnlichen 
+Sprache in wenigen Zeilen exemplarische Server-, Client- und
+Testprogramme realisieren lassen. Daher sind Vorkenntnisse in dieser
+Sprache n&ouml;tig. Sie sollten sich in Perl <b>w&auml;hrend der ersten
+Vorlesungswochen</b> parallel zur Vorlesung einarbeiten, indem Sie die 
+beiden ersten Kapitel des Perl-Skripts, 
+<a HREF="../perl/perl1.html">&Uuml;berblick &uuml;ber Perl</a>
+ und <a HREF="../perl/perl2.html">Einf&uuml;hrung in Perl</a>, 
+durcharbeiten. Dies ist gewissermassen der erste Teil des Praktikums.
+<p>
+<li>F&uuml;r die Programmierung von CGI-Anwendungen sind Grundkenntnisse
+in HTML erforderlich, um Formulare schreiben zu k&ouml;nnen. Die
+speziellen Formularelemente der Sprache werden hier knapp besprochen,
+allgemeine HTML-Kenntnisse bietet das <A HREF="../easyhtml/index.html">
+HTML-Einsteiger-Skript</A>. 
+</ol>
+</td></tr></table>
+<p>
+
+<h3>2 Einf&uuml;hrung und Standard-Tools</h3>
+In diesem Kapitel werden einige notwendige Programme und<br>
+Konfigurationsdateien der Netzwerk-Funktionen von UNIX behandelt.
+  <ol>
+  <li><a HREF="server2.html">Client und Server</a>
+  <li><a HREF="server2.html#2.2">Ports - Eing&auml;nge f&uuml;r Server</a>
+
+  <li><a HREF="server2.html#2.3">Dokumentation</a>
+  <li><a HREF="server2.html#2.4">Standard-Tools</a>
+  <li><a HREF="server2.html#2.5">Triviale Anfragen an h&ouml;here Protokolle</a>
+  <li><a HREF="server2.html#2.6">Einfache Protokolle</a>
+  <li><a HREF="../netze/netz9.html">H&ouml;here Protokolle</a>
+  <li><a HREF="../netze/netz8.html#8.8">Netzwerkkonfiguration</a>
+  </ol>
+<p>
+
+<h3>3 Netzwerkprogrammierung</h3>
+Hier werden die grundlegenden System-Calls zur Socket-Programmierung<br>
+(in C) und die Socket-Schnittstelle des TCP/IP-Netzes vorgestellt.
+  <ol>
+  <li><a HREF="server3.html">Die Socket-Netzwerkschnittstelle</a>
+  <li><a HREF="server3.html#3.2">Parallelit&auml;t und Signale</a>
+  <li><a HREF="server3.html#3.3">TCP/IP-Sockets: Die Funktionen</a>
+  <li><a HREF="server3.html#3.4">Der Internet-Superserver</a>
+  <li><a HREF="server3.html#3.5">Ein-/Ausgabe-Polling mit <tt>select()</tt></a>
+  <li><a HREF="server3.html#3.6">Erste Perl-Server und Clients</a>
+  </ol>
+<p>
+
+<h3>4 Client und Server programmieren</h3>
+Die Porgammiersprache f&uuml;r die Vorlesung ist Perl. Dies Kapitel<br>
+behandelt die diversen Netzwerkfunktionen und -Module von Perl.
+  <ol>
+  <li><a HREF="server4.html">Netzwerk-Funktionen in Perl</a>
+  <li><a HREF="server4.html#4.2">Single-Thread-Server in Perl</a>
+  <li><a HREF="server4.html#4.3">Multi-Thread-Server in Perl</a>
+  <li><a HREF="server4.html#4.4">Perl-Clients f&uuml;r Standard-Dienste</a>
+  </ol>
+<p>
+
+<h3>5 Standard-Server</h3>
+Aufbau, Installation, Konfiguration anhand einiger Beispielserver;<br>
+mehr dazu findet sich in der Begleitliteratur:<br>
+<i>Linux-Server f&uuml;r Intranet- und Internet</i>).
+  <ol>
+  <li><b>HTTP-Server</b>
+    <ol>
+    <li><a HREF="server5.html#5.1">Administration eines Apache Servers</a>
+    <li><a HREF="http://www.apache.org/">Webserver Apache</a>
+    </ol>
+  <li><b>FTP-Server</b>
+    <ol>
+    <li><a HREF="server5.html#5.2">Administration des ProFTPD</a>
+    <li><a HREF="server5.html#5.3">Anlegen des Anonymous-Users</a>
+    <li><a HREF="http://www.proftpd.org/">FTP-Server ProFTPD</a>
+    </ol>
+  <li><b>DNS-Server</b>
+    <ol>
+    <li><a HREF="server5.html#5.4">DNS-Server einrichten und abfragen</a>
+    <li><a HREF="http://www.isc.org/products/BIND/">DNS-Server BIND</a>
+    </ol>
+  <li><b>Proxy und Proxy-Cache</b>
+    <ol>
+    <li><a HREF="server5.html#5.5">Proxy-Grundlagen</a>
+    <li><a HREF="http://www.squid-cache.org/">Proxy und Proxy-Cache SQUID</a>
+    </ol>
+  </ol>
+<p>
+
+<h3>6 CGI-Programmierung</h3>
+
+Programmierung dynamischer Web-Applikationen in Perl
+  <ol>
+  <li><a HREF="../perl/perl3.html">CGI - Common Gateway Interface</a>
+  <li><a HREF="../perl/perl4.html">CGI-Beispiele</a>
+  <li><a HREF="server6.html#6.1">Session-Tracking</a>
+  <li><a HREF="server6.html#6.2">CGI-Upload</a>
+  <li><a HREF="server6.html#6.3">CGI und gesch&uuml;tzte Verzeichnisse</a>
+  <li><a HREF="server6.html#6.4">Komplexes Beispiel: Steuern per Internet</a>
+  </ol>
+<p>
+
+<h3>7 Die Last mit der Serverlast</h3>
+In diesem Kapitel wird die Auswertung der Logdateien behandelt<br>
+und gezeigt, was man bei h&ouml;herer Serverbelastung unternehmen kann.
+  <ol>
+  <li><a HREF="server7.html#7.1">Verz&ouml;gerung und Verlust in paketvermittelten Netzen</a>
+  <li><a HREF="server7.html#7.2">Serverstatistik</a>
+  <li><a HREF="server7.html#7.3">Lastmessung (Benchmarks)</a>
+  <li><a HREF="server7.html#7.4">Monitoring</a>
+  <li><a HREF="server7.html#7.5">Hochverf&uuml;gbarkeit</a>
+  <li><a HREF="server7.html#7.6">Lastverteilung</a>
+  </ol>
+<p>
+
+<h3>8 Sicherheit</h3>
+Nahezu jeder Rechner mit Verbindung zum Internet ist st&auml;ndigen Angriffen<br>
+ausgesetzt. Dies Kapitel rei&szlig;t an, wie man Server "abh&auml;rtet".
+  <ol>
+  <li><a HREF="server8.html#8.1">Allgemeines</a>
+  <li><a HREF="server8.html#8.2">System h&auml;rten</a>  
+  <li><a HREF="server8.html#8.3">Sicherheits-Tools</a>
+  <li><a HREF="../sicherheit/index.html">Skript Netzwerk-Sicherheit</a>
+  </ol>
+<p>
+
+<h3>Anhang</h3>
+
+  <ol>
+  <li><a HREF="beispiele/index.html">Perl-Beispielprogramme</a>
+  <li><a HREF="syscalls.html">Prozesse und Signale in C</a>
+  <li><a HREF="unix-socket-faq.html">UNIX-Socket-FAQ</a>
+  <li><a HREF="portnummern.html">Portnummern</a>
+  <li><a HREF="uebungen.html">&Uuml;bungsaufgaben</a>
+  <li><a HREF="Client-Server.html">"Client-Server Applications"</a> 
+      aus "The Perl Journal, Issue 15, Fall 1999 
+  <li><a HREF="server9.html">Literatur und Linux-Links</a>
+  <li><a HREF="relais-form.html">Formular zur Relais-Steuerung</a>
+  <li><a HREF="ThomasSocket1.pdf">Sockets in Linux (Prof. R. Thomas)</a>
+  <li><a HREF="ThomasSocket2.pdf">UNIX-Domain-Sockets in Linux (Prof. R. Thomas)</a>
+  <li><a HREF="ThomasSocket3.pdf">INET-Sockets in Linux (Prof. R. Thomas)</a>
+
+  </ol>
+<p>
+<H3><A HREF="server.tgz">Download</A> des gesamten Skripts (ohne Perl)</H3>
+<P>
+
+
+<hr>
+<h6><i>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</i></h6>
+<H6><I>Letzte Aktualisierung: 07. Oct 2004</I></H6>
+</body>
+</html>

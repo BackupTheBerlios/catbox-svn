@@ -1,0 +1,152 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: General Information and Concepts</TITLE>
+</HEAD>
+<BODY>
+Previous
+<A HREF="unix-socket-faq-2.html">Next</A>
+<A HREF="unix-socket-faq.html#toc1">Table of Contents</A>
+<HR>
+<H2><A NAME="s1">1. General Information and Concepts</A></H2>
+
+<H2><A NAME="ss1.1">1.1 What's new?</A></H2>
+
+<P>Changed on May 21/1998
+<UL>
+<LI>2.12.   Where can a get a library for programming sockets? (fixed
+a couple of links)</LI>
+<LI>7.  Sample Source Code (put examples on a new ftp server)</LI>
+</UL>
+</P>
+
+
+<H2><A NAME="ss1.2">1.2 About this FAQ </A></H2>
+
+<P>This FAQ is maintained by Vic Metcalfe 
+(
+<A HREF="mailto:vic@acm.org">vic@acm.org</A>), with lots of
+assistance from Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>).
+I am depending on the true
+wizards to fill in the details, and correct my (no doubt) plentiful
+mistakes.  The code examples in this FAQ are written to be easy to follow
+and understand.  It is up to the reader to make them as efficient as
+required.  I started this faq because after reading comp.unix.programmer 
+for a short time, it became evident that a FAQ for sockets was needed.  </P>
+<P>The FAQ is available at the following locations:</P>
+<P>
+<DL>
+<DT><B>Usenet: (Posted on the 21st of each month)</B><DD><P>news.answers, comp.answers, comp.unix.answers, comp.unix.programmer</P>
+
+<DT><B>FTP:</B><DD><P>
+<A HREF="ftp://rtfm.mit.edu/pub/usenet/news.answers/unix-faq/socket">ftp://rtfm.mit.edu/pub/usenet/news.answers/unix-faq/socket</A></P>
+
+<DT><B>WWW:</B><DD><P>
+<A HREF="http://www.ibrado.com/sock-faq">http://www.ibrado.com/sock-faq</A>
+<A HREF="http://kipper.york.ac.uk/~vic/sock-faq">http://kipper.york.ac.uk/~vic/sock-faq</A>
+<A HREF="http://www.ntua.gr/sock-faq">http://www.ntua.gr/sock-faq</A></P>
+</DL>
+</P>
+<P>Please 
+<A HREF="mailto:vic@acm.org">email me</A>
+if you would like to correct or clarify an answer.  I 
+would also like to hear from you if you would like me to add a question 
+to the list.  I may not be able to answer it, but I can add it in the 
+hopes that someone else will submit an answer.  Every hour I seem to be 
+getting even busier, so if I am slow to respond to your email, please be 
+patient.  If more than a week passes you may want to send me another one 
+as I often put messages aside for later and then forget about them.  I'll 
+have to work on dealing with my mail better, but until then feel free to 
+pester me a little bit.</P>
+
+
+<H2><A NAME="ss1.3">1.3 Who is this FAQ for?</A></H2>
+
+<P>This FAQ is for C programmers in the Unix environment.  It is not intended
+for WinSock programmers, or for Perl, Java, etc.  I have nothing against
+Windows or Perl, but I had to limit the scope of the FAQ for the first
+draft.  In the future, I would really like to provide examples for Perl,
+Java, and maybe others.  For now though I will concentrate on correctness 
+and completeness for C. </P>
+<P>This version of the FAQ will only cover sockets of the AF_INET family,
+since this is their most common use.  Coverage of other types of sockets
+may be added later. </P>
+
+
+<H2><A NAME="ss1.4">1.4 What are Sockets?</A></H2>
+
+<P>Sockets are just like "worm holes" in science fiction.  When things go
+into one end, they (should) come out of the other.  Different kinds of
+sockets have different properties.  Sockets are either connection-oriented
+or connectionless.  Connection-oriented sockets allow for data to flow
+back and forth as needed, while connectionless sockets (also known as
+datagram sockets) allow only one message at a time to be transmitted,
+without an open connection.  There are also different socket families. 
+The two most common are <CODE>AF_INET</CODE> for internet connections, and 
+<CODE>AF_UNIX</CODE> for
+unix IPC (interprocess communication).  As stated earlier, this FAQ deals
+only with <CODE>AF_INET</CODE> sockets. </P>
+
+
+<H2><A NAME="ss1.5">1.5 How do Sockets Work?</A></H2>
+
+<P>The implementation is left up to the vendor of your particular unix, but
+from the point of view of the programmer, connection-oriented sockets work
+a lot like files, or pipes.  The most noticeable difference, once you have 
+your file descriptor is that <CODE>read()</CODE> or <CODE>write()</CODE> calls may actually 
+read or 
+write fewer bytes than requested.  If this happens, then you will have to 
+make a second call for the rest of the data.  There are examples of this 
+in the 
+<A HREF="http://www.ibrado.com/sock-faq/examples.tar.gz">source code that accompanies the faq</A>.</P>
+
+
+<H2><A NAME="books"></A> <A NAME="ss1.6">1.6 Where can I get source code for the book [book title]?</A></H2>
+
+<P>Here is a list of the places I know to get source code for network
+programming books.  It is very short, so please mail me with any others
+you know of. </P>
+<P>Title: Unix Network Programming<BR>
+Author: W. Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>)<BR>
+Publisher: Prentice Hall, Inc.<BR>
+ISBN: 0-13-949876-1<BR>
+URL: 
+<A HREF="http://www.noao.edu/~rstevens">http://www.noao.edu/~rstevens</A></P>
+<P>Title: Power Programming with RPC<BR>
+Author: John Bloomer<BR>
+Publisher: O'Reilly &amp; Associates, Inc.<BR>
+ISBN: 0-937175-77-3<BR>
+URL: 
+<A HREF="ftp://ftp.uu.net/published/oreilly/nutshell/rpc/rpc.tar.Z">ftp://ftp.uu.net/published/oreilly/nutshell/rpc/rpc.tar.Z</A></P>
+<P>Recommended by: 
+Lokmanm Merican (lokmanm#pop4.jaring.my@199.1.1.88)<BR>
+Title: UNIX PROGRAM DEVELOPMENT for IBM PC'S Including OSF/Motif<BR>
+Author: Thomas Yager<BR>
+Publisher: Addison Wesley, 1991<BR>
+ISBN: 0-201-57727-5<BR></P>
+
+
+<H2><A NAME="ss1.7">1.7 Where can I get more information?</A></H2>
+
+<P>I keep a copy of the resources I know of on my socks page on the web.  I 
+don't remember where I got most of these items, but some day I'll check 
+out their sources, and provide ftp information here.  For now, you can 
+get them at 
+<A HREF="http://www.ibrado.com/sock-faq">http://www.ibrado.com/sock-faq</A>.</P>
+<P>There is a good TCP/IP FAQ maintained by 
+George Neville-Neil
+(
+<A HREF="mailto:gnn@wrs.com">gnn@wrs.com</A>) which
+can be found at
+<A HREF="http://www.visi.com/~khayes/tcpipfaq.html">http://www.visi.com/~khayes/tcpipfaq.html</A></P>
+
+
+<HR>
+Previous
+<A HREF="unix-socket-faq-2.html">Next</A>
+<A HREF="unix-socket-faq.html#toc1">Table of Contents</A>
+</BODY>
+</HTML>

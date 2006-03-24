@@ -1,0 +1,564 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<A NAME="4"></A>
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate<BR>und J&ouml;g Holzmann</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>5 Standard-Server</H1>
+
+<A NAME="6.1"></A>
+<H2>6.1 Session-Tracking</H2>
+Ein Problem bei CGI-Programmen ist, da&szlig; es sich bei HTTP um ein
+zustandsloses Protokoll handelt. Bei jeder Interaktion wird ein CGI-Programm
+aufs Neue aufgerufen. Ohne besondere Ma&szlig;nahmen ist nur eine Anfrage des
+Browsers, gefolgt von einer Antwort des CGI-Programms, m&ouml;glich. So lassen 
+sich viele Anwendungen nicht realisieren. Stellen Sie sich ein Bestellsystem 
+vor. Dieses erlaubt es, Waren in einen virtuellen Warenkorb zu stellen. Dieser 
+Vorgang kann sich &uuml;ber mehrere Aufrufe des CCI-Programms erstrecken und wird 
+entweder mit einem Abbruch der Aktion oder mit dem "Bezahlen" an der "Kasse" 
+abgeschlossen. Ein solches System ist jedoch nicht durch einfache Frage/Antwort-Folgen 
+zu realisieren.
+<P>
+Man mu&szlig; also Methoden finden, mit denen der Zustand zwischen mehreren Aufrufen 
+des CGI-Programms erhalten bleibt, und die ein zustandsloses (stateless) Protokoll 
+nutzen um ein zustandsbehaftetes (stateful) Protokoll dar&uuml;ber implementieren.
+Ein CGI-Programm selbst kann zun&auml;chst keinen Zustand halten. Wir wollen aber die 
+mehrfache Ausf&uuml;hrung eines CGI-Programms als ein virtuelles Programm auffassen, das 
+bei jedem CGI-Aufruf in einen neuen Zustand &uuml;bergeht.
+<P>
+Ein einfaches Beispiel:<BR>
+Bei jedem Aufruf des CGI-Programms soll eine Zahl (Session-Kennung) angezeigt werden. 
+Diese Zahl ist bei jedem neuen Aufruf zu inkrementieren. Jeder Browser bzw. Benutzer 
+soll eine eigene Kennung besitzen, so da&szlig; es nicht ausreicht, einen globalen Z&auml;hler 
+serverseitig zu erh&ouml;hen.
+<P>
+Der Z&auml;hler repr&auml;sentiert den Session-Zustand. Diesen m&uuml;ssen wir jeweils zwischen 
+zwei aufeinanderfolgenden Aufrufen des CCI-Programms erhalten. Da der Zustand pro 
+Browser bzw. User gilt, mu&szlig; dieser mehrfach gespeichert werden. Zur Speicherung
+des Zustands gibt es zwei M&ouml;glichkeiten:
+<UL>
+<LI>Der komplette Zustand wird clientseitig gespeichert. Hierbei kann er in 
+einer Browsersitzung versteckt sein oder aber auch in Form von Cookies auf der 
+Festplatte des Browsers liegen.
+<LI>Der Zustand aller Clients wird serverseitig gespeichert. Es ist dabei notwendig, 
+bei den Clients noch eine minimale Zustandsinformation zu hinterlegen. Diese Informationsmenge wird auch Sitzungsschl&uuml;ssel genannt.
+</UL>
+Die clientseitige Speicherung des gesamten Zustandes hat den Vorteil, da&szlig; die 
+Informationen vieler Clientsitzungen auch bei den Clients gespeichert sind und 
+somit f&uuml;r den Server keinen Speicherbedarf bedeuten. Ein Nachteil ist, da&szlig; die 
+Information auf der Clientseite eingesehen oder sogar ver&auml;ndert werden kann. 
+Da der Zustand bei jeder Interaktion &uuml;bertragen werden mu&szlig;, kann dies bei 
+vielen gleichzeitig aktiven Clients Server und Netz belasten. Ein dritter Nachteil 
+ist, da&szlig; keine Statistiken &uuml;ber die einzelnen Zust&auml;nde herzustellen sind, da die
+Info bei den Clients gespeichert ist.
+<P>
+Ein Vorteil der serverseitigen Speicherung ist, da&szlig; die gesamte Information &uuml;ber 
+alle Clients sicher beim Server aufgehoben ist und auch analysiert werden kann. 
+Positiv ist weiterhin, da&szlig; die Zustandsinformation nicht mehr komplett beim User 
+gespeichert wird. Im FOlgenden werden einige M&ouml;glichkeiten der Zustandsspeicherung
+vorgestellt.
+<P>
+
+<H3>Zustandsspeicherung &uuml;ber PATH_INFO</H3>
+Eine M&ouml;glichkeit, den Zustand zu erhalten, benutzt die URL. Am Anschlu&szlig; an den Namen 
+des CGI-Scriptes wird die URL fortgef&uuml;hrt. In obigem Beispiel w&auml;re dies:
+<PRE>
+http://www.netzmafia.de/cgi-bin/state.pl/1 
+http://www.netzmafia.de/cgi-bin/state.pl/2 
+http://www.netzmafia.de/cgi-bin/state.pl/3
+</PRE>
+usw.
+<P> 
+Hier sind <TT>/l, /2</TT> und <TT>/3</TT> zus&auml;tzliche Pfadinformationen, die den 
+Zustand repr&auml;sentieren. Innerhalb derselben Browsersitzung kann jeweils durch 
+Anklicken der n&auml;chsten dynamisch erzeugten URL zum n&auml;chsten Zustand gewechselt 
+werden. Ein Programm gelangt an diese Pfadinformation durch das Auslesen der Umgebungsvariablen <TT>PATH_INFO</TT>. Wie das geschieht, zeigt folgendes
+Programm:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit PATH_INFO.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Pathinfo');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print $saveaction;
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = $ENV{'PATH_INFO'} || INITSTATE;
+  $state =~ s/^\///;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_me_back = a({-href =&gt; url() . "/$newstate"}, , " [Weiter] ");
+  return $send_me_back;
+  }
+</PRE>
+
+Nachteil dieser L&ouml;sung ist, da&szlig; beim Beenden (oder Absturz) des Browsers alle
+Pfad-Info verloren ist. Weiterhin kann der Benutzer in der URL-Zeile des
+Browser beliebige Angaben machen und so einen beliebigen Zustand eingeben.
+Durch diese Methode des Session-Tracking k&ouml;nnen die statischen HTML-Seiten der
+weiterhin von Internet-Suchmaschinen verarbeitet (indexiert) werden, was eventuell
+auch nicht erw&uuml;nscht ist.
+<P>
+
+<H3>URL-Coding per Parameter</H3>
+Bei dieser Methode wird die SessionID an jede Internet-Adresse (Link) als Parameter angeh&auml;ngt (z. B. <TT>http://www.server.de/cgi-bin/forum.cgi?state=4</TT>). 
+Der Wert des Parameters wird dann per GET-Methode geholt. DIe Seitenabrufe sehen
+dann beispielsweise so aus:
+<PRE>
+http://www.netzmafia.de/cgi-bin/state.pl
+http://www.netzmafia.de/cgi-bin/state.pl?state=2 
+http://www.netzmafia.de/cgi-bin/state.pl?state=3
+</PRE>
+usw.
+<P> 
+Das Programm gleicht fast dem vorhergehenden:
+<PRE>
+#!/usr/bin/perl
+# Zustandserhaltung mit QUERY_STRING.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Query-String');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print $saveaction;
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = param('state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_back = a({-href =&gt; url() . "?state=$newstate"}, " [Weiter] ");
+  return $send_back;
+  }
+
+</PRE>
+Auch bei dieser Methode kann der Benutzer den Zustand beliebig &auml;ndern. Trotzdem
+wird sie h&auml;ufig verwendet. Au&szlig;erdem ist bei einem Beenden/Absturz des Browsers 
+der Status verloren. 
+<P>
+
+<H3>Zustand &uuml;ber Hidden-Felder in Formularen</H3>
+Man codiert den Zustand innerhalb eines Formulars &uuml;ber Felder, die nicht angezeigt
+werden (<TT>&lt;INPUT TYPE="HIDDEN" ...&gt;></TT>). Sie werden vom Browser
+generiert und mit Information versehen (<TT>VALUE=...</TT>). Sendet der
+Benutzer das Formular zur&uuml;ck, wird auch der neue Zustand geliefert. Das folgende
+Programm zeigt, wie es geht:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Hidden-Feldern.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Hidden Fields');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print '&lt;FORM METHOD="POST"&gt;\n';
+print $saveaction;
+print '&lt;INPUT TYPE="submit" NAME="submit" VALUE=" Abschicken "&gt;';
+print '&lt;/FORM&gt;\n';
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = param('state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  
+  my $send_back = '&lt;INPUT TYPE="hidden" NAME="state" VALUE=';
+  $send_back .= "\"$newstate\"&gt;";
+  return $send_back;
+  }
+</PRE>
+Auch bei dieser Methode kann der Benutzer den Zustand beliebig &auml;ndern. Trotzdem
+wird sie ebenso h&auml;ufig wie die vorstehende verwendet. Au&szlig;erdem ist auch
+bei einem Beenden/Absturz des Browsers der Status verloren. Man kann zur Not den
+Formularcharakter verbergen, wenn der Submit-Button durch ein Bild getarnt wird.
+Ein Vorteil ist, da&szlig; sich mehr Info in der Statusvariablen verbergen l&auml;&szlig;t.
+<P>
+
+<H3>Zustand &uuml;ber Cookies</H3>
+Cookies sind Informationen in Form einfacher ASCII-Texte, die von einem WWW-Server 
+auf dem Rechner des Clients gespeichert und sp&auml;ter wieder abgerufen werden k&ouml;nnen. 
+Der Zustand kann clientseitig gespeichert werden und bei Bedarf von der jeweiligen
+Dienst-Applikation vom Client wieder abgerufen werden. Cookies sind aber in Verruf
+geraten, weil sie f&uuml;r User-Tracking verwendet wurden. Sie werden deshalb gerne
+im Browser deaktiviert und garantieren somit kein durchg&auml;ngiges Session-Tracking,
+obwohl sie von Netscape eigens f&uuml;r diesen Zweck konzipiert worden sind. Sie stellen
+jedoch kein Sicherheitsrisiko dar. Session-Tracking &uuml;ber Cookies stellt die einfachste Methode dar und findet auch bei vielen Anwendungen Verwendung. Das folgende
+Programm zeigt, wie Cookies eingesetzt werden. Dank des Moduls <TT>CGI::Cookie</TT>
+ist die Cookie-Programmierung genauso einfach, wie die anderen Methoden:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Cookies.
+
+use strict;
+use CGI qw(:standard);
+use CGI::Cookie;
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header(-cookie =&gt; $saveaction);
+print start_html('Status mit Cookies');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print "Bitte 'Reload Page' bet&amp;auml;tigen";
+print end_html;
+
+sub retrieve_state 
+  {
+  my $state = cookie(-name =&gt; 'state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $cookie   = new CGI::Cookie(-name    =&gt; 'state',
+				                 -value   =&gt; $newstate,
+			                     -expires =&gt; '+5m');
+  return $cookie;
+  }
+</PRE>
+Das Cookie wird im Header der HTTP-Antwort des Servers &uuml;bermittelt. Es
+darf auch h&ouml;chstens einige hundert Bytes lang werden. Auch hat jeder
+Bowser eine Obergrenze f&uuml;r die Anzahl der verwalteten Cookies. Auch
+k&ouml;nnen erfahrene Benutzer durch Editieren der Datei <TT>cookies.txt</TT>
+auch die Statusinformation im Cookie ver&auml;ndern. Da w&uuml;rde es nur helfen,
+die Cookie-Information zu verschl&uuml;sseln oder mit einer Signatur zu versehen.
+<P>
+Serverseitiges Session-Tracking erfordert eine Datenbankanbindung und wird im
+Rahmen dieser Vorlesung nicht besprochen.
+<P>
+
+<H3>CGI und gesch&uuml;tzte Verzeichnisse</H3>
+Den Zugriff auf einzelne Verzeichnisse eines Webangebots kann eingeschr&auml;nkt
+werden. Der Benutzer mu&szlig; sich dann mit Benutzerkennung und Passwort
+anmelden, bevor er an die Daten des Verzeichnisses kommt. Wenn nun in so einem
+gesch&uuml;tzten Verzeichnis ein Formular liegt, dann ist zwar das Verzeichnis
+gesch&uuml;tzt, das CGI-Script kann jedoch jederzeit aufgerufen werden, ohne 
+da&szlig; User und Passwort angegeben werden m&uuml;ssen. Um CGIs zu sch&uuml;tzen
+kann man zwei Wege einschlagen:
+<UL>
+<LI>Benutzerauthentisierung ins CGI-Skript aufnehmen. Das geht recht einfach,
+indem man die Benutzerverwaltung selbst in die Hand nimmt. Das Schema der
+Apache-Basic-Authentisierung kann dabei beibehalten werden. Die Benutzerdatei
+enth&auml;t Zeilen mit den durch Doppelpunkt getrennten Paaren von Username und
+Passwort. Das eingegebene Passwort wird verschl&uuml;sselt und mit dem gespeicherten
+verschl&uuml;sselten Passwort verglichen:
+<PRE>
+$username = substr($username,0,8);
+$cryptedpass = crypt($password,substr($username,0,2));
+
+open DAT, $PASSWORDFILE;
+while (<DAT>)
+  {
+  chomp; $_ =~ s/\r//;            # <CR><LF> am Ende weg
+  ($uid,$pass) = split(":", $_);  # user:passwort
+  if ($uid eq $username)          # userid "passt"
+    {
+    fail("Falsches Passwort!") unless ($pass eq $cryptedpass);
+    last;
+    }
+  }
+close DAT;
+</PRE>
+<LI>Die andere M&ouml;glichkeit ist es, im Skript festzustellen, von wo es
+aufgerufen wurde (das verhindert das Einbinden des Scriptes in fremde Seiten).
+Die Environment-Variable <TT>HTTP_REFERER</TT> liefert die Referer-Adresse, also die
+Adresse der Seite, von der das Skript aufgerufen wurde. Zuerst wird definiert, 
+wie die Datei mit dem HTML-Formular hei&szlig;t und sp&auml;ter im Programm
+<TT>HTTP_REFERER</TT> damit verglichen:
+<PRE>
+my $referer = "http://myhost.tld/upload/upload.html";
+
+...
+
+fail ("Programmaufruf ohne Erlaubnis!"> if ($ENV{'HTTP_REFERER'} ne $referer);
+</PRE>
+</UL>
+Das folgende Datei-Upload-Programm verwendet die zweite Methode.
+<P>
+Ein <A HREF="beispiele/anmeldung.pl">Anmeldeskript</A> f&uuml;r eine geschlossene
+Benutzergruppe, das <A HREF="beispiele/anmeldung.html">Formular dazu</A> und
+ein <A HREF="beispiele/htaccess-muster">Muster f&uuml;r <TT>,htaccess</TT></A>
+finden Sie in den Beispielen.
+<P>
+Infos zum Anlegen von gesch&uuml;tzten Verzeichnissen finden Sie unter 
+<A HREF="http://www.netzmafia.de/geheim/index.html">http://www.netzmafia.de/geheim/index.html</A>.
+Zum Login folgende Zugangsdaten eingeben:
+<UL>
+<LI>Username: user
+<LI>Passwort: geheim
+</UL>
+<P>
+
+<h2>Fileupload per Perl/CGI</h2>
+Eine Datei soll &uuml;ber ein Formular und per HTTP auf einen Server geladen 
+werden, da ein FTP-Zugang nicht zur Verf&uuml;gung steht oder nicht eingesetzt 
+werden soll. F&uuml;r den Upload wird beim Formular die Codierung 
+<TT>multipart/form-data</TT> verwendet, die es erlaubt, ein mehrteiliges
+Formular per <TT>POST</TT>-Methode zum Server zu senden. Der eine Teil sind
+die normalen Formulareingaben, der andere Teil ist der Inahlt der hochgeladenen
+Datei. Selbst mehrere Dateien k&ouml;nnen so auf einmal hochgeladen werden.
+AUf den Server wird zun&auml;chst eine tempor&auml;re Datei angelegt, die dann
+vom CGI-Script verarbeitet werden mu&szlig;. Das Formular hat zwei Eingabefelder,
+eines zur Auswahl der lokalen Datei und eines zur Angabe des Namens der Datei auf
+dem Server (letztere k&ouml;nnte auch aus dem Originalnamen abgeleitet oder
+automatisch generiert werden):
+<pre>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Upload&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;H1&gt;Datei-Upload&lt;/H1&gt;
+&lt;form action="/cgi-bin/upload.pl" method="post" enctype="multipart/form-data"&gt;
+Lokaler Dateiname: &lt;input type="file" name="datei" size=40&gt;&lt;BR&gt;
+Dateiname auf dem Server: &lt;input type="text" name="dateiname" size="40"&gt;&lt;BR&gt;
+&lt;input type="Submit" value="Upload"&gt;
+&lt;input type="reset" value="L&ouml;schen"&gt;
+&lt;/form&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</pre>
+Betrachtet man sich das Formular mit dem Browser, sieht man einen Button "Browse"
+neben der ersten Eingabezeile:
+<p>
+<img src="uploadform.gif">
+<p>
+Durch den Eingabetyp "file" kann durch Anklicken des Buttons ein Fenster zum 
+Durchsuchen der Platte ge&ouml;ffnet werden wie man es von anderen Windows-Programmen
+her kennt. Nach Eingabe der Daten und Anklicken des "Submit"-Buttons erfolgt der 
+Upload. 
+<P>
+Der folgende Perl-Quellcode enth&auml;lt ein Beispiel f&uuml;r ein Upload-Script.
+Die Parameter stellen sowohl ein Filehandle, als auch den Dateinamen der 
+hochgeladenen Datei zur Verf&uuml;gung.
+In der <TT>while</TT>-Schleife wird die Datei in 1024 KByte gro&szlig;en
+Bl&ouml;cken eingelesen und in die angegebene Datei geschrieben. Beide sind im 
+Bin&auml;r-Modus ge&ouml;ffnet, weil nicht bekannt ist, ob die Daten, die ankommen, 
+Bin&auml;r- oder Text-Daten sind. Zuletzt wird noch eine Best&auml;tigung an den 
+User zur&uuml;ckgegeben, da&szlig; die Datei erfolgreich gesichert wurde.
+<pre>
+!/usr/bin/perl
+# Einfaches Script fuer File-Upload
+
+use strict;
+use CGI qw(:standard);
+
+# Upload Dir, kein Slash am Ende!
+my $updir = "/home/httpd/htdocs/upload";
+
+# Referer (mit .htaccess geschuetztes Verzeichnis wo das Formular liegt)
+my $ref = "http://myhost.tld/upload/upload.html";
+
+my $data; # Lesepuffer
+
+##### BITTE BEACHTEN ######################################################
+# Die Felder des Formulars
+#   &lt;form action="/cgi-bin/ups.pl" method="post" enctype="multipart/form-data"&gt;
+#   Lokaler Dateiname:
+#   &lt;input type="file" name="datei" size=40&gt;&lt;BR&gt;
+#   Dateiname auf dem Server:
+#   &lt;input name="dateiname" size="40"&gt;
+#   &lt;input type="Submit" value="Upload"&gt;
+#   &lt;input type="reset" value="L&amp;ouml;schen"&gt;
+#   &lt;/form&gt;
+
+print header;
+print start_html('Datei-Upload');
+
+if ($ENV{'HTTP_REFERER'} ne $ref)
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Es wurde versucht, ohne Erlaubnis hochzuladen! Abbruch...";
+  print $ENV{'HTTP_REFERER'};
+  print end_html;
+  exit;
+  }
+
+my $datei = param('datei');
+my $dateiname = param('dateiname');
+
+if (! $datei or ! $dateiname)
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Datei oder Dateiname fehlt! Abbruch...";
+  print end_html;
+  exit;
+  }
+
+if (! open WF, "&gt;$updir/$dateiname")
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Datei kann nicht geschrieben werden! Abbruch...";
+  print end_html;
+  exit;
+  }
+
+
+if (! open WF, "&gt;$updir/$dateiname")
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Datei kann nicht geschrieben werden! Abbruch...";
+  print end_html;
+  exit;
+  }
+
+binmode $datei;
+binmode WF;
+while(read $datei,$data,1024)
+  { print WF $data; }
+close WF;
+
+
+print "&lt;H1&gt;Upload O. K.&lt;/H1&gt;\n";
+print "Die Datei wurde hochgeladen.&lt;BR&gt;\n";
+print "Remote Path and Filename: $updir/$dateiname\n";
+
+print end_html;
+exit;
+</pre>
+
+Dieses Script ist <b>nicht</b> f&uuml;r den praktischen Gebrauch gedacht, 
+es dient lediglich als Beispiel. Sonst m&uuml;ssten die Sicherheits-Vorkehrungen 
+viel strenger sein.
+Ein Datei-Upload auf den Server bedeutet immer ein Sicherheits-Risiko. Darum mu&szlig;
+die Datei auch in einem "harmlosen" Verzeichnis landen, keinesfalls in <TT>cgi-bin</TT>
+Auch sollte man die Maximalgr&ouml;&szlig;e der Datei begrenzen, sonst f&uuml;rt das
+Hochladen riesiger Dateien zu einer Denial-of-Service-Situation.
+Deshalb sollten von Anfang an einige Sicherheits-Vorkehrungen getroffen
+werden. Dazu z&auml;hlen unter anderem:
+<ul>
+<li>Das Definieren einer maximalen Dateigr&ouml;&szlig;e<BR>
+Das kann durch Setzen der Variablen <TT>$POST_MAX</TT> geschehen. Hier
+wird die Maximal gr&ouml;&szlig;e in Bytes angegeben, z. B. f&uuml;r
+ein Maximum von 400 KByte:
+<PRE>
+$POST_MAX = 400 * 1024;
+</PRE>
+&Uuml;brigens kann man durch Setzen der Variablen <TT>DISABLE_UPLOADS</TT>
+auf einen Wert ungleich 0 den Upload komplett unterbinden.
+<li>Berechtigung f&uuml;r Aufrufer vergeben<BR>
+Der Aufruf des Scripts darf nur aus einem durch Pa&szlig;wort gesch&uuml;tzten
+Verzeichnis erfolgen. Dieser Fall wird im Beispiel abgehandelt. Die
+Umgebungsvariable <TT>HTTP_REFERER</TT> enth&auml;lt die URL der
+aufrufenden Seite. Wenn jemand versucht, das Script von einer anderen
+Seite aus aufzurufen, wird er abgewiesen.
+<li>Die &Uuml;berpr&uuml;fung des Dateinamens auf Integrit&auml;t<BR>
+Dies k&ouml;nnte z. B. so aussehen:
+<pre>
+my @extensions = "txt dat gif jpg";
+
+if(param('dateiname') !~ /^[a-z\.\-_]+?\.([a-z]{3})$/)
+ { die("Ung&uuml;ltiger Dateiname"); }
+else
+ {
+ my $extension = $1;
+ if(!grep($extension,@extensions))
+  { die("Ung&uuml;ltige Dateiendung"); }
+ }
+</pre>
+In dem obigen Code-Schnipsel wird ein Array <TT>@extensions</TT> mit 
+g&uuml;ltigen Datei-Endungen definiert.
+Dann wird der Dateiname auf Integrit&auml;t &uuml;berpr&uuml;ft. Wenn
+Sonderzeichen, shell pipes oder &auml;hnliches darin vorkommen, so wird 
+das Script mit einer Fehlermeldung beendet.
+</ul>
+<p>
+
+<H4><A HREF="http://www.apache.org/">Webserver Apache</A></H4>
+<P>
+
+<P>
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server5.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server7.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+</BODY>
+</HTML>
+
+
+
+

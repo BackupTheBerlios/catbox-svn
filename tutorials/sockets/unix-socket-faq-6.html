@@ -1,0 +1,77 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: Advanced Socket Programming</TITLE>
+</HEAD>
+<BODY>
+<A HREF="unix-socket-faq-5.html">Previous</A>
+<A HREF="unix-socket-faq-7.html">Next</A>
+<A HREF="unix-socket-faq.html#toc6">Table of Contents</A>
+<HR>
+<H2><A NAME="s6">6. Advanced Socket Programming</A></H2>
+
+<H2><A NAME="ss6.1">6.1 How would I put my socket in non-blocking mode?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Technically, <CODE>fcntl(soc, F_SETFL, O_NONBLOCK)</CODE> is incorrect since it
+clobbers all other file flags. Generally one gets away with it since
+the other flags (<CODE>O_APPEND</CODE> for example) don't really apply much to
+sockets. In a similarly rough vein, you would use <CODE>fcntl(soc, F_SETFL, 0)</CODE>
+to go back to blocking mode.</P>
+<P>To do it right, use <CODE>F_GETFL</CODE> to get the current flags, set or clear the
+<CODE>O_NONBLOCK</CODE> flag, then use <CODE>F_SETFL</CODE> to set the flags.</P>
+<P>And yes, the flag can be changed either way at will.</P>
+
+
+
+<H2><A NAME="ss6.2">6.2 How can I put a timeout on connect()?</A></H2>
+
+<P>Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>) has outlined the following
+procedure for using <CODE>select()</CODE> with <CODE>connect()</CODE>, which will allow you to
+put a timeout on the <CODE>connect()</CODE> call:</P>
+<P>First, create the socket and put it into non-blocking mode, then call
+<CODE>connect()</CODE>. There are three possibilities:</P>
+<P>
+<UL>
+<LI>connect succeeds: the connection has been successfully made (this
+usually only happens when connecting to the same machine)
+</LI>
+<LI>connect fails: obvious
+</LI>
+<LI>connect returns -1/<CODE>EINPROGRESS</CODE>. The connection attempt has begun,
+but not yet completed.</LI>
+</UL>
+</P>
+<P>If the connection succeeds:</P>
+<P>
+<UL>
+<LI>the socket will <CODE>select()</CODE> as writable (and will 
+also select as readable
+if data arrives)</LI>
+</UL>
+</P>
+<P>If the connection fails:</P>
+<P>
+<UL>
+<LI>the socket will select as readable *and* writable, but either a read
+or write will return the error code from the connection attempt. Also,
+you can use <CODE>getsockopt(SO_ERROR)</CODE> to get the error status - but be
+careful; some systems return the error code in the result parameter of
+<CODE>getsockopt()</CODE>, but others (incorrectly) cause the <CODE>getsockopt</CODE>
+call <EM>itself</EM>
+to fail with the stored value as the error.</LI>
+</UL>
+</P>
+<P>Sample code that illustrates this can be found in the socket-faq
+examples, in the file <CODE>connect.c</CODE>.</P>
+
+
+<HR>
+<A HREF="unix-socket-faq-5.html">Previous</A>
+<A HREF="unix-socket-faq-7.html">Next</A>
+<A HREF="unix-socket-faq.html#toc6">Table of Contents</A>
+</BODY>
+</HTML>

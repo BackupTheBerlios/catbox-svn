@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<TITLE>Systeminfos</TITLE>
+</HEAD>
+<BODY>
+<H3>Systeminfos</H3>
+Unter /proc befinden sich beim klassischen Unix nur Informationen zu Prozessen. Bei
+Linux findet man jedoch noch einiges mehr. Die Informationen können ganz einfach z.B.
+per cat-Kommando auf der normalen Konsole angezeigt werde, da es sich um reine (Pseudo-
+Textdateien handelt.
+<p>
+
+<pre>
+/proc/cpuinfo       - Informationen zur CPU (u.a. Name, Taktfrequenz, Cache-Größe)
+/proc/meminfo       - Informationen über den Arbeitsspeicher (u.a. Gesamtgröße, Cache, Swap)
+/proc/partitions    - Informationen über Partitionen des Massenspeichers (u.a. Partitionsname,
+                      Anzahl der Blöcke)
+/proc/modules       - Übersicht über die geladenen Module (u.a. Name, Speicheradresse)
+/proc/devices       - Übersicht über vorhandene Char- und Block-Devices
+/proc/version       - Informationen über die Kernelversion
+/proc/loadavg       - aktuelle Systemauslastung
+/proc/stat          - Prozesse
+/proc/interrupts    - Übersicht über Interrupts
+/proc/net/dev       - Statistik der Netzwerkgeräte (u.a. übertragene Bytes, Fehler)
+/proc/bus           - Informationen und Übersichten über die Busse im Rechner.
+/proc/bus/*/devices - Übersichten über die jeweiligen Geräte des Bus
+/proc/ide           - Hier finden sich die IDE-Geräte
+/proc/ide/*/model   - Die Modellbezeichnung des Geräts
+/proc/acpi/thermal-zone/THRG/temperature - CPU-Temperatur
+</pre>
+
+<p>
+<H3>Nützliche Programme</H3>
+
+<pre>
+free           - Arbeitsspeicherverwendung
+df             - Speicherplatz auf gemounteten Geräten
+uptime         - Anzeige der Systemlast und der Uptime
+hostname       - Anzeige des Hostname
+date           - Systemzeit anzeigen
+uname          - OS-Namen anzeigen
+ifconfig       - Informationen über Netzwerkgeräte (als root)
+iwconfig       - desgleichen für WLAN-Benutzer
+top            - kurze Systeminformationen (Last, Speicher, etc) und Anzeige der Prozesse
+htop           - die noch komfortablere version von top
+ps             - Anzeige der Prozesse
+pstree         - Anzeige der Prozesse in Baumform
+netstat        - Informationen über Netzwerkverbindungen, Routingtabelle, etc.
+hddtemp        - Zeigt die Temperatur von SMART-fähigen Festplatten an
+acpi           - Bietet eine komfortable Schnittstelle zu ACPI
+dmesg          - Alle Systemstart-Informationen des Kernels (u.a. auch die Erkennung der Hardware)
+iptraf         - Viele Möglichkeiten zur Überwachung des IP-Verkehrs
+lsof           - list open files
+nmap           - portscanner
+</pre>
+
+<H6><I>Letzte Aktualisierung: 05. Nov 2005</I></H6>
+</BODY>
+</HTML>

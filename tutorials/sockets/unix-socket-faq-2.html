@@ -1,0 +1,977 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: Questions regarding both Clients and Servers (TCP/SOCK_STREAM)</TITLE>
+</HEAD>
+<BODY>
+<A HREF="unix-socket-faq-1.html">Previous</A>
+<A HREF="unix-socket-faq-3.html">Next</A>
+<A HREF="unix-socket-faq.html#toc2">Table of Contents</A>
+<HR>
+<H2><A NAME="s2">2. Questions regarding both Clients and Servers (TCP/SOCK_STREAM)</A></H2>
+
+<H2><A NAME="closed"></A> <A NAME="ss2.1">2.1 How can I tell when a socket is closed on the other end?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>AFAIK:</P>
+<P>If the peer calls <CODE>close()</CODE> or exits, without having messed with 
+<CODE>SO_LINGER</CODE>,
+then our calls to <CODE>read()</CODE> should return 0. It is less clear what happens
+to <CODE>write()</CODE> calls in this case; I would expect <CODE>EPIPE</CODE>, not on the 
+next call, but the one after.</P>
+<P>If the peer reboots, or sets <CODE>l_onoff = 1, l_linger = 0</CODE> and then closes,
+then we should get <CODE>ECONNRESET</CODE> (eventually) from <CODE>read()</CODE>, or 
+<CODE>EPIPE</CODE> from <CODE>write()</CODE>.</P>
+<P>I should also point out that when <CODE>write()</CODE> returns <CODE>EPIPE</CODE>, it also
+raises the <CODE>SIGPIPE</CODE> signal - you never see the <CODE>EPIPE</CODE> error 
+unless you handle or ignore the signal.</P>
+<P>If the peer remains unreachable, we should get some other 
+error.             </P>
+<P>I don't think that <CODE>write()</CODE> can legitimately return 0.  <CODE>read()</CODE> 
+should
+return 0 on receipt of a FIN from the peer, and on all following calls.</P>
+<P>So yes, you <B>must</B> expect <CODE>read()</CODE> to return 0.</P>
+<P>As an example, suppose you are receiving a file down a TCP link; you
+might handle the return from <CODE>read()</CODE> like this:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+rc = read(sock,buf,sizeof(buf));
+if (rc &gt; 0)
+{
+    write(file,buf,rc);
+    /* error checking on file omitted */
+}
+else if (rc == 0)
+{
+    close(file);
+    close(sock);
+    /* file received successfully */
+}
+else /* rc &lt; 0 */
+{
+    /* close file and delete it, since data is not complete
+       report error, or whatever */
+}
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss2.2">2.2 What's with the second parameter in bind()?</A></H2>
+
+<P>The man page shows it as "<CODE>struct sockaddr *my_addr</CODE>".  The 
+<CODE>sockaddr struct</CODE>
+though is just a place holder for the structure it really wants.  You have
+to pass different structures depending on what kind of socket you have.
+For an <CODE>AF_INET</CODE> socket, you need the sockaddr_in structure.  It has three
+fields of interest:</P>
+<P>
+<DL>
+<DT><B>sin_family</B><DD><P>Set this to <CODE>AF_INET</CODE>.</P>
+<DT><B>sin_port</B><DD><P>The network byte-ordered 16 bit port number</P>
+<DT><B>sin_addr</B><DD><P>The host's ip number.  This is a <CODE>struct in_addr</CODE>, which
+contains only one field, <CODE>s_addr</CODE> which is a <CODE>u_long</CODE>.</P>
+</DL>
+</P>
+
+
+<H2><A NAME="ss2.3">2.3 How do I get the port number for a given service? </A></H2>
+
+<P>Use the <CODE>getservbyname()</CODE> routine.  This will return a pointer to a 
+<CODE>servent</CODE>
+structure.  You are interested in the <CODE>s_port</CODE> field, which contains the 
+port number, with correct byte ordering (so you don't need to call 
+<CODE>htons()</CODE> on it).  Here is a sample routine:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+/* Take a service name, and a service type, and return a port number.  If the
+   service name is not found, it tries it as a decimal number.  The number
+   returned is byte ordered for the network. */
+int atoport(char *service, char *proto) {
+  int port;
+  long int lport;
+  struct servent *serv;
+  char *errpos;
+
+  /* First try to read it from /etc/services */
+  serv = getservbyname(service, proto);
+  if (serv != NULL)
+    port = serv-&gt;s_port;
+  else { /* Not in services, maybe a number? */
+    lport = strtol(service,&amp;errpos,0);
+    if ( (errpos[0] != 0) || (lport &lt; 1) || (lport &gt; 5000) )
+      return -1; /* Invalid port address */
+    port = htons(lport);
+  }
+  return port;
+}
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss2.4">2.4 If bind() fails, what should I do with the socket descriptor?</A></H2>
+
+<P>If you are exiting, I have been assured by Andrew that all unixes will 
+close open file descriptors on exit.  If you are not exiting though, you 
+can just close it with a regular <CODE>close()</CODE> call.</P>
+
+
+<H2><A NAME="close"></A> <A NAME="ss2.5">2.5 How do I properly close a socket?</A></H2>
+
+<P>This question is usually asked by people who try <CODE>close()</CODE>, because they 
+have seen that that is what they are supposed to do, and then run netstat 
+and see that their socket is still active.  Yes, <CODE>close()</CODE> is the correct 
+method.  To read about the TIME_WAIT state, and why it is important, 
+refer to 
+<A HREF="#time_wait">2.7 Please explain the TIME_WAIT state.</A>.</P>
+
+
+<H2><A NAME="ss2.6">2.6 When should I use shutdown()?</A></H2>
+
+<P>From Michael Hunter 
+(
+<A HREF="mailto:mphunter@qnx.com">mphunter@qnx.com</A>):</P>
+<P><CODE>shutdown()</CODE> is useful for deliniating when you are done providing a 
+request
+to a server using TCP.  A typical use is to send a request to a server
+followed by a <CODE>shutdown()</CODE>.  The server will read your request 
+followed by
+an <CODE>EOF</CODE> (read of 0 on most unix implementations).  This tells the server
+that it has your full request.  You then go read blocked on the socket. 
+The server will process your request and send the necessary data back to
+you followed by a close.  When you have finished reading all of the
+response to your request you will read an <CODE>EOF</CODE> thus signifying that you
+have the whole response.  It should be noted the TTCP (TCP for
+Transactions -- see R. Steven's home page) provides for a better method of
+tcp transaction management. </P>
+<P>S.Degtyarev (
+<A HREF="deg@sunsr.inp.nsk.su">deg@sunsr.inp.nsk.su</A>) wrote a nice in-depth message to me
+about this.  He shows a practical example of using shutdown() to aid in
+synchronization of client processes when one is the "reader" process, and
+the other is the "writer" process.  A portion of his message follows:</P>
+<P>Sockets are very similar to pipes in the way they are used for data
+transfer and client/server transactions, but not like pipes they are
+bidirectional.  Programs that use sockets often <CODE>fork()</CODE> and each
+process inherits the socket descriptor.  In pipe based programs it is
+strictly recommended to close all the pipe ends that are not used to
+convert the pipe line to one-directional data stream to avoid data losses
+and deadlocks.  With the socket there is no way to allow one process only
+to send data and the other only to receive so you should always keep in
+mind the consequences. </P>
+<P>Generally the difference between <CODE>close()</CODE> and <CODE>shutdown()</CODE> is: 
+<CODE>close()</CODE> closes the socket id for the process but the connection is
+still opened if another process shares this socket id.  The connection
+stays opened both for read and write, and sometimes this is very
+important.  <CODE>shutdown()</CODE> breaks the connection for all processes
+sharing
+the socket id.  Those who try to read will detect <CODE>EOF</CODE>, and those
+who
+try to write will reseive <CODE>SIGPIPE</CODE>, possibly delayed while the kernel
+socket buffer will be filled.  Additionally, <CODE>shutdown()</CODE> has a second
+argument
+which denotes how to close the connection: 0 means to disable further
+reading, 1 to disable writing and 2 disables both. </P>
+<P>The quick example below is a fragment of a very simple client process.
+After establishing the connection with the server it forks.  Then child
+sends the keyboard input to the server until <CODE>EOF</CODE> is received and the
+parent receives answers from the server. </P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+/*
+ *      Sample client fragment,
+ *      variables declarations and error handling are omitted
+ */
+        s=connect(...);
+
+        if( fork() ){   /*      The child, it copies its stdin to
+                                        the socket              */
+                while( gets(buffer) &gt;0)
+                        write(s,buf,strlen(buffer));
+
+                close(s);
+                exit(0);
+                }
+
+        else {          /* The parent, it receives answers  */
+                while( (l=read(s,buffer,sizeof(buffer)){
+                        do_something(l,buffer);
+
+                /* Connection break from the server is assumed  */
+                /* ATTENTION: deadlock here                     */
+                wait(0); /* Wait for the child to exit          */
+                exit(0);
+                }
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>What do we expect? The child detects an <CODE>EOF</CODE> from its <CODE>stdin</CODE>, it
+closes the socket (assuming connection break) and exits.  The server in
+its
+turn detects <CODE>EOF</CODE>, closes connection and exits.  The parent detects
+<CODE>EOF</CODE>, makes the <CODE>wait()</CODE> system call and exits.  What do we see
+instead?  The socket instance in the parent process is still opened for
+writing and reading, though the parent never writes.  The server never
+detects EOF and waits for more data from the client forever.  The parent
+never sees the connection is closed and hangs forever and the server hangs
+too.  Unexpected deadlock!  ( any deadlock is unexpected though :-) </P>
+<P>You should change the client fragment as follows:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+                if( fork() ) {  /* The child                    */
+                        while( gets(buffer) }
+                                write(s,buffer,strlen(buffer));
+
+                                shutdown(s,1); /* Break the connection
+        for writing, The server will detect EOF now. Note: reading from
+        the socket is still allowed. The server may send some more data
+        after receiving EOF, why not? */
+                        exit(0);
+                        }
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>I hope this rough example explains the troubles you can have with
+client/server syncronization.  Generally you should always remember all
+the instances of the particular socket in all the processes that share
+the socket and close them all at once if you whish to use close() or use
+shutdown() in one process to break the connection.</P>
+
+
+<H2><A NAME="time_wait"></A> <A NAME="ss2.7">2.7 Please explain the TIME_WAIT state.</A></H2>
+
+<P>Remember that TCP guarantees all data transmitted will be delivered, if at
+all possible.  When you close a socket, the server goes into a TIME_WAIT
+state, just to be really really sure that all the data has gone through. 
+When a socket is closed, both sides agree by sending messages to each
+other that they will send no more data.  This, it seemed to me was good
+enough, and after the handshaking is done, the socket should be closed. 
+The problem is two-fold.  First, there is no way to be sure that the last 
+ack was communicated successfully.  Second, there may be "wandering 
+duplicates" left on the net that must be dealt with if they are delivered.</P>
+<P>Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>) helped to explain the closing 
+sequence in the following usenet posting:</P>
+<P>Assume that a connection is in ESTABLISHED state, and the client is 
+about
+to do an orderly release. The client's sequence no. is Sc, and the server's
+is Ss. The pipe is empty in both directions.</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+   Client                                                   Server
+   ======                                                   ======
+   ESTABLISHED                                              ESTABLISHED
+   (client closes)
+   ESTABLISHED                                              ESTABLISHED
+                &lt;CTL=FIN+ACK&gt;&lt;SEQ=Sc&gt;&lt;ACK=Ss&gt; -------&gt;&gt;
+   FIN_WAIT_1
+                &lt;&lt;-------- &lt;CTL=ACK&gt;&lt;SEQ=Ss&gt;&lt;ACK=Sc+1&gt;
+   FIN_WAIT_2                                               CLOSE_WAIT
+                &lt;&lt;-------- &lt;CTL=FIN+ACK&gt;&lt;SEQ=Ss&gt;&lt;ACK=Sc+1&gt;  (server closes)
+                                                            LAST_ACK
+                &lt;CTL=ACK&gt;,&lt;SEQ=Sc+1&gt;&lt;ACK=Ss+1&gt; -------&gt;&gt;
+   TIME_WAIT                                                CLOSED
+   (2*msl elapses...)
+   CLOSED
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Note: the +1 on the sequence numbers is because the FIN counts as 
+one 
+byte of data. (The above diagram is equivalent to fig. 13 from RFC 793).</P>
+<P>Now consider what happens if the last of those packets is dropped in the
+network. The client has done with the connection; it has no more data or
+control info to send, and never will have. But the server does not know
+whether the client received all the data correctly; that's what the last
+ACK segment is for. Now the server may or may not <EM>care</EM> whether the
+client got the data, but that is not an issue for TCP; TCP is a reliable
+rotocol, and <EM>must</EM> distinguish between an orderly connection <B>close</B>
+where all data is transferred, and a connection <B>abort</B> where data may
+or may not have been lost.</P>
+<P>So, if that last packet is dropped, the server will retransmit it (it is,
+after all, an unacknowledged segment) and will expect to see a suitable
+ACK segment in reply.  If the client went straight to CLOSED, the 
+only
+possible response to that retransmit would be a RST, which would 
+indicate
+to the server that data had been lost, when in fact it had not been.</P>
+<P>(Bear in mind that the server's FIN segment may, additionally, contain
+data.)</P>
+<P>DISCLAIMER: This is my interpretation of the RFCs (I have read all the
+TCP-related ones I could find), but I have not attempted to examine
+implementation source code or trace actual connections in order to
+verify it. I am satisfied that the logic is correct, though.</P>
+<P>More commentarty from Vic:</P>
+<P>The second issue was addressed by Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>,
+author of "Unix Network Programming", see
+<A HREF="unix-socket-faq-1.html#books">1.6 Where can I get source code for the book [book  title]?</A>).
+I have put 
+together quotes from some
+of his postings and email which explain this.  I have brought together
+paragraphs from different postings, and have made as few changes as 
+possible.</P>
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>If the duration of the TIME_WAIT state were just to handle TCP's 
+full-duplex 
+close, then the time would be much smaller, and it would be some function 
+of the current RTO (retransmission timeout), not the MSL (the 
+packet lifetime).</P>
+<P>A couple of points about the TIME_WAIT state.</P>
+<P>
+<UL>
+<LI>The end that sends the first FIN goes into the TIME_WAIT 
+state, because that
+is the end that sends the final ACK.  If the other end's 
+FIN is lost, or
+if the final ACK is lost, having the end that sends the first FIN 
+maintain state about the connection guarantees that it has enough 
+information to retransmit the final ACK.
+</LI>
+<LI>Realize that TCP sequence numbers wrap around after 2**32 bytes have 
+been transferred.  Assume a connection between A.1500 (host A, port 
+1500) and B.2000.  During the connection one segment is lost and 
+retransmitted.  But the segment is not really lost, it is held by 
+some intermediate router and then re-injected into the network.  (This 
+is called a "wandering duplicate".)  But in the time between the 
+packet being lost &amp; retransmitted, and then reappearing, the 
+connection is closed (without any problems) and then another 
+connection is established between the same host, same port (that is, 
+A.1500 and B.2000; this is called another "incarnation" of the 
+connection).  But the sequence numbers chosen for the new incarnation 
+just happen to overlap with the sequence number of the wandering 
+duplicate that is about to reappear.  (This is indeed possible, given 
+the way sequence numbers are chosen for TCP connections.)  Bingo, you 
+are about to deliver the data from the wandering duplicate (the 
+previous incarnation of the connection) to the new incarnation of the 
+connection.  To avoid this, you do not allow the same incarnation of 
+the connection to be reestablished until the TIME_WAIT state terminates.
+
+Even the TIME_WAIT state doesn't complete solve the second problem, 
+given what is called TIME_WAIT assassination.  RFC 1337 has more 
+details.
+</LI>
+<LI>The reason that the duration of the TIME_WAIT state is 2*MSL is 
+that the 
+maximum amount of time a packet can wander around a network is 
+assumed to be MSL seconds.  The factor of 2 is for the round-trip.  
+The recommended value for MSL is 120 seconds, but Berkeley-derived 
+implementations normally use 30 seconds instead.  This means a 
+TIME_WAIT 
+delay between 1 and 4 minutes.  Solaris 2.x does indeed use the 
+recommended MSL of 120 seconds.</LI>
+</UL>
+</P>
+<P>A wandering duplicate is a packet that appeared to be lost and was
+retransmitted.  But it wasn't really lost ... some router had problems,
+held on to the packet for a while (order of seconds, could be a minute
+if the TTL is large enough) and then re-injects the packet back into
+the network.  But by the time it reappears, the application that sent
+it originally has already retransmitted the data contained in that packet.</P>
+<P>Because of these potential problems with TIME_WAIT assassinations, one 
+should 
+<EM>not</EM> avoid the TIME_WAIT state by setting the <CODE>SO_LINGER</CODE> 
+option to send an 
+RST instead of the normal TCP connection termination 
+(FIN/ACK/FIN/ACK).  
+The TIME_WAIT state is there for a reason; it's your friend and it's 
+there to help you :-)</P>
+<P>I have a long discussion of just this topic in my just-released "TCP/IP
+Illustrated, Volume 3".  The TIME_WAIT state is indeed, one of the most
+misunderstood features of TCP.</P>
+<P>I'm currently rewriting "Unix Network Programming" (see
+<A HREF="unix-socket-faq-1.html#books">1.6 Where can I get source code for the book [book  title]?</A>). and 
+will include 
+lots more on this topic, as it is often confusing and misunderstood.</P>
+<P>An additional note from Andrew:</P>
+<P><B>Closing a socket:</B> if <CODE>SO_LINGER</CODE> has not been called on a socket, 
+then
+<CODE>close()</CODE> is not supposed to discard data. This is true on SVR4.2 
+(and,
+apparently, on all non-SVR4 systems) but apparently <B>not</B> on 
+SVR4; the
+use of either <CODE>shutdown()</CODE> or <CODE>SO_LINGER</CODE> seems to be required to
+guarantee delivery of all data.</P>
+
+
+<H2><A NAME="peer_death"></A> <A NAME="ss2.8">2.8 Why does it take so long to detect that the peer died?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Because by default, no packets are sent on the TCP connection unless there
+is data to send or acknowledge.</P>
+<P>So, if you are simply waiting for data from the peer, there is no way to
+tell if the peer has silently gone away, or just isn't ready to send any
+more data yet. This can be a problem (especially if the peer is a PC, and
+the user just hits the Big Switch...).</P>
+<P>One solution is to use the <CODE>SO_KEEPALIVE</CODE> option. This option enables
+periodic probing of the connection to ensure that the peer is still present.
+<B>BE WARNED:</B> the default timeout for this option is <B>AT LEAST 2 HOURS</B>.
+This timeout can often be altered (in a system-dependent fashion) but not
+normally on a per-connection basis (AFAIK).</P>
+<P>RFC1122 specifies that this timeout (if it exists) must be configurable.
+On the majority of Unix variants, this configuration may only be done
+globally, affecting all TCP connections which have keepalive enabled. The
+method of changing the value, moreover, is often difficult and/or poorly
+documented, and in any case is different for just about every version in
+existence. </P>
+<P>If you must change the value, look for something resembling <CODE>tcp_keepidle</CODE>
+in your kernel configuration or network options configuration. </P>
+<P>If you're <EM>sending</EM> to the peer, though, you have some better guarantees;
+since sending data implies receiving ACKs from the peer, then you will 
+know after the retransmit timeout whether the peer is still alive. But the
+retransmit timeout is designed to allow for various contingencies, with the
+intention that TCP connections are not dropped simply as a result of minor
+network upsets. So you should still expect a delay of several minutes before
+getting notification of the failure.</P>
+<P>The approach taken by most application protocols currently in use on the
+Internet (e.g. FTP, SMTP etc.) is to implement read timeouts on the server
+end; the server simply gives up on the client if no requests are received in
+a given time period (often of the order of 15 minutes). Protocols where the
+connection is maintained even if idle for long periods have two choices:</P>
+<P>
+<OL>
+<LI>use <CODE>SO_KEEPALIVE</CODE></LI>
+<LI>use a higher-level keepalive mechanism (such as sending a null request
+to the server every so often).</LI>
+</OL>
+</P>
+
+
+<H2><A NAME="ss2.9">2.9 What are the pros/cons of select(), non-blocking I/O and SIGIO?</A></H2>
+
+<P>Using non-blocking I/O means that you have to poll sockets to see if 
+there is data to be read from them.  Polling should usually be avoided 
+since it uses more CPU time than other techniques.  </P>
+<P>Using <CODE>SIGIO</CODE> allows your application to do what it does and have the
+operating system tell it (with a signal) that there is data waiting for it
+on a socket.  The only drawback to this soltion is that it can be
+confusing, and if you are dealing with multiple sockets you will have to
+do a <CODE>select()</CODE> anyway to find out which one(s) is ready to be read. </P>
+<P>Using <CODE>select()</CODE> is great if your application has to accept data from more
+than one socket at a time since it will block until any one of a number of
+sockets is ready with data.  One other advantage to <CODE>select()</CODE> is that you
+can set a time-out value after which control will be returned to you
+whether any of the sockets have data for you or not. </P>
+
+
+<H2><A NAME="ss2.10">2.10 Why do I get EPROTO from read()?</A></H2>
+
+<P>From Steve Rago (
+<A HREF="mailto:sar@plc.com">sar@plc.com</A>):</P>
+<P><CODE>EPROTO</CODE> means that the protocol encountered an unrecoverable error
+for that endpoint.  <CODE>EPROTO</CODE> is one of those catch-all error codes
+used by STREAMS-based drivers when a better code isn't available.</P>
+<P>And an addition note from Andrew
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Not quite to do with <CODE>EPROTO</CODE> from <CODE>read()</CODE>, but I found out once that
+on some STREAMS-based implementations, <CODE>EPROTO</CODE> could be returned by
+<CODE>accept()</CODE> if the incoming connection was reset before the accept
+completes.</P>
+<P>On some other implementations, accept seemed to be capable of blocking
+if this occured. This is important, since if <CODE>select()</CODE> said the listening
+socket was readable, then you would normally expect <EM>not</EM> to block in
+the <CODE>accept()</CODE> call. The fix is, of course, to set nonblocking mode on
+the listening socket if you are going to use <CODE>select()</CODE> on it.</P>
+
+
+<H2><A NAME="flush"></A> <A NAME="ss2.11">2.11 How can I force a socket to send the data in its buffer?</A></H2>
+
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>You can't force it.  Period.  TCP makes up its own mind as to when
+it can send data.  Now, <EM>normally</EM> when you call <CODE>write()</CODE> on a TCP
+socket, TCP will indeed send a segment, but there's no guarantee
+and no way to force this.  There are <EM>lots</EM> of reasons why TCP
+will not send a segment: a closed window and the Nagle algorithm
+are two things to come immediately to mind.  </P>
+<P>(Snipped suggestion from Andrew Gierth to use <CODE>TCP_NODELAY</CODE>)</P>
+<P>Setting this only disables one of the many tests, the Nagle algorithm.
+But if the original poster's problem is this, then setting this socket
+option will help.</P>
+<P>A quick glance at tcp_output() shows around 11 tests TCP has to make
+as to whether to send a segment or not.</P>
+<P>Now from Dr. Charles E. Campbell Jr. 
+(
+<A HREF="mailto:cec@gryphon.gsfc.nasa.gov">cec@gryphon.gsfc.nasa.gov</A>):</P>
+<P>As you've surmised, I've never had any problem with disabling Nagle's
+algorithm.  Its basically a buffering method; there's a fixed overhead 
+for all packets, no matter how small.  Hence, Nagle's algorithm 
+collects small packets together (no more than .2sec delay) and thereby 
+reduces the amount of overhead bytes being transferred.  This approach 
+works well for rcp, for example: the .2 second delay isn't humanly 
+noticeable, and multiple users have their small packets more 
+efficiently transferred.  Helps in university settings where most folks 
+using the network are using standard tools such as rcp and ftp, and 
+programs such as telnet may use it, too.</P>
+<P>However, Nagle's algorithm is pure havoc for real-time control and not much
+better for keystroke interactive applications (control-C, anyone?).  It has
+seemed to me that the types of new programs using sockets that people write
+usually do have problems with small packet delays.  One way to bypass 
+Nagle's algorithm selectively is to use "out-of-band" messaging, but 
+that is limited in its content and has other effects (such as a loss of 
+sequentiality) (by the way, out-of-band is often used for that ctrl-C, 
+too).</P>
+<P>More from Vic:</P>
+<P>So to sum it all up, if you are having trouble and need to flush the 
+socket, setting the <CODE>TCP_NODELAY</CODE> option will usually solve the problem.  
+If it doesn't, you will have to use out-of-band messaging, but according 
+to Andrew, "out-of-band data has its own problems, and I don't think it 
+works well as a solution to buffering delays (haven't tried it though). 
+It is <EM>not</EM> 'expedited data' in the sense that exists in some other 
+protocols; it is transmitted in-stream, but with a pointer to indicate 
+where it is."</P>
+<P>I asked Andrew something to the effect of "<B>What promises does TCP
+make about when it will get around to writing data to the network?</B>"  I
+thought his reply should be put under this question:</P>
+<P>Not many promises, but some.</P>
+<P>I'll try and quote chapter and verse on this:</P>
+<P><B>References:</B></P>
+<P>
+<BLOCKQUOTE>
+RFC 1122, "Requirements for Internet Hosts" (also STD 3)<BR>
+RFC  793, "Transmission Control Protocol"   (also STD 7)
+</BLOCKQUOTE>
+</P>
+<P>
+<OL>
+<LI>The socket interface does not provide access to the TCP PUSH flag.</LI>
+<LI>RFC1122 says (4.2.2.2):
+
+A TCP MAY implement PUSH flags on SEND calls.  If PUSH flags
+are not implemented, then the sending TCP: (1) must not
+buffer data indefinitely, and (2) MUST set the PSH bit in
+the last buffered segment (i.e., when there is no more
+queued data to be sent).
+</LI>
+<LI>RFC793 says (2.8):
+
+When a receiving TCP sees the PUSH flag, it must not wait for
+more data from the sending TCP before passing the data to the
+receiving process.
+
+[RFC1122 supports this statement.]</LI>
+<LI>Therefore, data passed to a <CODE>write()</CODE> call must be delivered to
+the peer within a finite time, unless prevented by protocol
+considerations.
+</LI>
+<LI>There are (according to a post from Stevens quoted in the FAQ 
+[earlier in this answer - Vic]) about 11 tests made which could 
+delay sending 
+the data. But as I see it, there are only 2 that are significant, since
+things like retransmit backoff are a) not under the programmers
+control and b) must either resolve within a finite time or
+drop the connection.</LI>
+</OL>
+</P>
+<P>The first of the interesting cases is "window closed"  (ie. there is no 
+buffer space at the receiver;
+this can delay data indefinitely, but only if the receiving
+process is not actually reading the data that is available)</P>
+<P>Vic asks:</P>
+<P><B>OK, it makes sense that if the client isn't reading, the data isn't going
+to make it across the connection.  I take it this causes the sender to
+block after the recieve queue is filled?</B></P>
+<P>The sender blocks when the socket send buffer is full, so buffers
+will be full at both ends.</P>
+<P>While the window is closed, the sending TCP sends window probe
+packets. This ensures that when the window finally does open again,
+the sending TCP detects the fact. [RFC1122, ss 4.2.2.17]</P>
+<P>The second interesting case is "Nagle algorithm" (small segments, e.g. 
+keystrokes, are delayed to
+form larger segments if ACKs are expected from the peer; this
+is what is disabled with <CODE>TCP_NODELAY</CODE>)</P>
+<P>Vic Asks:</P>
+<P><B>Does this mean that my tcpclient sample should set TCP_NODELAY to ensure
+that the end-of-line code is indeed put out onto the network when sent?</B></P>
+<P>No. tcpclient.c is doing the right thing as it stands; trying to write
+as much data as possible in as few calls to <CODE>write()</CODE> as is feasible.
+Since the amount of data is likely to be small relative to the socket
+send buffer, then it is likely (since the connection is idle at that
+point) that the entire request will require only one call to <CODE>write()</CODE>,
+and that the TCP layer will immediately dispatch the request as a
+single segment (with the PSH flag, see point 2.2 above).</P>
+<P>The Nagle algorithm only has an effect when a second <CODE>write()</CODE> call is
+made while data is still unacknowledged. In the normal case, this data
+will be left buffered until either: a) there is no unacknowledged data;
+or b) enough data is available to dispatch a full-sized segment. The
+delay cannot be indefinite, since condition (a) must become true within
+the retransmit timeout or the connection dies.</P>
+<P>Since this delay has negative consequences for certain applications,
+generally those where a stream of small requests are being sent without
+response, e.g. mouse movements, the standards specify that an option
+must exist to disable it. [RFC1122, ss 4.2.3.4]</P>
+<P>Additional note: RFC1122 also says:</P>
+<P>
+<DL>
+<DT><B>[DISCUSSION]:</B><DD><P>When the PUSH flag is not implemented on SEND calls,
+i.e., when the application/TCP interface uses a pure
+streaming model, responsibility for aggregating any
+tiny data fragments to form reasonable sized segments
+is partially borne by the application layer.</P>
+</DL>
+</P>
+<P>So programs should avoid calls to <CODE>write()</CODE> with small data lengths
+(small relative to the MSS, that is); it's better to build up a
+request in a buffer and then do one call to <CODE>sock_write()</CODE> or 
+equivalent.</P>
+<P>The other possible sources of delay in the TCP are not really
+controllable by the program, but they can only delay the data
+temporarily.</P>
+<P> 
+Vic asks:</P>
+<P><B>By temporarily, you mean that the data will go as soon as it can, and I
+won't get stuck in a position where one side is waiting on a response,
+and the other side hasn't recieved the request?  (Or at least I won't
+get  stuck forever)</B> </P>
+<P>You can only deadlock if you somehow manage to fill up all the buffers
+in both directions... not easy.</P>
+<P>If it is possible to do this, (can't think of a good example though),
+the solution is to use nonblocking mode, especially for writes. Then
+you can buffer excess data in the program as necessary.</P>
+
+
+<H2><A NAME="ss2.12">2.12 Where can I get a library for programming sockets?</A></H2>
+
+<P>There is the Simple Sockets Library by Charles E. Campbell, Jr. PhD. and
+Terry McRoberts.  The file is called 
+<A HREF="http://www.ibrado.com/sock-faq/ssl.tar.gz">ssl.tar.gz</A>, and you can download it
+from this faq's home page.  For c++ there is the Socket++ library which is
+on 
+<A HREF="ftp://ftp.virginia.edu/pub/socket++-1.10.tar.gz">ftp://ftp.virginia.edu/pub/socket++-1.10.tar.gz</A>.  There is 
+also C++
+Wrappers.  The file is called
+<A HREF="ftp://ftp.huji.ac.il/pub/languages/C++/C++_wrappers.2.4.tar.gz">ftp://ftp.huji.ac.il/pub/languages/C++/C++_wrappers.tar.gz</A>.
+Thanks to Bill McKinnon for tracking it down for me!  
+From 
+<A HREF="http://www.cs.wustl.edu/~schmidt">http://www.cs.wustl.edu/~schmidt</A>
+you should be able to find the ACE toolkit. 
+PING Software Group has some libraries that include a sockets interface 
+among other things.  My link to their web site has gone stale, and
+I don't know where their new site is.  Please send me an email if you
+find it.</P>
+<P>
+<A HREF="mailto:ph.jounin@computer.org">Philippe Jounin <ph.jounin@computer.org></A> has developed a
+cross platform library which includes high level support for http and
+ftp protocols, with more to come.  You can find it at
+<A HREF="http://perso.magic.fr/jounin-ph/P_tcp4u.htm">http://perso.magic.fr/jounin-ph/P_tcp4u.htm</A>, and you
+can find a review of it at
+<A HREF="http://www6.zdnet.com/cgi-bin/texis/swlib/hotfiles/info.html?fcode=000H4F">http://www6.zdnet.com/cgi-bin/texis/swlib/hotfiles/info.html?fcode=000H4F</A></P>
+<P>I don't have any experience with any of these libraries, so I can't 
+recomend one over the other.</P>
+
+
+<H2><A NAME="ss2.13">2.13 How come select says there is data, but read returns zero?</A></H2>
+
+<P>The data that causes select to return is the EOF because the other side
+has closed the connection.  This causes read to return zero.  For more
+information see 
+<A HREF="#closed">2.1 How can I tell when a socket is closed on the other end?</A></P>
+
+
+<H2><A NAME="ss2.14">2.14 Whats the difference between select() and poll()?</A></H2>
+
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>The basic difference is that <CODE>select()</CODE>'s <CODE>fd_set</CODE> is a bit mask and 
+therefore
+has some fixed size.  It would be possible for the kernel to not limit
+this size when the kernel is compiled, allowing the application to define
+<CODE>FD_SETSIZE</CODE> to whatever it wants (as the comments in the system header
+imply today) but it takes more work.  4.4BSD's kernel and the Solaris
+library function both have this limit.  But I see that BSD/OS 2.1 has
+now been coded to avoid this limit, so it's doable, just a small matter
+of programming. :-)  Someone should file a Solaris bug report on this,
+and see if it ever gets fixed.</P>
+<P>With <CODE>poll()</CODE>, however, the user must allocate an array of <CODE>pollfd</CODE> 
+structures,
+and pass the number of entries in this array, so there's no fundamental
+limit.  As Casper notes, fewer systems have <CODE>poll()</CODE> than <CODE>select</CODE>, so 
+the latter
+is more portable.  Also, with original implementations (SVR3) you could not
+set the descriptor to -1 to tell the kernel to ignore an entry in the 
+<CODE>pollfd</CODE>
+structure, which made it hard to remove entries from the array; SVR4 gets
+around this.  Personally, I always use <CODE>select()</CODE> and rarely <CODE>poll()</CODE>, 
+because I
+port my code to BSD environments too.  Someone could write an implementation
+of <CODE>poll()</CODE> that uses <CODE>select()</CODE>, for these environments, but I've 
+never 
+seen one. Both <CODE>select()</CODE> and <CODE>poll()</CODE> are being standardized by POSIX 
+1003.1g.</P>
+
+
+<H2><A NAME="ss2.15">2.15 How do I send [this] over a socket?</A></H2>
+
+<P>Anything other than single bytes of data will probably get mangled unless 
+you take care.  For integer values you can use <CODE>htons()</CODE> and friends, and 
+strings are really just a bunch of single bytes, so those should be OK.  
+Be careful not to send a pointer to a string though, since the pointer 
+will be meaningless on another machine.  If you need to send a struct, 
+you should write <CODE>sendthisstruct()</CODE> and <CODE>readthisstruct()</CODE> functions 
+for it 
+that do all the work of taking the structure apart on one side, and 
+putting it back together on the other.  If you need to send floats, you 
+may have a lot of work ahead of you.  You should read RFC 1014 which is 
+about portable ways of getting data from one machine to another (thanks 
+to Andrew Gabriel for pointing this out).</P>
+
+
+<H2><A NAME="ss2.16">2.16 How do I use TCP_NODELAY?</A></H2>
+
+<P>First off, be sure you really want to use it in the first place.  It will 
+disable the Nagle algorithm 
+(see 
+<A HREF="#flush">2.11 How can I force a socket to send the data in its buffer?</A>),
+which will cause network traffic 
+to increase, with smaller than needed packets wasting bandwidth.  Also, 
+from what I have been able to tell, the speed increase is very small, so 
+you should probably do it without <CODE>TCP_NODELAY</CODE> first, and only turn 
+it on if there is a problem.</P>
+<P>Here is a code example, with a warning about using it from Andrew Gierth: </P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+  int flag = 1;
+  int result = setsockopt(sock,            /* socket affected */
+                          IPPROTO_TCP,     /* set option at TCP level */
+                          TCP_NODELAY,     /* name of option */
+                          (char *) &amp;flag,  /* the cast is historical 
+                                                  cruft */
+                          sizeof(int));    /* length of option value */
+  if (result &lt; 0)
+     ... handle the error ...
+</PRE>
+</CODE></BLOCKQUOTE>
+ </P>
+<P><CODE>TCP_NODELAY</CODE> is for a <EM>specific</EM> purpose; to disable the Nagle 
+buffering
+algorithm. It should only be set for applications that send frequent
+small bursts of information without getting an immediate response, where
+timely delivery of data is required (the canonical example is mouse
+movements).</P>
+
+
+<H2><A NAME="ss2.17">2.17 What exactly does the Nagle algorithm do?</A></H2>
+
+<P>It groups together as much data as it can between ACK's from the other end
+of the connection.  I found this really confusing until Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>)
+drew the following diagram, and explained: </P>
+<P>This diagram is not intended to be complete, just to illustrate
+the point better...</P>
+<P><B>Case 1</B>: client writes 1 byte per <CODE>write()</CODE> call. The program on
+host B is tcpserver.c from the FAQ examples.</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+      CLIENT                                  SERVER
+APP             TCP                     TCP             APP
+                [connection setup omitted]
+
+ &quot;h&quot; ---------&gt;          [1 byte]
+                    ------------------&gt;
+                                           -----------&gt; &quot;h&quot;
+                                   [ack delayed]
+ &quot;e&quot; ---------&gt; [Nagle alg.              .
+                 now in effect]          .
+ &quot;l&quot; ---------&gt; [ditto]                  .
+ &quot;l&quot; ---------&gt; [ditto]                  .
+ &quot;o&quot; ---------&gt; [ditto]                  .
+ &quot;\n&quot;---------&gt; [ditto]                  .
+                                         .
+                                         .
+                       [ack 1 byte]
+                    &lt;------------------
+                [send queued
+                data]
+                        [5 bytes]
+                    ------------------&gt;
+                                          ------------&gt; &quot;ello\n&quot;
+                                          &lt;------------ &quot;HELLO\n&quot;
+                   [6 bytes, ack 5 bytes]
+                    &lt;------------------
+ &quot;HELLO\n&quot; &lt;----
+              [ack delayed]
+                 .
+                 .
+                 .   [ack 6 bytes]
+                    ------------------&gt;
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Total segments: 5. (If <CODE>TCP_NODELAY</CODE> was set, could have been up to 10.)
+Time for response: 2*RTT, plus ack delay.</P>
+<P><B>Case 2</B>: client writes all data with one <CODE>write()</CODE> call.</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+      CLIENT                                  SERVER
+APP             TCP                     TCP             APP
+                [connection setup omitted]
+
+ &quot;hello\n&quot; ---&gt;          [6 bytes]
+                    ------------------&gt;
+                                          ------------&gt; &quot;hello\n&quot;
+                                          &lt;------------ &quot;HELLO\n&quot;
+                   [6 bytes, ack 6 bytes]
+                    &lt;------------------
+ &quot;HELLO\n&quot; &lt;----
+            [ack delayed]
+                 .
+                 .
+                 .   [ack 6 bytes]
+                    ------------------&gt;
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Total segments: 3.</P>
+<P>Time for response = RTT (therefore minimum possible).</P>
+<P>Hope this makes things a bit clearer...</P>
+<P>Note that in case 2, you <EM>don't</EM> want the implementation to gratuitously
+delay sending the data, since that would add straight onto the response
+time.</P>
+
+
+<H2><A NAME="ss2.18">2.18 What is the difference between read() and recv()?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P><CODE>read()</CODE> is equivalent to <CODE>recv()</CODE> with a <CODE>flags</CODE> parameter of 0. 
+Other values
+for the <CODE>flags</CODE> parameter change the behaviour of <CODE>recv()</CODE>. Similarly, 
+<CODE>write()</CODE> is equivalent to <CODE>send()</CODE> with <CODE>flags</CODE> == 0. </P>
+<P>It is unlikely that send()/recv() would be dropped; perhaps someone with a
+copy of the POSIX drafts for socket calls can check... </P>
+<P>Portability note: non-unix systems may not allow <CODE>read()/write()</CODE> on
+sockets, but <CODE>recv()/send()</CODE> are usually ok. This is true on 
+Windows and OS/2, for example. </P>
+
+
+<H2><A NAME="ss2.19">2.19 I see that send()/write() can generate SIGPIPE. Is there any advantage to handling the signal, rather than just ignoring it and checking for the EPIPE error? Are there any useful parameters passed to the signal catching function? </A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>In general, the only parameter passed to a signal handler is the signal
+number that caused it to be invoked.  Some systems have optional additional
+parameters, but they are no use to you in this case. </P>
+<P>My advice is to just ignore <CODE>SIGPIPE</CODE> as you suggest. That's what I do in
+just about all of my socket code; errno values are easier to handle than
+signals (in fact, the first revision of the FAQ failed to mention 
+<CODE>SIGPIPE</CODE> in that context; I'd got so used to ignoring it...)</P>
+<P>There is one situation where you should <EM>not</EM> ignore <CODE>SIGPIPE</CODE>; if 
+you are
+going to <CODE>exec()</CODE> another program with stdout redirected to a socket. In
+this case it is probably wise to set <CODE>SIGPIPE</CODE> to <CODE>SIG_DFL</CODE> before 
+doing the <CODE>exec()</CODE>. </P>
+
+
+<H2><A NAME="ss2.20">2.20 After the chroot(), calls to socket() are failing.  Why?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>On systems where sockets are implemented on top of Streams (e.g. all
+SysV-based systems, presumably including Solaris), the <CODE>socket()</CODE> function
+will actually be opening certain special files in /dev. You will need to
+create a /dev directory under your fake root and populate it with the
+required device nodes (only). </P>
+<P>Your system documentation may or may not specify exactly which device
+nodes are required; I can't help you there (sorry).  (Editors note:  
+Adrian Hall
+(
+<A HREF="mailto:adrian@hottub.org">adrian@hottub.org</A>) suggested checking the man page for 
+ftpd, which should list the files you need to copy and devices you need 
+to create in the chroot'd environment.)</P>
+<P>A less-obvious issue with <CODE>chroot()</CODE> is if you call <CODE>syslog()</CODE>, as many
+daemons do; <CODE>syslog()</CODE> opens (depending on the system) either a UDP
+socket, a FIFO or a Unix-domain socket. So if you use it after a
+<CODE>chroot()</CODE> call, make sure that you call <CODE>openlog()</CODE> *before* the 
+chroot.</P>
+
+
+<H2><A NAME="EINTR"></A> <A NAME="ss2.21">2.21 Why do I keep getting EINTR from the socket calls?</A></H2>
+
+<P>This isn't really so much an error as an exit condition.  It means that 
+the call was interrupted by a signal.  Any call that might block should 
+be wrapped in a loop that checkes for <CODE>EINTR</CODE>, as is done in the example 
+code (See 
+<A HREF="unix-socket-faq-7.html#examples">7. Sample Source Code</A>).</P>
+
+
+<H2><A NAME="ss2.22">2.22 When will my application receive SIGPIPE?</A></H2>
+
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>Very simple: with TCP you get <CODE>SIGPIPE</CODE> if your end of the connection
+has received an RST from the other end.  What this also means is that
+if you were using <CODE>select</CODE> instead of write, the select would have
+indicated the socket as being readable, since the RST is there for
+you to read (read will return an error with <CODE>errno</CODE> set to 
+<CODE>ECONNRESET</CODE>).</P>
+<P>Basically an RST is TCP's response to some packet that it doesn't expect
+and has no other way of dealing with.  A common case is when the peer closes
+the connection (sending you a FIN) but you ignore it because you're writing
+and not reading.  (You should be using <CODE>select</CODE>.)  So you write to a 
+connection
+that has been closed by the other end and the other end's TCP responds with
+an RST.</P>
+
+
+<H2><A NAME="ss2.23">2.23 What are socket exceptions?  What is out-of-band data?</A></H2>
+
+<P>Unlike exceptions in C++, socket exceptions do not indicate that an error 
+has occured.  Socket exceptions usually refer to the notification 
+that out-of-band data has arrived.  Out-of-band data (called "urgent 
+data" in TCP) looks to the application like a separate stream of data 
+from the main data stream.  This can be useful for separating two 
+different kinds of data.  Note that just because it is called "urgent 
+data" does not mean that it will be delivered any faster, or with higher 
+priorety than data in the in-band data stream.  Also beware that unlike 
+the main data stream, the out-of-bound data may be lost if your 
+application can't keep up with it.</P>
+
+
+<H2><A NAME="ss2.24">2.24 How can I find the full hostname (FQDN) of the system I'm</A>running on?</H2>
+
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>Some systems set the hostname to the FQDN and others set it to just
+the unqualified host name.  I know the current BIND FAQ recommends the
+FQDN, but most Solaris systems, for example, tend to use only the
+unqualified host name.</P>
+<P>Regardless, the way around this is to first get the host's name (perhaps
+an FQDN, perhaps unaualified).  Most systems support the Posix way to do
+this using <CODE>uname()</CODE>, but older BSD systems only provide 
+<CODE>gethostname()</CODE>.
+Call <CODE>gethostbyname()</CODE> to find your IP address.  Then take the IP address
+and call <CODE>gethostbyaddr()</CODE>.  The <CODE>h_name</CODE> member of the <CODE>hostent{}</CODE>
+should
+then be your FQDN.</P>
+
+
+<HR>
+<A HREF="unix-socket-faq-1.html">Previous</A>
+<A HREF="unix-socket-faq-3.html">Next</A>
+<A HREF="unix-socket-faq.html#toc2">Table of Contents</A>
+</BODY>
+</HTML>

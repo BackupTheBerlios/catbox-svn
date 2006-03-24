@@ -1,0 +1,1871 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>Prozesse und Signale in C</H1>
+<H2>Prozesse</H2>
+Unser Praktikum l&auml;uft auf einem System mit dem Betriebssystem UNIX. Dieses
+Betriebssystem (und auch der frei erh&auml;ltliche Abk&ouml;mmling Linux) ist ein 
+Multitasking-System und kann somit mehrere Aufgaben gleichzeitig erledigen. Jedes 
+laufende Programm verh&auml;lt sich dabei so, als ob es das einzige Programm w&auml;re, 
+das auf dem Computer ausgef&uuml;hrt wird. Wenn unter Linux ein Programm ausgef&uuml;hrt 
+wird, bekommt das Programm eine eindeutige Prozess-Identifikation (PID) zugewiesen, die 
+im Bereich zwischen 1 und 32767 liegt. Anhand dieser PID kann das Betriebssystem in 
+Ausf&uuml;hrung befindliche Programme identifizieren und auf diese zugreifen. Wird ein 
+Programm beendet, wird auch seine PID freigegeben und kann sp&auml;ter einem anderen 
+Programm zugewiesen werden.
+<p>
+UNIX und Linux stellen, wie viele andere Betriebssysteme auch, eine spezielle Funktion zur 
+Verf&uuml;gung, mit deren Hilfe man die PID eines Prozesses abfragen kann. 
+Eine zweite Funktion erlaubt es einem Kindprozess, die PID seines Elternprozesses zu 
+ermitteln. Beide Funktion sind in der Header-Datei <TT>unistd.h</TT> definiert:
+<pre>
+pid_t getpid(void);
+pid_t getppid(void);
+</pre>
+<p>
+Die erste Funktion, <TT>getpid()</TT>, liefert die PID des Prozesses zur&uuml;ck, der <TT>getpid()</TT> 
+aufgerufen hat. Die zweite Funktion, <TT>getppid()</TT>, liefert die Eltern-PID des Prozesses. 
+Der R&uuml;ckgabewert ist jeweils vom Typ <TT>pid_t</TT>, der in einer der in <TT>stdlib.h</TT> 
+eingeschlossenen Header-Dateien als <TT>int</TT> definiert ist.
+<p>
+Beispiel: Die ID des aktuellen Prozesses und seines Elternprozesses ermitteln.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(void)
+  {
+  pid_t  pid;
+  pid = getpid();
+  printf ("Meine PID = %d\n", pid) ;
+
+  pid = getppid();
+  printf ("Meine Eltern-PID = %d\n", pid) ;
+  return 0;
+  }
+</pre>
+<p>
+Das Programm aus diesem Listing definiert eine Variable vom Typ <TT>pid_t</TT>. 
+Die Werte, die von den Funktionen <TT>getpid()</TT> und <TT>getppid()</TT>
+zur&uuml;ckgegeben werden, werden dann ausgegeben. 
+Wenn Sie das Programm mehrmals im gleichen Konsolenfenster ausf&uuml;hren, erhalten 
+Sie jedes Mal eine andere Prozess-ID, w&auml;hrend die ID f&uuml;r den Elternprozess 
+immer die gleiche bleibt. 
+<p>
+
+<h3> Mit fork() andere Prozesse starten</h3>
+Linux und andere Mitglieder der Unix-Familie verf&uuml;gen &uuml;ber eine Standardmethode 
+zum Starten anderer Prozesse, die auf der Funktion <TT>fork()</TT> basiert. Ebenso wie 
+<TT>getpid()</TT> liefert <TT>fork()</TT> eine Prozess-ID zur&uuml;ck und ist in der 
+Header-Datei <TT>unistd.h</TT> definiert. Ihr Prototyp sieht wie folgt aus:
+<pre>
+pid_t fork(void);
+</pre>
+Tritt kein Fehler auf, erzeugt <TT>fork()</TT> einen neuen 
+Prozess, der mit dem aufrufenden Prozess identisch ist. Sowohl der alte als auch der 
+neue Prozess werden danach - ab der Anweisung hinter dem <TT>fork()</TT>-Aufruf - 
+parallel ausgef&uuml;hrt. Obwohl beide Prozesse das gleiche Programm ausf&uuml;hren, 
+verf&uuml;gen sie &uuml;ber eigene Kopien aller Daten und Variablen. Eine dieser 
+Variablen ist der R&uuml;ckgabewert von <TT>fork()</TT>.
+<UL>
+<LI>Im Kindprozess ist der Wert 0.
+<LI>Im Elternprozess ist es der Wert der Prozess-ID des Kindprozesses. 
+<LI>Wenn <TT>fork()</TT> scheitert, wird <TT>-1</TT> zur&uuml;ckgegeben. 
+</UL>
+<br>Nach erfolgreicher Ausf&uuml;hrung von <TT>fork()</TT> gibt es den aufrufenden
+Proze&szlig; zweimal. Beide Prozesse werden mit dem Befehl fortgesetzt, der auf 
+<tt>fork()</tt> folgt. Zum Beispiel:
+<pre>
+switch (pid = fork()) 
+  {       
+  case -1: printf("Schief gegangen!\n"); break;
+  case 0 : printf("Kindprozess!\n"); break;
+  default : printf("Proze&szlig; %d wurde erzeugt!\n",i); break;
+  }
+</pre>
+Da der Elternprozess eine vollst&auml;ndige Kopie seiner Daten f&uuml;r den Sohn
+erzeugt, besteht im Anschluss keine M&ouml;glichkeit, da&szlig; Vater und Sohn
+&uuml;ber gemeinsame Variablen kommunizieren. Jeder hat von jeder Variablen
+ja sein eigenes Exemplar.
+<p>
+Beispiel: Mit Hilfe von fork() einen neuen Prozess erzeugen.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+int main(void)
+  {
+  pid_t  pid;
+  int x = 22;
+
+  pid = fork();
+  if (pid &lt; 0)
+    {
+    printf("Fehler: fork()-Rsultat %d.\n", pid);
+    exit(1);
+    }
+  if (pid == 0)
+    {
+    printf("Kind: PID = %u. Eltern-PID = %u\n",
+            getpid(), getppid());
+    printf("Kind: xalt = %d\n", x);
+    x = 11;
+    printf("Kind: xneu = %d\n", x);
+    sleep(2);
+    puts ("Kind: Beendet.");
+    exit(42);
+    }
+  else
+    {
+    printf("Eltern: PID = %u. Kind-PID = %u\n",
+            getpid(), pid);
+    puts("Eltern:  60 Sekunden Pause.");
+    sleep(60);
+    puts("Eltern: wieder wach.");
+    printf("Eltern: x = %d\n", x);
+    }
+
+  return 0;
+  }
+</pre>
+<p>
+Ausgabe:
+<pre>
+Eltern: PID = 1535. Kind-PID = 1536
+Eltern:  60 Sekunden Pause.
+Kind: PID = 1536. Eltern-PID = 1535
+Kind: xalt = 22
+Kind: xneu = 11
+Kind: Beendet.
+Eltern: wieder wach.
+Eltern: x = 22
+</pre>
+<p>
+Anhand des R&uuml;ckgabewertes von <TT>fork()</TT> wird festgestellt, 
+ob ein Fehler aufgetreten ist. Sind keine Fehler aufgetreten, werden zwei Prozesse 
+ausgef&uuml;hrt. Im Kindprozess ist der Wert von <TT>pid</TT> 0, im 
+Elternprozess enth&auml;lt die Variable eine Prozess-ID im Bereich zwischen 1 und 32767. 
+Die <TT>if</TT>-Anweisung wird von beiden Prozessen ausgewertet. Der 
+Kindprozess f&uuml;hrt danach den Block nach dem <TT>if</TT> aus, der Elternprozess 
+den Block nach dem <TT>else</TT>.
+<p>
+An der Programmausgabe k&ouml;nnen Sie erkennen, da&szlig; der Elternprozess nach dem 
+<TT>fork()</TT>-Aufruf eine Meldung ausgibt und sich dann schlafen legt.
+Parallel wird der Kindprozess weiter ausgef&uuml;hrt. Als erstes gibt er seine eigene 
+PID und die seines Elternprozesses aus. Als N&auml;chstes gibt der Kindprozess den 
+Wert der Variablen <TT>x</TT> aus, &auml;ndert den Wert und gibt ihn erneut aus. 
+Schlie&szlig;lich geht auch er f&uuml;r 2 Sekunden Pause. 
+Da der Elternprozess 60 Sekunden schl&auml;ft, wacht der Kindprozess vor seinem Eltern 
+auf und gibt eine Meldung aus. Dann beendet er sich und gibt den Wert 42 zur&uuml;ck.
+60 Sekunden sp&auml;ter erwacht der Elternprozess von seinem eigenen 
+<TT>sleep()</TT>-Aufruf, gibt den Wert der Variablen x aus und beendet sich ebenfalls.
+<p>
+
+<h4>Beenden Prozesses (exit)</h4>
+Der Aufruf der Systemfunktion <tt>void <B>_</B>exit(int status);</tt>
+beendet den aufrufenden Proze&szlig;. &Uuml;blicherweise wird in einem Anwenderprogramm
+nicht unmittelbar die Systemfunktion <tt><B>_</B>exit</tt>, sondern die 
+C-Bibliotheksroutine <tt>exit()</tt> benutzt, da letztere vor dem eigentlichen 
+Beenden daf&uuml;r sorgt, da&szlig; Dateien geschlossen werden.
+<p>
+Der Parameter <tt>status</tt> dient dazu, dem Vaterprozess beispielsweise
+Informationen &uuml;ber die ordnungsgem&auml;&szlig;e Abwicklung des Sohnes zukommen
+zu lassen. Der Vater kann den Status mit der Systemfunktion <tt>wait()</tt>
+abfragen. Wenn ein Anwenderprogramm keine der Exit-Funktionen explizit aufruft,
+erfolgt dies implizit nach dem Verlassen der <tt>main()</tt>-Routine.
+<p>
+
+<h3> Zombie-Prozesse</h3>
+Das obige Programm enth&auml;lt allerdings auch einen dicken Fehler, der in 
+bestimmten Situationen Probleme verursachen kann. Um zu verstehen, worin dieser 
+Fehler besteht, f&uuml;hren Sie das Programm noch einmal im Hintergrund aus.
+Wenn die "<TT>Kind: Beendet</TT>"-Meldung erscheint, rufen Sie den 
+Befehl <TT>ps u</TT> auf und betrachten den Eintrag des Kindprozesses:
+<pre>
+...
+
+jpl   1714  0.0  0.0     0    0 pts/5  Z    Jan27  0:00 [kind &lt;defunct&gt;]
+...
+</pre>
+Der Kind-Prozess wird als erloschen (<TT>defunct</TT>) gemeldet. In der 
+<TT>STAT</TT>-Spalte dieses Prozesses steht ein <TT>Z</TT>, was bedeutet, 
+da&szlig; es sich um einen so genannten "Zombie"-Prozess handelt.
+<p>
+Prozesse verwenden zum Beenden die <TT>return</TT>-Anweisung oder rufen die Funktion 
+<TT>exit()</TT> mit einem Wert auf, der an das Betriebssystem zur&uuml;ckgeliefert wird. 
+Das Betriebssystem l&auml;sst den Prozess so lange in seiner Prozesstabelle eingetragen, 
+bis entweder der Elternprozess des Prozesses den zur&uuml;ckgelieferten Wert liest oder der 
+Elternprozess selbst beendet wird. Ein Zombie-Prozess ist in diesem Sinne ein 
+Prozess, der zwar beendet wurde, dessen Elternprozess den Exit-Wert des Kindes aber 
+noch nicht gelesen hat. Erst wenn der Elternprozess beendet wird, wird auch der 
+Zombie-Prozess aus der Prozesstabelle des Betriebssystems entfernt.
+<p>
+Es gibt mehrere Wege, die Entstehung von Zombie-Prozessen zu verhindern. Am 
+h&auml;ufigsten wird die Systemfunktion <TT>wait()</TT> verwendet 
+(Header-Datei <TT>sys/wait.h</TT>):
+<pre>
+pid_t wait(int *status);
+</pre>
+Wenn die Funktion <tt>wait()</tt> aufgerufen wird, h&auml;lt sie die 
+Ausf&uuml;hrung des Elternprozesses so lange an, bis ein Kindprozess beendet wird. 
+Beim Aufruf von "wait" gibt es drei m&ouml;gliche Ergebnisse:
+<ul>
+<li><tt>wait()</tt> liefert -1: der Proze&szlig; hat keine Kinder (mehr).
+<li>Der Proze&szlig; hat zwar Kinder, aber alle leben noch - dann schl&auml;ft der
+Vater, bis der folgende Fall eintritt.
+<li> Der Proze&szlig; hat mindestens ein Zombie-Kind: eines davon wird ausgew&auml;hlt,
+seine Verwaltungsdaten werden freigegeben und seine PID als R&uuml;ckgabewert
+der Funktion abgeliefert. Zuvor werden in den Parameter <tt>status</tt> noch die
+folgenden Informationen eingetragen:
+  <ul>
+  <li>Bits 8 bis 15: Der "exit"-Status des Sohnes
+  <li>Bits 0 bis &nbsp;7: Die Nummer des Signals, das den Tod des Sohnes verursacht hat
+  </ul>
+</ul>
+<P>
+Wenn Sie an dem R&uuml;ckgabewert des Kindprozesses nicht interessiert sind, &uuml;bergeben 
+Sie <TT>wait()</TT> den Wert <TT>NULL</TT>.
+<p>
+Beispiel:  Mit wait() Zombie-Prozesse verhindern.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main(void)
+  {
+  pid_t  pid;
+  int    status;
+
+  pid = fork();
+  if (pid &lt; 0)
+    {
+    printf("Fehler: fork()-Rsultat %d.\n", pid);
+    exit(1);
+    }
+  if (pid == 0)
+    {
+    printf("Kind: PID = %u. Eltern-PID = %u\n",
+            getpid(), getppid());
+    sleep(1);
+    puts ("Kind: Beendet.");
+    exit(42);
+    }
+  else
+    {
+     printf("Eltern: PID = %u. Kind-PID = %u\n",
+             getpid(), pid);
+     puts("Eltern:  10 Sekunden Pause.");
+     sleep(10);
+     puts("Eltern: wieder wach.")
+     pid = wait(&amp;status);
+     printf("Eltern: Kind mit PID %u ", pid);
+     if (WIFEXITED(status) != 0)
+       printf("wurde mit Status %d beendet\n",WEXITSTATUS(status));
+     else
+       printf("wurde mit Fehler beendet.\n");
+     }
+
+  return 0;
+  }
+
+</pre>
+<p>
+Dieses Listing entspricht weitgehend dem vorhergehenden Programm. Der Hauptunterschied 
+liegt darin, da&szlig; der Elternprozess nach dem Erwachen die Funktion 
+<TT>wait()</TT> aufruft. Da der Kindprozess schon vorher beendet wurde, kehrt 
+<TT>wait()</TT> sofort nach dem Aufruf zur&uuml;ck und setzt die Variable <TT>pid</TT> auf die Prozess-ID des 
+beendeten Kindprozesses. Des Weiteren kopiert die Funktion den Exit-Wert des 
+Prozesses in die Variable <TT>status</TT>, deren Adresse der Funktion als Argument &uuml;bergeben 
+wurde. Der Elternprozess gibt die Prozess-ID des Kindes aus und verwendet die 
+Makros, <TT>WIFEXITED()</TT> and <TT>WEXITSTATUS()</TT>, die in <TT>sys/wait.h</TT> definiert sind, um den 
+R&uuml;ckgabestatus des Kindprozesses abzufragen und ebenfalls auszugeben. Auf der 
+Manpage zur <TT>wait()</TT>-Funktion k&ouml;nnen Sie nachlesen, da&szlig; diese Makros daf&uuml;r sorgen, 
+da&szlig; nur 8-Bit-Werte (1 bis 255) als Exit-Status zur&uuml;ckgeliefert werden.
+<p>
+Die <TT>wait()</TT>-Funktion ist offensichtlich recht n&uuml;tzlich, wenn man wei&szlig;, da&szlig; der 
+Kindprozess bereits beendet wurde. Sollte dies nicht der Fall sein, h&auml;lt die 
+<TT>wait()</TT>-Funktion den Elternprozess so lange an, bis der Kindprozess beendet wird. 
+Wenn dieses Verhalten nicht gew&uuml;nscht, kann man die <TT>waitpid()</TT>-Funktion 
+verwenden, die in der Header-Datei <TT>sys/wait.h</TT> definiert ist:
+<pre>
+pid_t waitpid(pid_t pid, int *status, int options);
+</pre>
+Mit <TT>waitpid()</TT> k&ouml;nnen Sie auf einen bestimmten Prozess (spezifiziert durch seine 
+Prozess-ID) oder einen beliebigen Kindprozess (falls f&uuml;r <TT>pid</TT> der Wert 
+<TT>-1</TT> &uuml;bergeben 
+wird) warten. Der Exit-Status des Kindprozesses wird im zweiten Argument 
+zur&uuml;ckgeliefert. Dem letzten Parameter, <TT><i>options</i></TT>, kann man eine der Konstanten 
+<TT>WNOHANG</TT>, <TT>WUNTRACED</TT> oder <TT>0</TT> (<TT>waitpid()</TT> verh&auml;lt sich dann wie <TT>wait()</TT>) &uuml;bergeben. Die 
+erste dieser Konstanten ist die interessanteste, da sie daf&uuml;r sorgt, da&szlig; <TT>waitpid()</TT> 
+sofort mit einem Wert von <TT>0</TT> - einer ung&uuml;ltigen Prozess-ID - zur&uuml;ckkehrt, wenn kein 
+Kindprozess beendet wurde. Der Elternprozess kann dann mit der Ausf&uuml;hrung 
+fortfahren und <TT>waitpid()</TT> zu einem sp&auml;teren Zeitpunkt wieder aufrufen. 
+<p>
+Beispiel:  Mit waitpid() Zombie-Prozesse verhindern.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main(void)
+  {
+  pid_t  pid;
+  int    status;
+
+  pid = fork();
+  if (pid &lt; 0)
+    {
+    printf("Fehler: fork()-Rsultat %d.\n", pid);
+    exit(1);
+    }
+  if (pid == 0)
+    {
+    printf("Kind: PID = %u. Eltern-PID = %u\n",
+            getpid(), getppid());
+    sleep(10);
+    puts ("Kind: Beendet.");
+    exit(66);
+    }
+  else
+    {
+    printf("Eltern: PID = %u. Kind-PID = %u\n",
+            getpid(), pid);
+    while ((pid = waitpid (-1, &amp;status,  WNOHANG)) == 0)
+      {
+      printf("Eltern: Kein Kind beendet.");
+      puts(" 1 Sekunde Pause.");
+      sleep(1);
+      }
+    printf("Eltern: Kind mit PID %u ", pid);
+    if (WIFEXITED(status) != 0)
+      printf("wurde mit Status %d beendet\n", WEXITSTATUS(status));
+    else
+      printf("wurde mit Fehler beendet.\n");
+    }
+
+  return 0;
+  }
+</pre>
+<p>
+
+<h3> Einen Prozess durch einen anderen ersetzen</h3>
+Die <TT>fork()</TT>-Funktion ist nur ein Teil der L&ouml;sung; der zweite Teil 
+besteht darin, einen laufenden Prozess durch einen anderen zu ersetzen. 
+Unter Linux/Unix gibt es gleich eine ganze Reihe von Systemfunktionen, die so 
+genannte <TT>exec</TT>-Familie, mit denen man einen Prozess unter Beibehaltung der Prozess-
+ID auf ein anderes Programm umschalten kann. In der <TT>exec</TT>-Manpage finden Sie 
+ausf&uuml;hrliche Informationen zu den verschiedenen Mitgliedern der <TT>exec</TT>-Familie. Wir 
+werden uns jetzt auf die Funktion <TT>execl()</TT> konzentrieren, die in der Header-Datei 
+<TT>unistd.h</TT> wie folgt definiert ist:
+<pre>
+int execl( const char *path, const char *arg, ...);
+</pre>
+Diese Funktion kehrt nur dann zur&uuml;ck, wenn ein Fehler auftritt. Andernfalls wird der 
+aufrufende Prozess vollst&auml;ndig durch den neuen Prozess ersetzt. Den 
+Programmnamen des Prozesses, der den aufrufenden Prozess ersetzen soll, &uuml;bergibt 
+man im Argument zu <TT>path</TT>, etwaige Kommandozeile-Parameter werden danach 
+&uuml;bergeben. Im Unterschied zu Funktionen wie <TT>printf()</TT> ist <TT>execl()</TT> darauf 
+angewiesen, da&szlig; man als letztes Argument einen <TT>NULL</TT>-Zeiger &uuml;bergibt, der das Ende 
+der Argumentenliste anzeigt.
+<p>
+Der zweite an <TT>execl()</TT> &uuml;bergebene Parameter ist nicht der erste Kommandozeilen-Parameter, der an das aufzurufende Programm (spezifiziert in 
+<TT>path</TT>) &uuml;bergeben wird. Vielmehr ist er der Name, unter dem der 
+neue Prozess in der vom <TT>ps</TT>-Befehl erzeugten Prozessliste aufgef&uuml;hrt 
+wird. Der erste Parameter, der an das (in <TT>path</TT> spezifizierte) Programm 
+&uuml;bergeben wird, ist also tats&auml;chlich der dritte Parameter von <TT>execl()</TT>.
+Wenn Sie beispielsweise das Programm <TT>/bin/ls</TT> mit dem Parameter <TT>-lisa</TT> 
+aufrufen wollen und m&ouml;chten, da&szlig; das Programm in der Prozessliste unter dem 
+Namen "<TT>verz</TT>" aufgerufen wird, w&uuml;rden Sie <TT>execl()</TT> wie folgt aufrufen:
+<pre>
+execl("/bin/ls", "verz", "-lisa", NULL);<br>
+</pre>
+Dieser Aufruf w&uuml;rde den aktuellen Prozess durch einen Prozess ersetzen, der dem 
+Aufruf von <TT>/bin/ls -lisa</TT> von der Befehlszeile entspricht. 
+<p>
+Beispiel:  Mit execl() einen Prozess durch einen anderen ersetzen.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;errno.h&gt;
+
+int main(void)
+  {
+  pid_t  pid ;
+
+  pid = getpid();
+  printf ("Meine PID = %u\n", pid);
+  execl ("/bin/ps", "ps-proggie", "u", NULL);
+  puts("Ein Fehler ist aufgetreten.");
+  return 0;
+  }
+</pre>
+<p>
+Beachten Sie, da&szlig; der urspr&uuml;ngliche Prozess die gleiche Prozess-ID 
+tr&auml;gt wie sp&auml;ter der neue Prozess, der ihn ersetzte.
+<p><TT>execl()</TT> ist nicht die einzige Funktion dieser Art, es gibt eine
+ganze Familie mit leicht unterschiedlicher Arbeitsweise.
+<p>
+
+<h4>Ausf&uuml;hren eines Programmes mit <TT>execve()</TT></h4>
+Hier soll nur noch ein weiterer Vertreter der Familie vorgestellt werden:
+<PRE>
+int execve (char *filename,char *argv[], char *envp[]);
+</PRE>.
+Der Parameter <tt>filename</tt> bezeichnet dann entweder ein ausf&uuml;hrbares
+Programm oder ein Skript, das von einem Interpreter ausgef&uuml;hrt wird. 
+<tt>argv</tt> ist ein Feld von Zeichenketten, das die Aufrufparameter enth&auml;lt, 
+mit denen das Programm versorgt werden soll. Dabei mu&szlig; <tt>argv[0]</tt>
+der Name des Programmes selbst sein. <tt>envp</tt> ist ebenfalls ein Feld von
+Zeichenketten und enth&auml;lt die Umgebungsvariablen (mit Inhalt) in der
+Form "NAME=inhalt", die dem Programm &uuml;bergeben werden sollen. Beide
+Felder m&uuml;ssen mit einem NULL-Zeiger abgeschlossen sein.
+<p>
+Bei Erfolg kehrt die Funktion <tt>execve()</tt> wie <tt>execl()</tt> nicht
+zur&uuml;ck. Stattdessen wird das aufrufende Programm durch das aufgerufenen 
+Programmes ersetzt (&uuml;berschrieben) und dieses gestartet.
+Das gestartete Programm erh&auml;lt die gleiche Proze&szlig;nummer wie der
+aufrufende Proze&szlig; und erbt in der Regel alle "offenen" Dateideskriptoren
+Im Fehlerfall liefert die Funktion den Wert -1 zur&uuml;ck.
+Beispiel:
+<pre> 
+char *parameter[] = { "ls", "lisa", NULL };
+char *umgebung[]  = { "PATH=/bin:/usr/bin", "HOME=/root", NULL };
+
+execve("/bin/ls",parameter,umgebung);
+printf("Ooops! ls konnte nicht gestartet werden\n");
+</pre>
+<p>
+
+<h4>Dateien und <tt>fork/exec</tt></h4>
+Die Tabelle der Dateideskriptoren geh&ouml;rt ebenfalls zu den Daten des
+Prozesses. Hat der Elternprozess "offene" Dateideskriptoren, hat sie ebenfalls 
+der Kindprozess und sie zeigen auf dieselben Eintr&auml;ge in der Datetabelle, da 
+diese <b>nicht</b> zu den Proze&szlig;daten geh&ouml;rt und damit nicht kopiert 
+wird. Beide Prozesse k&ouml;nnen somit gemeinsam auf offene Dateien zugreifen und 
+sie benutzen dabei den selben Dateioffset. Da das Schreiben aber asynchron erfolgt,
+ist die Nutzung einer gemeinsamen Datei zur Proze&szlig;kommunikation keine besonders
+gute Idee. Besser werden dazu Pipes verwendet (N&auml;heres siehe <A HREF="#PIPE">weiter unten</A>). 
+<p>
+
+<h3>Alles zusammen</h3>
+Die C-Funktion <TT>system()</TT> kann Kommandos an UNIX &uuml;bergeben - sie vereint
+also <TT>fork()</TT> und <TT>exec..()</TT>. Sie erh&auml;lt eine Stringkonstante
+(z.B. <TT>system("ls -l");</TT>) oder eine Stringvariable (z.B. <TT>char kommando[
+20]; ...; system(kommando);</TT>) als Eingabeparameter. Dieser Parameter ist
+das Kommando, das dann von UNIX ausgef&uuml;hrt wird.
+<TT>system()</TT> erzeugt einen eigenen Proze&szlig;. Dieser f&uuml;hrt das Kommando aus, 
+was aber keinen Effekt f&uuml;r den aufrufenden Proze&szlig; hat.
+<P>
+
+<H2> Signale</H2>
+Ein weiteres wichtiges Element der Unix-&auml;hnlichen Betriebssysteme stellen - neben 
+der M&ouml;glichkeit, neue Prozesse zu starten oder einen Prozess durch einen anderen 
+Prozess zu ersetzen - die Signale dar, die vielfach auch als Software-Interrupts 
+bezeichnet werden. Signale sind Meldungen, die vom Betriebssystem an einen 
+laufenden Prozess geschickt werden. Manche Signale werden durch Fehler im 
+Programm selbst ausgel&ouml;st, andere sind Anforderungen, die der Anwender 
+beispielsweise &uuml;ber die Tastatur ausl&ouml;st und die vom Betriebssystem an 
+den laufenden Prozess weitergeleitet werden.<br>
+Alle Signale, die an ein Programm gesendet werden, verf&uuml;gen &uuml;ber ein 
+vordefiniertes Verhalten, das durch das Betriebssystem festgelegt wird. Einige Signale, 
+insbesondere die Signale, die aufgrund irgendwelcher aufgetretener Fehlerbedingungen an 
+das Programm geschickt werden, f&uuml;hren dazu, da&szlig; das Programm beendet und eine 
+"Core Dump"-Datei, erzeugt wird. <br>
+In der folgenden Tabelle finden Sie eine Liste der am h&auml;ufigsten unter Unix-Systemen 
+ausgel&ouml;sten Signale. Eine vollst&auml;ndige Liste der f&uuml;r Linux definierten 
+Signale finden Sie in der Header-Datei <TT>/usr/include/bits/signum.h</TT>.
+<p>
+<table border="1" cellpadding="3" cellspacing="0">
+<tr><th>
+Name</th><th>
+Wert</th><th>
+Funktion</th></tr>
+<tr><td valign="top">
+SIGHUP</td><td valign="top">
+1</td><td valign="top">
+Logoff</td></tr>
+<tr><td valign="top">
+SIGINT</td><td valign="top">
+2</td><td valign="top">
+Benutzer-Interrupt (ausgel&ouml;st durch [Strg]+[C])</td></tr>
+<tr><td valign="top">
+SIGQUIT</td><td valign="top">
+3</td><td valign="top">
+Benutzeraufforderung zum Beenden (ausgel&ouml;st durch [Strg)+[\])</td></tr>
+<tr><td valign="top">
+SIGFPE</td><td valign="top">
+8</td><td valign="top">
+Flie&szlig;kommafehler, beispielsweise Null-Division</td></tr>
+<tr><td valign="top">
+SIGKILL</td><td valign="top">
+9</td><td valign="top">
+Prozess killen</td></tr>
+<tr><td valign="top">
+SIGUSR1</td><td valign="top">
+10</td><td valign="top">
+Benutzerdefiniertes Signal</td></tr>
+<tr><td valign="top">
+SIGSEGV</td><td valign="top">
+11</td><td valign="top">
+Prozess hat versucht, auf Speicher zuzugreifen, der ihm nicht zugewiesen war</td></tr>
+<tr><td valign="top">
+SIGUSR2</td><td valign="top">
+12</td><td valign="top">
+Weiteres benutzerdefiniertes Signal</td></tr>
+<tr><td valign="top">
+SIGALRM</td><td valign="top">
+14</td><td valign="top">
+Timer (Zeitgeber), der mit der Funktion <TT>alarm()</TT> gesetzt wurde, ist abgelaufen</td></tr>
+<tr><td valign="top">
+SIGTERM</td><td valign="top">
+15</td><td valign="top">
+Aufforderung zum Beenden</td></tr>
+<tr><td valign="top">
+SIGCHLD</td><td valign="top">
+17</td><td valign="top">
+Kindprozess wird aufgefordert, sich zu beenden</td></tr>
+<tr><td valign="top">
+SIGCONT</td><td valign="top">
+18</td><td valign="top">
+Nach einem <TT>SIGSTOP</TT>- oder <TT>SIGTSTP</TT>-Signal fortfahren</td></tr>
+<tr><td valign="top">
+SIGSTOP</td><td valign="top">
+19</td><td valign="top">
+Den Prozess anhalten</td></tr>
+<tr><td valign="top">
+SIGTSTP</td><td valign="top">
+20</td><td valign="top">
+Prozess suspendiert, ausgel&ouml;st durch [Strg)+[Z].</td></tr>
+</table>
+<p>
+
+Abgesehen von <TT>SIGSTOP</TT> und <TT>SIGKILL</TT> kann man das Standardverhalten 
+jedes Signals durch Installation einer Signal-Bearbeitungsroutine anpassen. Eine Signal-
+Bearbeitungsroutine ist eine Funktion, die vom Programmierer implementiert wurde 
+und die jedes Mal aufgerufen wird, wenn der Prozess ein entsprechendes Signal 
+empf&auml;ngt. Abgesehen von <TT>SIGSTOP</TT> und <TT>SIGKILL</TT> k&ouml;nnen Sie 
+f&uuml;r jedes Signal aus eine eigene Signal-Bearbeitungsroutine einrichten. 
+Eine Funktion, die als Signal-Bearbeitungsroutine fungieren soll, muss einen einzigen 
+Parameter vom Typ <TT>int</TT> und einen <TT>void</TT>-R&uuml;ckgabetyp definieren. 
+Wenn ein Prozess ein Signal empf&auml;ngt, wird die Signal-Bearbeitungsroutine mit der 
+Kennnummer des Signals als Argument aufgerufen.
+<p>
+Um Signale abfangen und mit einer geeigneten Signal-Bearbeitungsroutine bearbeiten 
+zu k&ouml;nnen, muss der Programmierer dem Betriebssystem mitteilen, da&szlig; es bei jedem 
+Auftreten des betreffenden Signals f&uuml;r das Programm die zugeh&ouml;rige Signal-
+Bearbeitungsroutine aufrufen soll. Zwei Funktionen gibt es, mit denen man unter Unix 
+eine Signal-Bearbeitungsroutine ver&auml;ndern oder untersuchen kann: <TT>signal()</TT> und 
+<TT>sigaction()</TT>, die beide in der Header-Datei <TT>signal.h</TT> definiert sind. Die zweite 
+Funktion,<TT> sigaction()</TT>, ist die aktuellere und wird auch h&auml;ufiger eingesetzt. Sie ist wie 
+folgt definiert:
+<pre>
+int sigaction(int signum, const struct sigaction *act,
+              struct sigaction *oldact);
+</pre>
+<p>
+Im Erfolgsfall liefert die Funktion <TT>0</TT> zur&uuml;ck, im Fehlerfall <TT>-1</TT>. Der 
+erste Parameter von <TT>sigaction()</TT> ist die Nummer des Signals, dessen Verhalten 
+Sie ver&auml;ndern oder untersuchen wollen. Man &uuml;bergibt dem Parameter aber nicht die 
+tats&auml;chliche Signal-Nummer, sondern die zugeh&ouml;rige symbolische Konstante - also 
+beispielsweise <TT>SIGINT</TT> statt der Zahl <TT>2</TT>. Der zweite und der dritte 
+Parameter sind Zeiger auf eine <TT>sigaction</TT>-Struktur. Diese Struktur ist in 
+<TT>signal.h</TT> definiert:
+<pre>
+struct sigaction
+  {   
+  void (*sa_handler)(int);
+  sigset_t sa_mask;
+  int sa_flags;
+  void (*sa_restorer)(void);
+  }
+</pre>
+<p>
+Indem Sie dem zweiten Parameter der <TT>sigaction()</TT>-Funktion einen Zeiger auf eine 
+korrekt eingerichtete <TT>sigaction</TT>-Struktur &uuml;bergeben, k&ouml;nnen Sie das Verhalten f&uuml;r das 
+zugeh&ouml;rige Signal ver&auml;ndern. Indem Sie einen Zeiger auf eine solche Struktur als 
+dritten Parameter &uuml;bergeben, fordern Sie die <TT>sigaction()</TT>-Funktion 
+auf, die Daten, die das aktuelle Verhalten zu dem Signal bestimmen, in die &uuml;bergebene 
+<TT>sigaction</TT>-Struktur zu kopieren. Beiden Parametern kann man auch <TT>NULL</TT>-
+Zeiger &uuml;bergeben.
+<p>
+Es ist also m&ouml;glich, das aktuelle Verhalten zu &auml;ndern, sowie das aktuelle Verhalten zu 
+untersuchen, ohne es zu &auml;ndern, das aktuelle Verhalten zu untersuchen und vor dem 
+&Auml;ndern abzuspeichern, so da&szlig; es sp&auml;ter wieder hergestellt werden kann. 
+<UL>
+<LI>Das Verhalten &auml;ndern: <TT>sigaction(SIGINT, &amp;neueaktion, NULL);</TT>
+<LI>Das Verhalten untersuchen: <TT>sigaction(SIGINT, NULL, &amp;alteaktion);</TT>
+<LI>Kopie des aktuellen Verhaltens anlegen und neues Verhalten einrichten:
+     <TT>sigaction(SIGINT, &amp;neueaktion, &amp;alteaktion);</TT>
+</UL>
+Bei dem ersten Element der  <TT>sigaction</TT>-Struktur, <TT>sa_handler</TT>, handelt
+es sich um einen Zeiger auf eine Funktion, die ein <TT>int</TT>-Argument &uuml;bernimmt. 
+Dieses Element dient als Zeiger auf die Funktion, die als Signal-Bearbeitungsroutine f&uuml;r das zu bearbeitende Signal fungieren 
+soll. Sie k&ouml;nnen diesem Strukturelement auch die symbolischen Konstanten <TT>SIG_DFL</TT> 
+oder <TT>SIG_IGN</TT> zuweisen. <TT>SIG_DFL</TT> stellt das Standardverhalten f&uuml;r das Signal wieder her, 
+<TT>SIG_IGN</TT> bewirkt, da&szlig; das Signal ignoriert wird. F&uuml;r das <TT>sa_flags</TT>-Element gibt es eine 
+ganze Reihe m&ouml;glicher Einstellungen, die uns aber nicht weiter interessieren sollen; 
+wir werden das Element in den Beispielen jeweils auf <TT>0</TT> setzen. &Uuml;ber das <TT>sa_mask</TT>-
+Element kann man angeben, welche anderen Signale w&auml;hrend der Ausf&uuml;hrung der 
+Signal-Bearbeitungsroutine blockiert werden sollen. Meist wird dieses Strukturelement 
+mit Hilfe der Funktion <TT>sigemptyset()</TT> gesetzt, die in <TT>signal.h</TT> wie folgt definiert ist:
+<pre>
+int sigemptyset(sigset_t *set);
+</pre>
+Das letzte Element der Struktur, <TT>sa_restorer</TT>, wird heute nicht mehr verwendet. 
+<P>
+Beispiel:  Ein einfaches Beispiel zur Behandlung von Signalen.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;signal.h&gt;
+
+static int BEENDEN = 0;
+
+void  sig_bearbeiter(int sig)
+  {
+  printf("Signal %d empfangen. Programm wird beendet.\n", sig);
+  BEENDEN = 1;
+  }
+
+int main(void)
+  {
+  struct sigaction sig_struct;
+
+  sig_struct.sa_handler = sig_bearbeiter;
+  sigemptyset(&amp;sig_struct.sa_mask);
+  sig_struct.sa_flags = 0;
+
+  if (sigaction(SIGINT,&amp;sig_struct,NULL) != 0)
+    {
+    puts ("Fehler beim Aufruf von sigaction!") ;
+    exit (1);
+    }
+
+  puts("Programm gestartet, beenden mit [Strg]+[C].");
+  while (BEENDEN == 0)
+    {
+    puts("Programm l&auml;uft.");
+    sleep(1);
+    }
+
+  puts("Erstmal aufraeumen.");
+  sleeep(5);
+  puts("Fertig!");
+  return 0;
+  }
+</pre>
+Wurde die Signal-Bearbeitungsroutine korrekt eingerichtet, gibt das Programm in 
+eine Meldung aus und tritt in die Schleife des Hauptprogramms ein. Solange die 
+Variable <TT>BEENDEN</TT> gleich <TT>0</TT> ist, gibt die 
+<TT>while</TT>-Schleife die Meldung <TT>"Programm l&auml;uft."</TT> aus und 
+legt sich jeweils f&uuml;r eine Sekunde schlafen.
+<p>
+Wenn die Signal-Bearbeitungsroutine <TT>sig_bearbeiter()</TT> aufgerufen wird, 
+gibt sie die Meldung <TT>"Signal 2 empfangen. Programm wird beendet.</TT>" auf 
+den Bildschirm aus und setzt danach den Wert der statischen Variablen 
+<TT>BEENDEN</TT> auf <TT>1</TT>. Nur das f&uuml;hrt zum Beeenden und 
+nicht das Bet&auml;tigen von <TT>[Ctrl]+[C]</TT>. Da Programm k&ouml;nnte
+auch einfach weiterlaufen und die Benuterunterbrechung ignorieren.
+Hier die Ausgabe eines Beispiel-Laufs:
+<pre>
+Beenden mit [Strg]+[C].
+Programm l&auml;uft.
+Programm l&auml;uft.
+Programm l&auml;uft.
+Signal 2 empfangen. Programm wird beendet.
+Erstmal aufraeumen.
+Fertig!
+</pre>
+<p>
+
+In der Folge werden weitere Betriebssystemfunktionen beschrieben, die im Zusammenhang
+mit der Steuerung von Prozessen von Bedeutung sind.
+<p>
+
+<h4>Setzen eines Timers (alarm)</h4>
+Mit der Systemfunktion <tt>unsigned int alarm(unsigned int seconds);</TT>
+kann ein "Wecker" aufgezogen werden, der nach "seconds" Sekunden das Signal
+"SIGALRM" an den aufrufenden Proze&szlig; sendet. Wird keine benutzerspezifische
+Signalreaktion vereinbart, so bricht der Proze&szlig; nach Empfang des Signals
+ab. Ein eventuell bereits vorher "aktiver" Wecker wird zur&uuml;ckgesetzt.
+Wenn der R&uuml;ckgabewert der Funktion <tt>alarm()</tt> 0 ist, dann war zuvor
+kein "Wecker" aktiv. Wenn der Wert ungleich 0 ist, dann gibt er an, nach
+wieviel Sekunden ein zuvor eingestellter Wecker abgelaufen w&auml;re.
+<p>
+
+<h4>Warten auf ein Signal (pause)</h4>
+Die Systemfunktion <tt>int pause(void);</tt>
+bewirkt, da&szlig; der aufrufende Proze&szlig; in den Schlafzustand versetzt wird
+und dort solange verharrt, bis irgendein Signal eintrifft. Damit ist allerdings
+noch nicht festgelegt, welche Reaktion im Anschluss erfolgen soll. Ohne
+entsprechende Ma&szlig;nahmen kehrt "pause" bei den meisten Signalen nicht
+zur&uuml;ck, sondern bricht das Programm ab. Davon abweichendes Verhalten
+kann mit der Systemfunktion "signal" erreicht werden.
+<p>
+
+<h4>Warten auf das Ende eines Zeitintervalls (nanosleep)</h4>
+Mit der Systemfunktion <tt>int  nanosleep(const struct timespec *req, struct
+timespec *rem);</tt>
+kann sich ein Proze&szlig; f&uuml;r eine vorgegebene Zeitspanne in den Schlafzustand
+versetzen. Die Parameter "req" und "rem" verweisen auf Datenstrukturen
+mit den Komponenten "tv_sec" (Sekunden) und "tv_nsec" (Nanosekunden). In
+"*req" wird das gew&uuml;nschte Schlafintervall angegeben. Falls der Parameter
+"rem" ungleich NULL ist, dann wird in "*rem" vom System die noch nicht
+verstrichene Restzeit abgelegt, wenn der Schlafzustand durch ein vorzeitig
+eintreffendes Signal beendet wird. In diesem Fall liefert "nanosleep" den
+Wert -1 zur&uuml;ck.
+Auf Intel-PC's ist die Genauigkeit des Intervalls auf ein Vielfaches von 
+10 Millisekunden beschr&auml;nkt.
+<br>Etwas einfacher zu benutzen ist die C-Bibliotheksfunktion
+<tt>unsigned int sleep(unsigned int seconds);</tt>
+wenn eine Sekundengenauigkeit ausreicht. Diese liefert im Falle eines vorzeitigen
+Abbruches die Restzeit als Funktionsergebnis zur&uuml;ck.
+<p>
+
+<h4>Vereinbarung einer Signalreaktion (signal)</h4>
+
+Die Vereinbarung einer Reaktion auf ein bestimmtes Signal erfolgt mit dem
+Systemaufruf <tt>void (*signal(int signum, void (*handler)(int)))(int);</tt>
+Da dieser Funktionsprototyp etwas verwirrend ist, hier ein Beispiel:
+ <pre>
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;ctype.h&gt;
+
+void tick (int dummy) // nur Wecker neu aufziehen
+  { alarm(1); }
+
+void beenden(int signal_nummer) 
+  { // Signal-Bearbeitungsroutine
+  char c;
+  if (signal_nummer == SIGINT) 
+    { 
+    printf("Proze&szlig; wirklich beenden ?");
+    c = getchar(); 
+    if (c == 'j' || c == 'J') exit(1);                   
+    else                      return;                    
+    }
+  else 
+    {
+    printf("unerwartetes Signal %d\n");
+    exit(1);
+    }
+  }
+
+int main(void) 
+  {
+  signal(SIGINT,beenden);
+  signal(SIGALRM,tick);
+  alarm(1);  // Wecker aufziehen
+  for (;;) 
+    {
+    pause();  // auf Signal warten
+    putchar('.');
+    };
+  }
+</pre>
+Das Hauptprogramm plant f&uuml;r das Signal "SIGINT" (z.B. Dr&uuml;cken
+von Ctrl-C) die Bearbeitungsroutine "beenden" und f&uuml;r das Signal
+"SIGALRM" (Timer-Signal) die Routine "tick" ein. Im Anschluss daran wird
+der Timer mit "alarm(1)" auf 1 Sekunde gesetzt.
+<br>Nun folgt eine Endlosschleife, in der mit "pause()" auf ein beliebiges
+Signal gewartet wird. Falls der Benutzer innerhalb der n&auml;chsten Sekunde
+nichts tut, wird beim Eintreffen von "SIGALRM" die Funktion "tick" aufgerufen,
+in der nur der Timer neu gesetzt wird. Die Folge ist eine regelm&auml;&szlig;ige
+Ausgabe der Zeichenfolge "tick" auf dem Terminal.
+<br>Wird allerdings Ctrl-C bet&auml;tigt (was das Signal "SIGINT" ausl&ouml;st),
+dann wird "beenden" aufgerufen, wo der Benutzer gefragt wird, ob er das
+Programm tats&auml;chlich abbrechen m&ouml;chte. Wenn er dann nicht mit
+"j" oder "y" antwortet, wird das Programm einfach fortgesetzt.
+<br>Die Signal-Bearbeitungsroutinen m&uuml;ssen void-Funktionen mit einem
+int-Parameter sein. Dieser repr&auml;sentiert die Nummer des Signals, das
+den Aufruf verursacht hat. Dadurch ist es m&ouml;glich, <b>eine</b> Routine
+f&uuml;r verschiedene Signale einzuplanen und in der Routine die ausl&ouml;sende
+Ursache zu ermitteln.
+<br>Innerhalb einer Signal-Bearbeitungsroutine wird ein erneutes Eintreffen
+des gleichen Signals ignoriert. In unserem Beispiel hei&szlig;t dies, da&szlig;
+das wiederholte Dr&uuml;cken von Ctrl-C (w&auml;hrend des Dialoges)
+keine Wirkung hat.
+<br>Statt des Namens einer Bearbeitungsfunktion kann an der Position des
+zweiten Parameters von "signal" auch eine von zwei vordefinierten Konstanten
+angegeben werden:
+<ul>
+<li>
+<tt>SIG_IGN</tt> bedeutet, da&szlig; das Signal ignoriert werden soll.
+<li><tt>SIG_DFL</tt> bedeutet, da&szlig; die Standardbearbeitung f&uuml;r 
+das Signal eingestellt werden soll.
+</ul>
+Schreibt man z. B. <tt>signal(SIGINT,SIG_IGN);</tt>,
+wird das Dr&uuml;cken von Ctrl-C grunds&auml;tzlich ignoriert.
+<p>M&ouml;chte man wissen, welche Signalbearbeitung vor dem Aufruf von
+"signal" eingestellt ist, dann muss man den R&uuml;ckgabewert von "signal"
+auswerten. Dieser repr&auml;sentiert die "alte" Signalreaktion. Damit kann
+beispielsweise eine Signalbearbeitung vor&uuml;bergehend modifiziert werden,
+um sie im Anschluss wieder auf den vorherigen Mechanismus zur&uuml;ckzusetzen.
+Mit <tt>void (*old)(int) = signal(SIGINT,beenden);</tt> holt man die "alte"
+Signalreaktion und mit <tt>signal(SIGINT,old);</tt> wird sie wieder eingesetzt.
+<p>
+
+<h4>Senden eines Signales (kill)</h4>
+Die Systemfunktion <tt>int kill(int pid, int signal);</tt>
+wird verwendet, um einem Proze&szlig; ein Signal zuzusenden. Wenn der Parameter 
+"pid" gr&ouml;&szlig;er als 0 ist, wird das Signal dem Proze&szlig; mit der 
+entsprechenden Nummer zugestellt. Wenn "pid" gleich 0 ist, wird es allen 
+Prozessen &uuml;bermittelt, die zur gleichen Gruppe wie der Aufrufer geh&ouml;ren. 
+Im Falle "pid" gleich -1 werden alle existierenden Prozesse (au&szlig;er 
+"init") adressiert, und bei "pid" kleiner -1 wird es an eine andere Gruppe 
+geschickt, deren Nummer gleich dem Absolutwert von "pid" ist.
+Wenn der aufrufende Proze&szlig; keine Superuser-Rechte besitzt, kann ein
+Signal nur an einen Proze&szlig; desselben Benutzers geschickt werden.
+<br>Zum gezielten Abbrechen eines Prozesses sollte m&ouml;glichst das Signal
+"SIGINT" benutzt werden. Der Empf&auml;nger kann da&szlig;elbe "abfangen" und
+hat damit die Chance, vor dem eigentlichen Beenden Aufr&auml;umarbeiten
+durchzuf&uuml;hren (z.B. Daten abspeichern). Allerdings kann er sich auch
+daf&uuml;r entscheiden, das Signal zu ignorieren, wodurch "SIGINT" keine
+sichere Ma&szlig;nahme zum "killen" eines Prozesses darstellt.
+<p>
+Die folgende Tabelle fasst die Funktionen f&uuml;r Signale zusammen:
+<P>
+<table border="1" cellpadding="3" cellspacing="0" width="90%">
+<tr>
+<td valign="top"><TT>exit</TT></td>
+<td valign="top">Beendet den Prozess.<BR>
+Prototyp: <TT>void exit (int status);</TT><BR>
+Parameter:<TT>status</TT>: Status der zur&uuml;ckgegeben wird (0 = OK)</td>
+</tr>
+<tr>
+<td valign="top"><TT>fork</TT></td>
+<td>Starten einen neuen Prozess.<BR>
+Prototyp: <TT>int fork(void);</TT><BR>
+R&uuml;ckgabewert: 0 an Kindprozess, Prozess-ID 
+(PID) des Kindes an Elternprozess, -1 bei Fehler.</td>
+</tr>
+<tr>
+<td valign="top"><TT>getpid</TT></td>
+<td valign="top">Liefert die Prozess-ID (PID) des aufrufenden
+Prozesses bzw. -1 bei einem Fehler.<BR>
+Prototyp: <TT>int getpid(void);</TT></td>
+</tr>
+<tr>
+<td valign="top"><TT>getppid</TT></td>
+<td valign="top">Liefert die Prozessidentifikationsnummer des Vaterprozesses
+(PPID) bzw. -1 bei einem Fehler.<BR>
+Prototyp: <TT>int getppid(void);</TT></td>
+</tr>
+<tr>
+<td valign="top"><TT>kill</TT></td>
+<td valign="top">Das Signal <TT>sig</TT> wird durch diese Funktion
+an den Prozess mit der Prozessidentifikationsnummer <TT>pid</TT> geschickt.<BR>
+Includes: <TT>#include &lt;signal.h&gt;<BR>
+Prototyp: <TT>int kill(int pid, int sig);</TT><BR>
+Parameter:<TT>pid</TT> des Empf&auml;nger-Prozesses.</td>
+</tr>
+<tr>
+<td valign="top"><TT>pause</TT></td>
+<td valign="top">Der Prozess wird angehalten und wartet auf ein Signal.<BR>
+Prototyp: <TT>int pause(void);</TT></td>
+</tr>
+<tr>
+<td valign="top"><TT>signal</TT></td>
+<td valign="top">Diese Funktion bindet das Signal sig an einen Signal Handler.<BR>
+Includes: <TT>#include &lt;signal.h&gt;</TT><BR>
+Prototyp: <TT>void signal(int sig, int *sighand);</TT><BR>
+Parameter: <TT>sig</TT>: Signal, das an den Signal Handler gebunden werden soll.<BR>
+           <TT>*sighand</TT>: Signal Handler der ausgef&uuml;hrt werden soll.</td>
+</tr>
+<tr>
+<td><TT>sleep</TT></td>
+<td valign="top">Der aufrufende Prozess blockiert f&uuml;r eine bestimmte Zeit.<BR>
+Prototyp: <TT>unsigned sleep(int sec);</TT><BR>
+Parameter: <TT>int sec</TT>: Dauer in Sekunden.</td>
+</tr>
+<tr>
+<td valign="top"><TT>wait</TT></td>
+<td valign="top">Es wird auf die Beendigung eines Sohnprozesses gewartet. Haben
+einer oder mehrere Sohnprozesse bereits terminiert, so kehrt
+der Aufruf sogleich zur&uuml;ck. Ist dies nicht der Fall wird
+auf die Beendigung des n&auml;chsten Sohnprozesses gewartet.<BR>
+Prototyp: <TT>int wait(int *statusp);</TT><BR>
+Parameter: <TT>*statusp</TT>: Zeiger
+auf Variable, in der der Terminierungsstatus des Sohnes
+zur&uuml;ckgegeben wird. Ben&ouml;tigt man den R&uuml;ckgabestatus
+nicht, kann 0 als Parameter benutzt werden.<BR>
+R&uuml;ckgabewert: PID des terminierten Sohnes bzw. -1 wenn kein 
+Sohnprozess existiert oder bereits terminierte S&ouml;hne durch fr&uuml;here
+<TT>wait(void)</TT>-Aufrufe entgegengenommen wurden.</td>
+</tr>
+<tr>
+<td valign="top"><TT>waitpid</TT></td>
+<td valign="top">Es wird auf die Beendigung eines bestimmten 
+Sohnprozesses gewartet.<BR>
+Prototyp: <TT>int waitpid(int pid, int *statusp, int optionen);</TT><BR>
+Parameter: <TT> *statusp</TT> wie bei <TT>wait</TT>.
+Ist der Wert von <TT>pid</TT> &gt; 0, handelt es sich um die PID des Prozesses, 
+auf den gewartet werden soll. Bei <TT>pid == -1</TT> wird auf die Beendigung 
+eines beliebigen  Sohnprozesses gewartet.<br>
+Der Parameter <TT>optionen</TT> bestimmt wie und worauf gewartet 
+werden soll. Er ist aber abh&auml;nig davon ob das System z.B. eine
+Job-Kontrolle unterst&uuml;tzt.</td>
+</table>
+<P>
+Zum Schluss ein Reaktionstest in C.
+<PRE>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;time.h&gt;
+#include &lt;math.h&gt;
+#include &lt;unistd.h&gt;
+
+clock_t start, ende, differenz, record=1000000;
+
+/* Signal-Handler-Routinen */
+void  strgbackslash_faenger(int sig)
+  {
+  signal(SIGQUIT, SIG_IGN);
+  printf("......Die schnellste STRG-C Tastenfolge dauerte %7.3f\n",
+          record/(double)CLOCKS_PER_SEC);
+  exit(0);
+  }
+
+void  strgc_faenger(int sig)
+  {
+  /* Fuer die Dauer dieser Funktionsausführung muessen weitere  */
+  /* SIGINT-Signale ignoriert werden.                           */
+  signal(SIGINT, SIG_IGN);
+
+  /* Gebrauchte Zeit berechnen und ausgeben */
+  ende = clock();
+  differenz = ende - start;
+  printf("Gebrauchte Zeit:  %10.3f Sek\n", differenz/(double)CLOCKS_PER_SEC);
+  if (differenz &lt; record) 
+    {
+    record = differenz;
+    printf("...........Neuer Rekord %10.3f Sek\n", record/(double)CLOCKS_PER_SEC);
+    }
+  sleep(rand()%2+1);
+  printf("\nDruecke so schnell wie moeglich STRG-C.......\n");
+  start = clock();
+
+  /* Signal-Handler wieder fuer SIGINT installieren */
+  signal(SIGINT, SIG_IGN);
+  if (signal(SIGINT, strgc_faenger) == SIG_ERR) 
+    {
+    printf("Fehler: SIGINT-Handler nicht installiert!\n");
+    exit(1);
+    }
+  }
+
+int main(void)
+  {
+  /* Startwert für Pseude-Zufallszahlen erzeugen und   */
+  /* Signal Handler installieren                       */
+  srand( time(NULL) );
+  if (signal(SIGQUIT, strgbackslash_faenger) == SIG_ERR) 
+    {
+    printf("Fehler: SIGQUIT-Handler nicht installiert!\n");
+    exit(1);
+    }
+  signal(SIGINT, SIG_IGN);
+  sleep(rand()%2+1);
+  printf("Bitte merk Dir: Beenden mit STRG-\\\n");
+  printf("\nDruecke so schnell wie moeglich STRG-C.......\n");
+  if (signal(SIGINT, strgc_faenger) == SIG_ERR) 
+    {
+    printf("Fehler: SIGINT-Handler nicht installiert!\n");
+    exit(1);
+    }
+  start = clock();
+  while (1);
+  return(0);
+  }
+</PRE>
+
+
+<H2>Prozess-Synchronisation</H2>
+
+<H3>Synchronisation durch Semaphore</H3>
+Ein Semaphor ist ein Z&auml;hler der mehreren Prozessen gleichzeitig den 
+Zugriff auf ein gemeinsames Datenobjekt erm&ouml;glicht. Es wird geregelt, 
+wieviele Prozesse gleichzeitig eine gemeinsame Ressource benutzen d&uuml;rfen.
+Ein Beispiel aus dem t&auml;glichen Leben ist
+z.B. die Benutzung eines Autobusses, in dem maximal 50 Personen
+Platz haben. Ein Semaphor w&auml;re hier ein Z&auml;hler, der mit 50
+initialisiert wird. Jedesmal, wenn eine Person in den Bus einsteigt,
+wird der Z&auml;hler um 1 vermindert (dekrementiert). Verl&auml;sst
+eine Person den Bus, wird der Z&auml;hler um 1 erh&ouml;ht
+(inkrementiert). Ist der Z&auml;hler 0, so darf keine weitere
+Person den Bus betreten. Um eine gemeinsam genutzte
+Ressource zu verwenden, mu&szlig; ein Prozess folgende Schritte
+ausf&uuml;hren:
+<Ol>
+<li>Abfragen des Semaphors, der die Ressource kontrolliert.
+<li><ul>
+  <li>Hat der Semaphor einen Wert gr&ouml;&szlig;er 0, 
+      dekrementieren des Semaphors und Verwenden der Ressource. 
+  <li>Hat der Semaphor den Wert 0, Prozess anhalten, bis ein anderer
+       Prozess, der zur Zeit die Ressource benutzt, diese freigibt.
+  </ul>
+<li>Beim Freigeben der Ressource incrementieren des Semaphors. Eventuell wartende
+Prozesse werden jetzt fortgesetzt.
+</Ol>
+Oft werden auch bin&auml;re Semaphore eingesetzt. Sie bewirken den
+wechselseitigen Ausschlu&szlig; von einer Ressource. Falls ein kritischer 
+Bereich belegt ist, warten die Prozesse im Zustand blockiert, 
+bis der kritische Bereich frei ist. Das System wird durch die
+wartenden Prozesse nicht belastet.
+<P>
+Das folgende Programmbeispiel erzeugt einen Semaphor, der auf 3 
+initialisiert wird, und 10 Sohnprozesse, die &uuml;ber den Semaphor
+synchronisiert werden. Die ersten drei Prozesse k&ouml;nnen sofort
+arbeiten. Alle anderen Prozesse m&uuml;ssen warten, bis ein anderer 
+Prozess den Semaphor wieder inkrementiert. 
+<P>
+Da bei verschiedenen UNIX-Varianten die Semaphor-Operationen 
+unterschiedlich sind, l&auml;uft das Beispiel nur unter Linux.
+
+<pre>
+#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;signal.h&gt;
+#include&lt;unistd.h&gt;
+#include&lt;sys/types.h&gt;
+#include&lt;sys/ipc.h&gt;
+#include&lt;sys/sem.h&gt;
+
+#if defined(__GNU_LIBRARY__) &amp;&amp; !defined(_SEM_SEMUN_UNDEFINED)
+   /* union semun is defined by including &lt;sys/sem.h&gt; */
+#else
+   /* according to X/OPEN we have to define it ourselves */
+   union semun
+     {
+     int val;                    /* value for SETVAL */
+     struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */
+     unsigned short int *array;  /* array for GETALL, SETALL */
+     struct seminfo *__buf;      /* buffer for IPC_INFO */
+     };
+#endif
+
+struct sembuf sem_p[1];      /* Strucktur fuer */
+                             /* P-Operation auf Semaphor */
+
+struct sembuf sem_v[1];      /* Strucktur fuer */
+                             /* V-Operation auf Semaphor */
+
+int main(void)
+  {
+  int prozess_pid[10];       /* Feld um die PID´s der  */
+                             /* Sohn-Prozesse zu speichern */
+  int anzahl;                /* Anzahl der Sohn-Prozesse */
+  int semid;                 /* ID der Semaphorengruppe */
+  ushort initarray[1];       /* Initialisierungsfeld */
+  ushort outarray[1];        /* Ausgabefeld */
+  union semun para;
+  union semun para2;          /* Variablen zum Arbeiten unter Linux */
+  para.array = initarray;
+  para2.array = outarray;
+
+  initarray[0] = 3;
+  semid = semget(IPC_PRIVATE,1,IPC_CREAT|0777);
+          /* Erzeugung einer Semaphorgruppe mit einem Semaphor */
+
+  semctl(semid,0,SETALL,para);
+
+  sem_p[0].sem_num = 0;         /* Vorbereitung der P-Operation */
+  sem_p[0].sem_op  = -1;
+  sem_p[0].sem_flg = 0;
+
+  sem_v[0].sem_num = 0;         /* Vorbereitung der V-Operation */
+  sem_v[0].sem_op  = 1;
+  sem_v[0].sem_flg = 0;
+
+  printf("\nZum Starten und Beenden bitte Eingabetaste druecken\n\n");
+  while (getchar() != '\n');
+
+  for (anzahl=0; anzahl&lt;10; anzahl++)     /* 10 Sohn-Prozesse */
+    {                                     /* werden erzeugt */
+    if((prozess_pid[anzahl] = fork()) == 0)
+      {
+      printf("Kunde %i betritt den Laden  \n",anzahl);
+      semop(semid,sem_p,1);             /* Semaphor dekrementieren */
+      printf("Kunde %i wird bedient \n",anzahl);
+      sleep(5);
+      printf("Kunde %i verlaesst den Laden\n",anzahl);
+      semop(semid,sem_v,1);             /* Semaphor inkrementieren */
+      exit(0);
+      }
+    }
+  while(getchar() != '\n');
+  for (anzahl=0; anzahl&lt;10; anzahl++)    /* terminiere die restlichen  */
+    kill(prozess_pid[anzahl],9);         /* Sohn-Prozesse */
+
+  semctl(semid,0,IPC_RMID,para);
+  return 0;
+  }
+</pre>
+<P>
+Die Ausgabe des Programms k&ouml;nnte folgenderma&szlig;en aussehen:
+<PRE>
+Zum Starten und Beenden bitte Eingabetaste druecken
+
+Kunde 0 betritt den Laden
+Kunde 0 wird bedient
+Kunde 1 betritt den Laden
+Kunde 1 wird bedient
+Kunde 2 betritt den Laden
+Kunde 2 wird bedient
+Kunde 3 betritt den Laden
+Kunde 4 betritt den Laden
+Kunde 5 betritt den Laden
+Kunde 6 betritt den Laden
+Kunde 7 betritt den Laden
+Kunde 8 betritt den Laden
+Kunde 9 betritt den Laden
+Kunde 0 verlaesst den Laden
+Kunde 2 verlaesst den Laden
+Kunde 1 verlaesst den Laden
+Kunde 5 wird bedient
+Kunde 4 wird bedient
+Kunde 3 wird bedient
+Kunde 3 verlaesst den Laden
+Kunde 4 verlaesst den Laden
+Kunde 5 verlaesst den Laden
+Kunde 7 wird bedient
+Kunde 6 wird bedient
+Kunde 8 wird bedient
+Kunde 8 verlaesst den Laden
+Kunde 6 verlaesst den Laden
+Kunde 7 verlaesst den Laden
+Kunde 9 wird bedient
+Kunde 9 verlaesst den Laden
+</PRE>
+<P>
+
+<H3>Synchronisation durch Signale</H3>
+Signale wurden schon weiter oben vorgestellt. Hier greifen wir sie
+nochmals auf - unter dem Aspekt der Proze&szlig;-Synchronisation.
+Bei der Synchronisation/Steuerung von Prozessen durch Signale kann man 
+die Reihenfolge festlegen, in der bestimmte Prozesse bearbeitet werden. 
+Die Funktionen <TT>signal()</TT>, <TT>pause()</TT> und <TT>kill()</TT>
+werden hierf&uuml;r verwendet. Durch die Funktion <TT>signal()</TT> wird ein 
+Signal-Handler, der beim Eintreffen des Signals ausgef&uuml;hrt wird, an 
+das Signal gebunden. Bei gr&ouml;&szlig;eren Programmen, die mehrere Prozesse haben, 
+wird es allerdings schwierig den &Uuml;berblick zu behalten. Bei dieser Methode 
+wird die Reihenfolge festgelegt in der Prozesse bzw. Teile von Prozessen
+ausgef&uuml;hrt werden. Die "parallele" Bearbeitung von Prozessen wird dadurch 
+eingeschr&auml;nkt. Ein weiteres Problem bei der Arbeit mit Signalen ist, da&szlig; 
+Signale nicht vom System gespeichert werden. Erh&auml;lt ein Prozess ein Signal 
+bevor dieser selbst die Funktion <TT>pause()</TT> aufgerufen hat geht 
+dieses Signal verloren und der Prozess wartet, wenn er sp&auml;ter die Funktion 
+<TT>pause()</TT> aufruft, vergeblich auf ein Signal.
+<P>
+Beispiel f&uuml;r die Synchronisation durch Signale: 
+<pre>
+#include&lt;stdio.h&gt;
+#include&lt;signal.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+void sighand(void) /* Signal Handler wird beim Eintreffen */
+  {                /* des Signales SIGUSR1 ausgefuehrt */
+  signal(SIGUSR1,&amp;sighand);
+  /* Hier wird die Bindung des Signals */
+  /* an den Signal Handler sighand() erneuert.  */
+
+  puts("Signalhandler aktiv!\n");
+  }
+
+int main(void)
+  {
+  int vater_pid, prozess1_pid, prozess2_pid;  /* PIDs der Soehne */
+  signal (SIGUSR1,&amp;sighand);                  /* Bindung des Signals SIGUSR1 */
+                                             /* an den Signal Handler sighand() */
+  if ((prozess1_pid = fork()) == 0)           /* Sohnprozess 1 wird erzeugt */
+    {                                         /* und gestartet */
+    vater_pid = getppid();                    /* Sohnprozess erfragt die */
+                                              /* PID des Vaters */
+    printf("Sohn 1 laeuft\n");
+    sleep(3);
+    kill(vater_pid,SIGUSR1);                  /* Dem Vaterprozess wird das */
+                                              /* Signal SIGUSR1 gesendet */
+    printf("Sohn 1 terminiert\n");
+    exit(0);
+    }
+
+  if ((prozess2_pid = fork()) == 0)           /* Sohnprozess 2 wird */
+    {                                         /* erzeugt und gestartet */
+    printf("Sohn 2 gestartet - wartet\n");
+    pause();                                  /* Sohnprozess 2 wartet */
+                                              /* auf ein Signal */
+
+    printf("Sohn 2 terminiert\n");
+    exit(0);
+    }
+  printf("Vater wartet auf Signal von Sohn 1\n");
+  pause();
+  printf("Vater: Signal von Sohn 1, kille Sohn 2\n");
+  kill(prozess2_pid,SIGUSR1);
+  putchar('\n');
+  return(0);
+  }
+</pre>
+<P>
+Die Ausgabe des Programms:
+<PRE>
+Vater wartet auf Signal von Sohn 1
+Sohn 1 laeuft
+Sohn 2 gestartet - wartet
+Sohn 1 terminiert
+Signalhandler aktiv!
+Vater: Signal von Sohn 1, kille Sohn 2
+Signalhandler aktiv!
+Sohn 2 terminiert
+</PRE>
+
+
+<H3>Wechselseitiger Ausschlu&szlig; mit Spinlocks</H3>
+Der Begriff "Spinlock" (engl. Spin = drehen, kreisen) entstand, weil 
+bei dieser Art des wechselseitigen Ausschlu&szlig;es eine 
+<TT>while</TT>-Schleife der Hauptbestandteil ist. Diese wird so 
+oft durchlaufen, bis der Prozess Zugriff auf die ben&ouml;tigte 
+Ressource erh&auml;lt. Man unterscheidet zwei Arten.
+<OL>
+<LI>Spinlocks durch Maschinenbefehle<BR>
+Hier wird durch Aufruf einer Funktion innerhalb einer <TT>while</TT>-Schleife
+(<TT>while(TEST_AND_SET(&amp;lock));</TT>) getestet, ob ein kritischer Bereich
+frei ist oder nicht. Dies wird anhand einer Sperrvariablen festgestellt. 
+Wenn der kritische Bereich besetzt ist, liefert die Funktion z.B. den Wert 
+<TT>1</TT> zur&uuml;ck, so da&szlig; die <TT>while</TT>-Schleife erneut durchlaufen wird. 
+<br>
+Ist der kritische Bereich frei, so erh&auml;lt man den Wert <TT>0</TT> 
+und die Sperrvariable wird auf <TT>1</TT> gesetzt. Hierbei ist wichtig, 
+da&szlig; die &Uuml;berpr&uuml;fung und das Setzen der Variable ohne Unterbrechung
+also "atomar" erfolgt.<br>
+Beim Verlassen des kritischen Bereiches setzt der Prozess die
+Sperrvariable einfach auf <TT>0</TT> (<TT>lock = 0</TT>).
+
+<LI>Spinlocks durch Lock Files<br>
+Bei dieser Art von Spinlock
+wird anstelle einer Sperrvariable eine sogenannte Lock-File
+verwendet. Diese Lock-File ist eine Datei mit einem
+bestimmten Namen. Dieser Name mu&szlig; allen Prozessen bekannt
+sein die sich einen kritischen Bereich teilen. Ein Prozess
+versucht vor dem Eintritt in einen kritischen Bereich diese
+Datei anzulegen. Existiert diese Datei, ist der kritische
+Bereich bereits von einem anderen Prozess belegt. Verl&auml;&szlig;t
+dieser den kritischen Bereich, l&ouml;scht er die Datei, die er
+beim Eintritt in diesen Bereich angelegt hat. Durch die 
+<TT>while</TT>-Schleife versuchen die Prozesse solange diese
+Datei anzulegen, bis es ihnen gelingt. Das Erzeugen der
+Lock-Files mu&szlig; "atomar" erfolgen.
+</OL>
+
+<p>Die Verwendung von Spinlocks hat diverse Nachteile. Es wird keine
+Reihenfolge festgelegt, so dass einige Prozesse ggf. sehr lange warten 
+m&uuml;ssen. Nach Freigabe des kritischen Bereiches besitzt jeder Prozess, 
+auch jener, der den kritischen Bereich gerade verlassen hat, die selbe 
+Wahrscheinlichkeit den kritischen Bereich als n&auml;chstes zu erhalten. 
+Der gr&ouml;&szlig;te Nachteil ist jedoch, da&szlig; die Prozesse
+nicht in den Zustand blockiert &uuml;bergehen sondern immer wieder
+die <TT>while</TT>-Schleife durchlaufen, was zu einer h&ouml;heren
+Belastung des Systems f&uuml;hrt.
+<P>
+
+<H2>Prozesskommunikation</H2>
+
+<H3>Pipes</H3> 
+Eine Pipe ist ein Datenkanal, der wie eine Datei behandelt wird. 
+Ein Prozess schreibt die
+Daten in diese Pipe und ein anderer Prozess kann diese Daten in
+der Reihenfolge auslesen, in der sie vom anderen Prozess
+geschrieben wurden. Eine Pipe in Unix/Linux ist unidirektional,
+so da&szlig; die Daten nur in eine Richtung &uuml;bermittelt werden. 
+Eine Pipe ist aus Sicht des Prozesses eine Datei, auf
+die er sequentiell schreibt oder von der er sequentiell liest. 
+Ein Prozess, der aus einer leeren Pipe lesen will, mu&szlig; warten, 
+bis von einem anderen Prozess in die Pipe geschrieben wurde. 
+Ein Prozess, der in eine Pipe schreiben will, mu&szlig; warten, 
+wenn der Pipe-Buffer voll ist. 
+<P>
+
+<A NAME="PIPE"><H4>Unbenannte Pipe</H4></A>
+Die (unbenannte) Pipe ist eingeschr&auml;nkt.Ihre Lebensdauer 
+ist abh&auml;ngig von der Lebensdauer der Prozesse die mit ihr 
+arbeiten. Sind all diese Prozesse beendet, wird die Pipe gel&ouml;scht.
+Die Kommunikation &uuml;ber eine unbenannte Pipe ist nur f&uuml;r Prozesse 
+m&ouml;glich, die im gleichen Proze&szlig;baum liegen.
+Mit dem <TT>pipe()</TT>-Aufruf besitzt ein Prozess zun&auml;chst eine 
+Pipe zu sich selbst, aus der er mit Filehandle 0 Daten lesen kann. 
+Mit dem Filehandle 1 kann er Daten in diese Pipe schreiben.
+Sinnvoll wird das erst, wenn der Vaterprozess durch einen 
+<TT>fork()</TT>-Aufruf einen Sohnprozess erzeugt, der mit dem 
+Vaterprozess Daten austauscht. Dieser Sohnprozess erbt die Pipe 
+seines Vaters. Die Richtung des Datenstromes wird
+dadurch beeinflu&szlig;t welcher Prozess die Lese-bzw. Schreibseite
+der Pipe schlie&szlig;t.
+<p>
+Sollen zwei S&ouml;hne durch eine unbenannte Pipe miteinander kommunizieren, 
+m&uuml;ssen folgende Schritte ausgef&uuml;hrt werden.
+<ol>
+<li>Vaterprozess richtet durch den Aufruf <TT>pipe()</TT> eine Pipe ein.
+<li>Der Vaterprozess erzeugt mit <TT>fork()</TT> einen "Schreib-Sohn".
+<li>Der Vaterprozess schlie&szlig;t die Schreibseite der Pipe.
+<li>Der "Schreib-Sohn" schlie&szlig;t die Leseseite der Pipe.
+<li>Der Vaterprozess erzeugt nun mittels <TT>fork()</TT> einen "Lese-Sohn".
+<li>Der Vaterprozess schlie&szlig;t nun auch die Leseseite der Pipe.
+<li>Dieser "Lese-Sohn" schlie&szlig;t die Schreibseite der Pipe.
+</ol>
+Die so erstellte Pipe bildet nun eine Verbindung zwischen dem ersten Sohn
+(Schreibprozess) und dem zweiten Sohn (Leseprozess). Der Vaterprozess
+hat nach dem Erstellen keinen Einflu&szlig; auf die Pipe, da er die
+Lese-und Schreibseite geschlossen hat.
+<P>
+Das folgende Beispiel demonstriert, wie eine Shell prinzipiell vorgeht, 
+wenn sie eine "Proze&szlig;-Pipeline" ausf&uuml;hrt. Angenommen, das 
+Kommando <tt>ls | sort</tt> wird eingegeben. Dann l&auml;uft - 
+vereinfacht dargestellt - der folgende Mechanismus ab:
+<pre>
+int Pipe[2];
+int status;
+char *parls[]   = { "/bin/ls", NULL };
+char *parsort[] = { "/usr/bin/sort", NULL };
+
+int main(void) 
+  {
+  ...
+  pipe(Pipe);           // Pipe erzeugen
+  if (fork() == 0)      // erster Sohn: "ls"
+    {
+    dup2(Pipe[1],1);    // Pipeausgabe->Standardausgabe
+    close(Pipe[0]);     // Pipeeingabe nicht ben&ouml;tigt
+    execve("/bin/ls",parls,NULL);
+    }
+  else 
+    {
+    if (fork() == 0)    // zweiter Sohn: "sort"
+      {
+      dup2(Pipe[0],0);  // Pipeeingabe->Standardeingabe
+      close(Pipe[1]);   // Pipeausgabe nicht ben&ouml;tigt
+      execve("/usr/bin/sort",parsort,NULL);
+      }
+    else                // Vater (Shell)
+      {             
+      close(Pipe[0]);
+      close(Pipe[1]);
+      wait(&amp;status);   
+      wait(&amp;status);
+      }
+    }
+  ...
+  }
+</pre>
+<P>
+
+<H4>Benannte Pipe</H4>
+Eine benannte Pipe (named pipe) besitzt einen Ger&auml;teeintrag vom Typ 
+FIFO (First In First Out) und hat einen Namen, mit dem sie von jedem 
+Proze&szlig; durch <TT>open()</TT> angesprochen werden kann.
+Eine benannte Pipe wird vom System nicht automatisch gel&ouml;scht,
+wenn alle Prozesse beendet sind. Durch den Aufruf <TT>unlink()</TT> 
+mu&szlig; der Anwender die benannte Pipe innerhalb eines
+Prozesses selber l&ouml;schen. F&uuml;r beannte Pipes gibt es folgende
+Schnittstellenfunktionen:
+<P>
+
+<table border="1" cellpadding="3" cellspacing="0" width="90%">
+<tr>
+<td valign="top"><TT>close</TT></td>
+<td valign="top">Schlie&szlig;t ein Schreib-oder Leseende einer Pipe.<BR>
+Prototyp: <TT>int close(int fd);</TT><BR>
+Parameter: <TT>fd</TT>: Lese-bzw. Schreibdeskriptor einer Pipe</td>
+</tr>
+<tr>
+<td valign="top"><TT>mkfifo</TT></td>
+<td valign="top">Erzeugt eine benannte Pipe.<BR>
+Prototyp: <TT>int mkfifo (char *name, int mode);</TT><BR>
+Parameter: <TT> *name</TT>: Name bzw. Pfad der Pipe, <TT>mode</TT>:
+Bitmaske f&uuml;r Zugriffsrechte auf die Pipe. Die Positon und Bedeutung
+dieser Bits sind so wie beim numerischen <TT>chmod</TT>-Kommando
+(z.B. 0755 [f&uuml;hrende Null wg. Oktalangabe]).<BR>
+R&uuml;ckgabewert: 0 bei erfolgreicher Ausf&uuml;hrung, sonst -1.</td>
+</tr>
+<tr>
+<td valign="top"><TT>open</TT></td>
+<td valign="top">&ouml;ffnet eine Pipe bzw. Datei.<BR>
+Prototyp: <TT>open (char *name, int flag, int mode);<BR>
+Parameter: <TT>*name</TT>: Name bzw. Pfad der Pipe, <TT>flag</TT>:
+Bitmuster f&uuml;r Zugriff auf die Pipe (<TT>O_RDONLY</TT> Lesezugriff,
+<TT>O_WRONLY</TT> Schreibzugriff, <TT>O_NONBLOCK</TT> Prozessverhalten)
+Wird <TT>O_NONBLOCK</TT> nicht angegeben (Normalfall), blockiert der
+Leseprozess, bis ein anderer Prozess die Pipe zum Schreiben &ouml;ffnet 
+und umgekehrt.<BR>
+R&uuml;ckgabewert: -1 bei Fehler oder Dateideskriptor f&uuml;r die Pipe.</td>
+</tr>
+<tr>
+<td valign="top"><TT>pipe</TT></td>
+<td valign="top">Erzeugt eine unbenannte Pipe.<BR>
+Prototyp: <TT>int ipe (int fd[2]);</TT><BR>
+Parameter: <TT>fd[2]</TT>: zwei Dateideskriptoren,
+die zur&uuml;ckgegeben werden, wobei <TT>fd[0]</TT> der Dateideskriptor f&uuml;r 
+die Leseseite und <TT>fd[1]</TT> Dateideskriptor f&uuml;r die Schreibseite 
+der Pipe ist.</td>
+</tr>
+<tr>
+<td valign="top"><TT>read</TT></td>
+<td valign="top">Lesen der Daten aus einer Pipe. Ist die Pipe leer, blockiert die
+Funktion.<BR>
+Prototyp: <TT>int read (int fd, char *outbuf, unsigned bytes);</TT><BR>
+Parameter: <TT>fd</TT>: Diskriptor der Pipe, <TT>*outbuf</TT>:
+Zeiger auf den Speicherbereich, in dem die Daten gespeichert werden und 
+<TT>bytes</TT>: Maximale Anzahl der Bytes, die gelesen werden.<BR>
+R&uuml;ckgabewert:  Anzahl der tats&auml;chlich gelesenen Bytes, -1 bei einem Fehler 
+und 0, wenn die Schreibseite der Pipe geschlossen wurde.</td>
+</tr>
+<tr>
+<td valign="top"><TT>unlink</TT></td>
+<td valign="top">L&ouml;scht die benannte Pipe.<BR>
+Prototyp: <TT>int unlink (char *name);<</TT><BR>
+Parameter: <TT> *name</TT>: Name/Pfad der Pipe.</td>
+</tr>
+<tr>
+<td valign="top"><TT>write</TT></td>
+<td valign="top">Schreibt Daten in eine Pipe. Ist der Pipe-Buffer voll, blockiert
+diese Funktion.<BR>
+Prototyp: <TT>int write (int fd, char *outbuf, unsigned bytes);</TT><BR>
+Parameter: <TT>fd</TT>: Diskriptor der Pipe, <TT>*outbuf</TT>:
+Zeiger auf den Speicherbereich, in dem die zu schreibenden Daten stehen und 
+<TT>bytes</TT>: Anzahl der Bytes, die geschrieben werden.<BR>
+</tr>
+</table>
+<p>
+
+Beispiel: Named Pipe f&uuml;r zwei getrennte Prozesse
+In Unix/Linux k&ouml;nnen benannte Pipes auch f&uuml;r die Kommunikation zwischen 
+Prozesse eingesetzt werden, die nicht miteinander "verwandt" sind:
+<pre>
+/* Empfaenger */
+#include&lt;stdio.h&gt;
+#include&lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include&lt;fcntl.h&gt;
+
+int main(void)
+  {
+  int ein;               /* Hilfsvariable fuer Programmstart */
+  int hilf;
+  char outbuffer[2];	 /* Buffer zum Auslesen der Pipe */
+  int fd;	             /* Dateideskriptor fuer Pipe */
+  int gelesen;           /* speichert die Anzahl der gelesenen Bytes */
+
+  printf("Empfaengerprozess wurde gestartet\n\n");
+  do
+    {
+    fd = open("TESTPIPE",O_RDONLY);  /* Oeffnen der Pipe zum Lesen */
+    if (fd == -1) printf("Prozess zum Schreiben in die Pipe starten!\n");
+    sleep(2);
+    } 
+  while (fd == -1);
+  do
+    {
+    gelesen = read(fd,outbuffer,2);	/* 2 Bytes werden ausgelesen */
+    if (gelesen != 0) printf("Lese %c aus der Pipe\n",outbuffer[0]);
+    sleep(2);
+    }
+  while (gelesen > 0);
+  unlink("TESTPIPE");		/* benannte Pipe wird geloescht */
+  return(0);
+  }
+</pre>
+
+
+<pre>
+/* Sender */
+#include&lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include&lt;stdio.h&gt;
+#include&lt;fcntl.h&gt;
+
+int main(void)
+  {
+  int hilf;
+  char inbuffer[2];  /* Buffer zum Schreiben in die Pipe */
+  int fd;            /* Dateideskriptor fuer Pipe */
+
+  system("mkfifo TESTPIPE -m 666");   /* benannte Pipe wird erzeugt */
+  printf("Sendeprozess wurde gestartet\n\n");
+
+  mkfifo("TESTPIPE",0666);           /* benannte Pipe wird erzeugt */
+  fd = open("TESTPIPE",O_WRONLY);    /* Oeffnen der Pipe zum */
+  for(hilf=0; hilf&lt;10; hilf++)       /* Zaehler zum Schreiben */
+    {
+    inbuffer[0] = (int)'0' + hilf;
+    inbuffer[1] = '\0';
+    write(fd,inbuffer,2);            /* 2 Bytes werden geschrieben */
+    printf("Schreibe %c in die Pipe\n",inbuffer[0]);
+    sleep(1);
+    }
+  return(0);
+  }
+</pre>
+<P>
+
+<H3>Message Queues</H3>
+Bei dieser Art der Kommunikation werden die Daten an Nachrichtenspeicher 
+gesendet und k&ouml;nnen dort von anderen Prozesssen abgeholt werden. Die 
+Message Queeues werden mit Hilfe einer Message-Queue-Tabelle vom Betriebssystem 
+verwaltet. Die Nachrichten bestehen aus einem Nachrichtenkopf
+(Message Header) und einem Nachrichtentext (Message Body). Im Header
+sind Informationen, wie Typ, Gr&ouml;&szlig;e der Nachricht und ein Zeiger
+auf den Speicherbereich, wo die Nachricht steht, enthalten. 
+<p>
+Eine solche Queue kann mit Nachrichten verschiedenen Typs arbeiten. 
+Der Typ wird durch die Anwendung bestimmt und ist einfach eine Zahl. 
+Ein Prozess kann Nachrichten an die Warteschlange senden. Beim 
+Erreichen der Kapazit&auml;t der Schlange kann der Prozess per Parameter 
+bestimmen, ob er blockieren will bis die Nachricht abzuliefern ist 
+oder mit einem Fehler zur&uuml;ckkehren m&ouml;chte. Auf der anderen Seite 
+kann ein Prozess eine Nachricht bestimmten Typs anfordern. Auch hier 
+kann der Prozess warten, bis er eine passende Nachricht bekommt, 
+oder mit einer Fehlermeldung sofort zur&uuml;ckkehren.
+<P>
+Die folgenden Funktionen <TT>msgsnd()</TT> und <TT>msgrcv()</TT> 
+verwenden eine Struktur <TT>msgbuf</TT> f&uuml;r ihre Nachrichten:
+<pre>
+struct msgbuf 
+  {
+  long mtype;     /* von der Anwendung definierbar > 0 */
+  char mtext[1];  /* Nachrichtendaten beginnen hier */
+  };
+</pre>
+Es kann als Typ eine beliebige Zahl gr&ouml;&szlig;er Null verwendet werden, 
+die allein von der Applikation festgelegt werden. F&uuml;r die eigenen 
+Nachrichten werden Sie im mtext vermutlich mehr als ein Zeichen 
+versenden wollen. Dazu definieren Sie sich eine eigene Struktur 
+mit entsprechend gr&ouml;&szlig;erem Datenpuffer. Die Gr&ouml;&szlig;e wird beiden 
+Funktionen als Parameter &uuml;bergeben.
+<P>
+An Include-Dateien werden ben&ouml;tigt:
+<pre>
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+</pre>
+<P>
+
+<table border="1" cellpadding="3" cellspacing="0" width="90%">
+<tr>
+<td valign="top"><TT>msgget</TT></td>
+<td valign="top">Die Funktion legt eine Message Queue an.<BR>
+Prototyp: <TT>int msgget(key_t key, int msgflg);</TT><BR>
+Parameter: <TT>key</TT> ist entweder eine Schl&uuml;sselzahl oder <TT>IPC_PRIVATE</TT>, 
+<TT>msgflg</TT> kombiniert die Konstanten <TT>IPC_CREAT</TT> und <TT>IPC_EXCL</TT> 
+und deren Oder-Verkn&uuml;pfung mit neun Berechtigungsbits f&uuml;r den Eigner, die Gruppe 
+und der Welt, wie sie vom Kommando <TT>chmod</TT> verwendet werden.<BR>
+R&uuml;ckgabewert: -1 im Fehlerfall oder die Message-Queue-ID, die f&uuml;r die n&auml;chsten 
+Aufrufe ben&ouml;tigt wird.</td>
+</tr>
+<tr>
+<td valign="top"><TT>msgsnd</TT></td>
+<td valign="top">Versenden von Nachrichten.<BR>
+Prototyp: <TT>int msgsnd(int msqid, struct  msgbuf  *msgp,  size_t msgsz, int msgflg);</TT><BR>
+Parameter: <TT>msqid</TT> ist der R&uuml;ckgabewert der Funktion <TT>msgget().</TT> <TT>msgp</TT> ist
+die Adresse der Datenstruktur mit dem Nachrichtentyp und den Daten. <TT>msgsz</TT> ist so gro&szlig; 
+wie das Array <TT>mtext</TT> in der Datenstruktur f&uuml;r die Nachricht. <TT>msgflg</TT> kann mit 
+der Optionen <TT>IPC_NOWAIT</TT> besetzt werden, wenn die Funktion bei einer &uuml;bervollen 
+Message-Queue nicht blockieren und warten soll, bis wieder Platz ist, sondern mit einem Fehler 
+zur&uuml;ckkehren.</td>
+</tr>
+<tr>
+<td valign="top"><TT>msgrcv</TT></td>
+<td valign="top">Nachrichten empfangen.<BR>
+Prototyp: <TT>int msgrcv(int msqid, struct  msgbuf  *msgp,  size_t msgsz, long msgtyp, int msgflg);</TT><BR>
+Parameter: <TT>msqid</TT> ist der R&uuml;ckgabewert der Funktion <TT>msgget().</TT> <TT>msgp</TT> ist
+die Adresse der Datenstruktur mit dem Nachrichtentyp und den empfangenen Daten.  <TT>msgsz</TT> ist so gro&szlig; 
+wie das Array <TT>mtext</TT> in der Datenstruktur f&uuml;r die Nachricht. <TT>msgtyp</TT> legt fest, auf 
+welchen Nachrichtentyp <TT>msgrcv()</TT> warten soll. Alle anderen Typen werden von <TT>msgrcv()</TT> 
+ignoriert. Wird hier 0 angegeben, nimmt <TT>mgsrcv()</TT> jeden Typ entgegen. <TT>msgflg</TT> kann mit 
+der Optionen <TT>IPC_NOWAIT</TT> besetzt werden, wenn die Funktion nicht blockieren und warten soll, bis 
+eine Nachricht vorliegt, sondern bei leerer Queue mit einem Fehler zur&uuml;ckkehrt.
+</td>
+</tr>
+<tr>
+<td valign="top"><TT>msgctl</TT></td>
+<td valign="top">Eigenschaften der Nachrichten verwaltet.<BR>
+Prototyp: <TT>int msgctl(int msqid, int kommando, struct msqid_ds *buf);</TT><BR>
+Parameter: <TT>msqid</TT> ist der R&uuml;ckgabewert der Funktion <TT>msgget().</TT>
+Mit <TT>kommando</TT> k&ouml;nnen folgende Konstanten &uuml;bergeben werden:<BR>
+<TT>IPC_STAT:</TT> Die Informationen &uuml;ber die Message Queue einlesen<BR>
+<TT>IPC_SET:</TT> &auml;ndere die Benutzerrechte in <TT>mode</TT><BR>
+<TT>IPC_RMID:</TT> Zerst&ouml;rt die Message Queue und weckt alle darauf wartenden Prozesse<BR></td>
+</table>
+<P>
+Mit dem Kommando <TT>ipcs</TT> erhalten Sie einen &Uuml;berblick &uuml;ber angeforderte Message-Queues.
+<P>
+Beispiel:<BR>
+Das Programm <TT>rcv.c</TT> wartet auf eine Nachricht in einer Message-Queue. 
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define MSGSIZE 20
+
+int main(void)
+  {
+  key_t Key = 666;
+  long Msgtyp = 4711;
+
+  int MsgID;
+  struct myMsg
+    {
+    long mtype;
+    char mtext[MSGSIZE];
+    } MsgData;
+
+  MsgID = msgget(Key, IPC_CREAT | 0666);   /* Messagequeue oeffnen/erzeugen */
+  if (MsgID &gt;= 0)
+    {
+    printf("Warte auf Message Type %ld\n", Msgtyp);
+    if (msgrcv(MsgID, &MsgData, MSGSIZE, Msgtyp, 0) == -1)
+      { printf("Fehler in msgrcv\n"); }
+    else
+      { printf("Daten empfangen: %s\n", MsgData.mtext); }
+    }
+  else
+    { printf("Fehler in msgget\n"); }
+  return(0);
+  }
+</pre>
+Das Programm <TT>snd.c</TT> sendet Nachrichten. 
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/msg.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define MSGSIZE 20
+
+int main(void)
+  {
+  key_t Key = 666;
+  long Msgtyp = 4711;
+
+  int MsgID;
+  struct myMsg
+    {
+    long mtype;
+    char mtext[MSGSIZE];
+    } MsgData;
+
+  MsgData.mtype = Msgtyp;
+  strncpy(MsgData.mtext, "Hello World", MSGSIZE);  /* Datenpuffer fuellen */
+
+  MsgID = msgget(Key, IPC_CREAT | 0666);     /* Messagequeue oeffnen/erzeugen */
+  if (MsgID &gt;= 0)
+    {
+    printf("Sende Messagetyp %ld\n", MsgData.mtype);
+    if (msgsnd(MsgID, &MsgData, MSGSIZE, 0) == -1)
+      { printf("Fehler in msgsnd\n"); }
+    else
+      { printf("Daten gesendet: %s\n", MsgData.mtext); }
+    }
+  else
+    { printf("Fehler in msgget\n"); }
+  return(0);
+  }
+</PRE>
+Die Message-Queue bleibt solange erhalten, bis ein Programm sie explizit per <TT>msgctl()</TT> 
+mit dem Kommando <TT>IPC_RMID</TT> entfernt, oder bis sie mit dem Befehl <TT>ipcrm</TT> gel&ouml;scht 
+wird (siehe <TT>man ipcrm</TT>, <TT>man ipcs</TT>).
+<P>
+
+<H3>Shared Memory</H3>
+Hier benutzen die Prozesse einen gemeinsamen Speicherbereich auf den sie 
+zugreifen. Dieser Speicherbereich mu&szlig; durch das Beriebssystem
+zur Verf&uuml;gung gestellt und  registriert werden. Erfolgt der Zugriff auf
+diesen Speicherbereich durch mehrere Prozesse, m&uuml;ssen diese sich
+synchronisieren.
+<P>
+An Include-Dateien werden ben&ouml;tigt:
+<pre>
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/shm.h&gt;
+</pre>
+<P>
+
+<table border="1" cellpadding="3" cellspacing="0" width="90%">
+<tr>
+<td valign="top"><TT>shmget</TT></td>
+<td valign="top">Legt den gemeinsamen Speicher an bzw. er&ouml;ffnet ihn.
+Prototyp: <TT>int shmget(key_t key, int size, int shmflg);</TT><BR>
+Parameter:  <TT>key</TT> ist entweder eine Schl&uuml;sselzahl oder <TT>IPC_PRIVATE</TT>.
+<TT>shmflg</TT> bildet eine Oder-Verkn&uuml;pfung der Konstanten <TT>IPC_CREAT</TT> 
+bzw. <TT>IPC_EXCL</TT> mit den neun Berechtigungsbits f&uuml;r den Eigner, die Gruppe 
+und der Welt (oktal!, wie bei <TT>chmod</TT>). <BR>
+R&uuml;ckgabewert: -1 im Fehlerfall oder die Shared-Memory-ID, die f&uuml;r die n&auml;chsten 
+Aufrufe ben&ouml;tigt wird.</td>
+</tr>
+<tr>
+<td valign="top"><TT>shmat</TT></td>
+<td valign="top">(shared memory attach) bindet den Speicher ein. 
+Prototyp: <TT>void *shmat(int shmid, const void *shmaddr, int shmflg);</TT><BR>
+Parameter: <TT>shmid</TT> ist die von <TT>shmget()</TT> ermittelte ID. 
+<TT>shmaddr</TT> ist normalerweise 0, dann sucht sich das System eine 
+passende Stelle. <TT>shmflg</TT> ist entweder 0 oder <TT>SHM_RDONLY,</TT> 
+wenn auf den Speicher nur lesend zugegriffen werden soll. <BR>
+R&uuml;ckgabewert: Der Fehlerwert von <TT>shmat()</TT> ist -1 und nicht <TT>NULL</TT>,
+wie man erwarten sollte. Daher ergeben sich Abfragen wie:
+<pre>
+myPtr = shmat(shID, 0, 0);
+if (myPtr == (char *)-1) ... 
+</pre>
+</td>
+</tr>
+<tr>
+<td valign="top"><TT>shmdt</TT></td>
+<td valign="top">(shared memory detach) hebt die Speicherbindung wieder auf.<BR>
+Prototyp: <TT>int shmdt(const void *shmaddr);<TT><BR>
+Parameter: <TT>shmaddr</TT> ist der R&uuml;ckgabewert von <TT>shmat()</TT>.<BR>
+R&uuml;ckgabewert: -1 im Fehlerfall, sonst 0.</td>
+</tr>
+<tr>
+<td valign="top"><TT>shmctl</TT></td>
+<td valign="top">Bestimmte Eigenschaften des gemeinsamen Speichers verwaltet.<BR>
+Prototyp: <TT>int shmctl(int shmid, int kommando, struct shmid_ds *buf);</TT><BR>
+Parameter: <TT>shmid</TT> ist der R&uuml;ckgabewert der Funktion <TT>shmget().</TT>
+Mit <TT>kommando</TT> k&ouml;nnen folgende Konstanten &uuml;bergeben werden:<BR>
+<TT>IPC_STAT:</TT> Die Informationen &uuml;ber den Speicher einlesen<BR>
+<TT>IPC_SET:</TT> &Auml;ndere die Benutzerrechte in <TT>mode</TT><BR>
+<TT>IPC_RMID:</TT> Markiere das Segment als zerst&ouml;rt<BR></td>
+</table>
+<P>
+Mit dem Kommandozeilenbefehl <TT>ipcs</TT> bekommen Sie, wie bei den Message-Queues,
+einen &Uuml;berblick &uuml;ber die angeforderten Shared-Memory-Bereiche.
+<P>
+Beispiel:
+Das erste Programm erzeugt einen Shared-Memory-Block von 128 Bytes und schreibt 
+dort ASCII-Zeichen hinein.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/shm.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define MAXMYMEM 100
+
+int main(void)
+  {
+  int ShmID;
+  key_t Key = 1234;
+  char *ShmPtr;
+  int i;
+
+  /* Shared Memory erzeugen */
+  ShmID = shmget(Key, MAXMYMEM, IPC_CREAT | 0666);
+  if (ShmID &gt;= 0) 
+    {
+    /* nun holen wir den Speicher */
+    ShmPtr = shmat(ShmID, 0, 0);
+    if (ShmPtr == (char *)-1) 
+      { printf("Fehler bei shmat\n"); }
+    else 
+      {
+      for (i=0; i&lt;95; i++) 
+        ShmPtr[i] = (char)((int)' ' + i);
+      while (getchar() != '\n'); /* Warte auf Enter */
+      shmdt(ShmPtr);
+      }
+    } 
+  else 
+    { printf("Fehler bei shget\n"); }
+  return(0);
+  }
+</pre>
+Das zweite Programm unterscheidet sich wenig vom vorhergehenden. Da das erste 
+Programm den Speicher reserviert, braucht das zweite dies nicht zu tun, es 
+liest einfach den Inhalt des Speichers aus und gibt ihn auf dem Bildschirm aus.
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;sys/ipc.h&gt;
+#include &lt;sys/shm.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define MAXMYMEM 100
+
+int main(void)
+  {
+  int ShmID;
+  key_t Key = 1234;
+  char *ShmPtr;
+  int i;
+
+  /* Existierenden Shared Memory zugreifen */
+  ShmID = shmget(Key, MAXMYMEM, 0666);
+  if (ShmID &gt;= 0) 
+    {
+    ShmPtr = shmat(ShmID, 0, 0);
+    if (ShmPtr == (char *)-1) 
+      { printf("Fehler bei shmat\n"); }
+    else 
+      {
+      for (i=0; i&lt;95; i++) 
+        putchar(ShmPtr[i]);
+      putchar('\n');
+      shmdt(ShmPtr);
+      }
+    }
+  else 
+    { printf("Fehler bei shget\n"); }
+  return(0);
+  }
+</pre>
+Man kann die Programme nacheinander laufen lassen. Nach dem ersten 
+Programmlauf sieht man mit  <TT>ipcs</TT>, da&szlig; der Shared-Memory-Block 
+noch vorhanden ist. 
+<P>
+
+<H3>Sockets</H3>
+Sockets erm&ouml;glichen eine bidirektionale Kommunikation sowohl lokal als
+auch innerhalb eines Netzwerkes. Der vom Benutzer aus sichtbare
+Teil der Kommunikation besteht aus drei Teilen:
+<ul>
+<li>dem Socket-Kopf (Socket Layer),
+<li>dem Protokollteil (Protocol Layer),
+<li>dem Ger&auml;tetreiber ( Device Layer).
+</ul>
+
+Der Socket-Kopf bildet die Schnittstelle zwischen den Betriebssystemaufrufen 
+und den weiter unten liegenden Schichten. Sockets mit gleichen Charakteristika 
+bez&uuml;glich Adressierung und Protokolladre&szlig;format werden zu Bereichen, sogenannten
+Domains, zusammengefa&szlig;t. Die Unix-System-Domain dient dabei zur
+lokalen Kommunikation zwischen Prozessen. Die Internet-Domain
+dient zur Kommunikation &uuml;ber ein Netzwerk.
+<P>
+Sockets werden an anderer Stelle behandelt.
+<P>
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server6.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server7.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+<H6><I>Letzte Aktualisierung: 30. Sep 2004</I></H6>
+</BODY>
+</HTML>

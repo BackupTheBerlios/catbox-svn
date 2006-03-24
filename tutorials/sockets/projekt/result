@@ -1,0 +1,220 @@
+hostname: doc
+
+os: GNU/Linux
+2.4.26
+dmesg_Linux version 2.4.26-1-386 (horms@tabatha) (gcc version 3.2.3 (Debian)) #1 Tue Aug 24 13:31:19 JST 2004
+dmesg_BIOS-provided physical RAM map:
+dmesg_ BIOS-e820: 0000000000000000 - 000000000009fc00 (usable)
+dmesg_ BIOS-e820: 000000000009fc00 - 00000000000a0000 (reserved)
+dmesg_ BIOS-e820: 00000000000e0000 - 0000000000100000 (reserved)
+dmesg_ BIOS-e820: 0000000000100000 - 0000000007fc0000 (usable)
+dmesg_ BIOS-e820: 0000000007fc0000 - 0000000007ff8000 (ACPI data)
+dmesg_ BIOS-e820: 0000000007ff8000 - 0000000008000000 (ACPI NVS)
+dmesg_ BIOS-e820: 00000000ffb80000 - 00000000ffc00000 (reserved)
+dmesg_ BIOS-e820: 00000000fff00000 - 0000000100000000 (reserved)
+dmesg_127MB LOWMEM available.
+dmesg_On node 0 totalpages: 32704
+dmesg_zone(0): 4096 pages.
+dmesg_zone(1): 28608 pages.
+dmesg_zone(2): 0 pages.
+dmesg_ACPI: RSDP (v000 AMI                                       ) @ 0x000ff980
+dmesg_ACPI: RSDT (v001 D815EA D815EEA2 0x20010404 MSFT 0x00001011) @ 0x07ff0000
+dmesg_ACPI: FADT (v001 D815EA EA81510A 0x20010404 MSFT 0x00001011) @ 0x07ff1000
+dmesg_ACPI: DSDT (v001 D815E2 EA81520A 0x00000021 MSFT 0x0100000b) @ 0x00000000
+dmesg_Kernel command line: root=/dev/hda1 ro 
+dmesg_Local APIC disabled by BIOS -- reenabling.
+dmesg_Found and enabled local APIC!
+dmesg_Initializing CPU#0
+dmesg_Detected 996.780 MHz processor.
+dmesg_Console: colour VGA+ 80x25
+dmesg_Calibrating delay loop... 1985.74 BogoMIPS
+dmesg_Memory: 123112k/130816k available (1124k kernel code, 7316k reserved, 469k data, 96k init, 0k highmem)
+dmesg_Dentry cache hash table entries: 16384 (order: 5, 131072 bytes)
+dmesg_Inode cache hash table entries: 8192 (order: 4, 65536 bytes)
+dmesg_Mount cache hash table entries: 512 (order: 0, 4096 bytes)
+dmesg_Buffer cache hash table entries: 4096 (order: 2, 16384 bytes)
+dmesg_Page-cache hash table entries: 32768 (order: 5, 131072 bytes)
+dmesg_CPU: L1 I cache: 16K, L1 D cache: 16K
+dmesg_CPU: L2 cache: 256K
+dmesg_CPU:     After generic, caps: 0383fbff 00000000 00000000 00000000
+dmesg_CPU:             Common caps: 0383fbff 00000000 00000000 00000000
+dmesg_CPU: Intel Pentium III (Coppermine) stepping 0a
+dmesg_Enabling fast FPU save and restore... done.
+dmesg_Enabling unmasked SIMD FPU exception support... done.
+dmesg_Checking 'hlt' instruction... OK.
+dmesg_Checking for popad bug... OK.
+dmesg_POSIX conformance testing by UNIFIX
+dmesg_enabled ExtINT on CPU#0
+dmesg_ESR value before enabling vector: 00000000
+dmesg_ESR value after enabling vector: 00000000
+dmesg_Using local APIC timer interrupts.
+dmesg_calibrating APIC timer ...
+dmesg_..... CPU clock speed is 996.7814 MHz.
+dmesg_..... host bus clock speed is 132.9040 MHz.
+dmesg_cpu: 0, clocks: 1329040, slice: 664520
+dmesg_CPU0<T0:1329040,T1:614880,D:49640,S:664520,C:1329040>
+dmesg_ACPI: Subsystem revision 20040326
+dmesg_ACPI: Interpreter disabled.
+dmesg_PCI: PCI BIOS revision 2.10 entry at 0xfda95, last bus=2
+dmesg_PCI: Using configuration type 1
+dmesg_PCI: Probing PCI hardware
+dmesg_PCI: ACPI tables contain no PCI IRQ routing entries
+dmesg_PCI: Probing PCI hardware (bus 00)
+dmesg_Transparent bridge - Intel Corp. 82801BA/CA/DB/EB PCI Bridge
+dmesg_PCI: Using IRQ router PIIX/ICH [8086/2440] at 00:1f.0
+dmesg_Linux NET4.0 for Linux 2.4
+dmesg_Based upon Swansea University Computer Society NET3.039
+dmesg_Initializing RT netlink socket
+dmesg_Starting kswapd
+dmesg_VFS: Disk quotas vdquot_6.5.1
+dmesg_devfs: v1.12c (20020818) Richard Gooch (rgooch@atnf.csiro.au)
+dmesg_devfs: boot_options: 0x0
+dmesg_pty: 256 Unix98 ptys configured
+dmesg_Serial driver version 5.05c (2001-07-08) with HUB-6 MANY_PORTS MULTIPORT SHARE_IRQ SERIAL_PCI enabled
+dmesg_ttyS00 at 0x03f8 (irq = 4) is a 16550A
+dmesg_ttyS01 at 0x02f8 (irq = 3) is a 16550A
+dmesg_COMX: driver version 0.85 (C) 1995-1999 ITConsult-Pro Co. <info@itc.hu>
+dmesg_RAMDISK driver initialized: 16 RAM disks of 8192K size 1024 blocksize
+dmesg_Initializing Cryptographic API
+dmesg_NET4: Linux TCP/IP 1.0 for NET4.0
+dmesg_IP: routing cache hash table of 512 buckets, 4Kbytes
+dmesg_TCP: Hash tables configured (established 8192 bind 16384)
+dmesg_Linux IP multicast router 0.06 plus PIM-SM
+dmesg_RAMDISK: cramfs filesystem found at block 0
+dmesg_RAMDISK: Loading 3924 blocks [1 disk] into ram disk... |/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/done.
+dmesg_Freeing initrd memory: 3924k freed
+dmesg_VFS: Mounted root (cramfs filesystem).
+dmesg_Freeing unused kernel memory: 96k freed
+dmesg_NET4: Unix domain sockets 1.0/SMP for Linux NET4.0.
+dmesg_Uniform Multi-Platform E-IDE driver Revision: 7.00beta4-2.4
+dmesg_ide: Assuming 33MHz system bus speed for PIO modes; override with idebus=xx
+dmesg_ide: late registration of driver.
+dmesg_ICH2: IDE controller at PCI slot 00:1f.1
+dmesg_ICH2: chipset revision 2
+dmesg_ICH2: not 100% native mode: will probe irqs later
+dmesg_    ide0: BM-DMA at 0xffa0-0xffa7, BIOS settings: hda:DMA, hdb:pio
+dmesg_    ide1: BM-DMA at 0xffa8-0xffaf, BIOS settings: hdc:pio, hdd:DMA
+dmesg_hda: ST330621A, ATA DISK drive
+dmesg_blk: queue c8826f20, I/O limit 4095Mb (mask 0xffffffff)
+dmesg_hdd: LITEON DVD-ROM LTD163, ATAPI CD/DVD-ROM drive
+dmesg_ide0 at 0x1f0-0x1f7,0x3f6 on irq 14
+dmesg_ide1 at 0x170-0x177,0x376 on irq 15
+dmesg_hda: attached ide-disk driver.
+dmesg_hda: 58633344 sectors (30020 MB) w/512KiB Cache, CHS=58168/16/63, UDMA(100)
+dmesg_Partition check:
+dmesg_ /dev/ide/host0/bus0/target0/lun0: [PTBL] [3649/255/63] p1 p2 < p5 >
+dmesg_Journalled Block Device driver loaded
+dmesg_kjournald starting.  Commit interval 5 seconds
+dmesg_EXT3-fs: mounted filesystem with ordered data mode.
+dmesg_kjournald starting.  Commit interval 5 seconds
+dmesg_EXT3-fs: mounted filesystem with ordered data mode.
+dmesg_Adding Swap: 497972k swap-space (priority -1)
+dmesg_EXT3 FS 2.4-0.9.19, 19 August 2002 on ide0(3,1), internal journal
+dmesg_Real Time Clock Driver v1.10f
+dmesg_hdd: attached ide-cdrom driver.
+dmesg_hdd: ATAPI 48X DVD-ROM drive, 512kB Cache, UDMA(33)
+dmesg_Uniform CD-ROM driver Revision: 3.12
+dmesg_Linux agpgart interface v0.99 (c) Jeff Hartmann
+dmesg_agpgart: Maximum main memory to use for agp memory: 94M
+dmesg_agpgart: agpgart: Detected an Intel i815, but could not find the secondary device. Assuming a non-integrated video card.
+dmesg_agpgart: Detected Intel i815 chipset
+dmesg_agpgart: AGP aperture is 64M @ 0xf8000000
+dmesg_PCI: Found IRQ 11 for device 01:0a.0
+dmesg_3c59x: Donald Becker and others. www.scyld.com/network/vortex.html
+dmesg_See Documentation/networking/vortex.txt
+dmesg_01:0a.0: 3Com PCI 3c905C Tornado at 0xcc00. Vers LK1.1.18-ac
+dmesg_ 00:04:76:dc:7a:55, IRQ 11
+dmesg_  product code 5545 rev 00.13 date 01-15-02
+dmesg_  Internal config register is 1800000, transceivers 0xa.
+dmesg_  8K byte-wide RAM 5:3 Rx:Tx split, autoselect/Autonegotiate interface.
+dmesg_  MII transceiver found at address 24, status 782d.
+dmesg_  Enabling bus-master transmits and whole-frame receives.
+dmesg_01:0a.0: scatter/gather enabled. h/w checksums enabled
+dmesg_Intel(R) PRO/100 Network Driver - version 2.3.38-k1
+dmesg_Copyright (c) 2004 Intel Corporation
+dmesg_
+dmesg_PCI: Found IRQ 9 for device 01:0c.0
+dmesg_PCI: Sharing IRQ 9 with 00:1f.3
+dmesg_PCI: Sharing IRQ 9 with 00:1f.5
+dmesg_e100: selftest OK.
+dmesg_e100: eth1: Intel(R) PRO/100 Network Connection
+dmesg_  Hardware receive checksums enabled
+dmesg_  cpu cycle saver enabled
+dmesg_
+dmesg_SCSI subsystem driver Revision: 1.00
+dmesg_scsi0 : SCSI host adapter emulation for IDE ATAPI devices
+dmesg_Intel 810 + AC97 Audio, version 0.24, 13:35:20 Aug 24 2004
+dmesg_PCI: Found IRQ 9 for device 00:1f.5
+dmesg_PCI: Sharing IRQ 9 with 00:1f.3
+dmesg_PCI: Sharing IRQ 9 with 01:0c.0
+dmesg_PCI: Setting latency timer of device 00:1f.5 to 64
+dmesg_i810: Intel ICH2 found at IO 0xef00 and 0xe800, MEM 0x0000 and 0x0000, IRQ 9
+dmesg_i810_audio: Audio Controller supports 6 channels.
+dmesg_i810_audio: Defaulting to base 2 channel mode.
+dmesg_i810_audio: Resetting connection 0
+dmesg_ac97_codec: AC97 Audio codec, id: ADS96 (Analog Devices AD1885)
+dmesg_i810_audio: AC'97 codec 0 Unable to map surround DAC's (or DAC's not present), total channels = 2
+dmesg_usb.c: registered new driver usbdevfs
+dmesg_usb.c: registered new driver hub
+dmesg_usb-uhci.c: $Revision: 1.275 $ time 13:35:41 Aug 24 2004
+dmesg_usb-uhci.c: High bandwidth mode enabled
+dmesg_PCI: Found IRQ 11 for device 00:1f.2
+dmesg_PCI: Setting latency timer of device 00:1f.2 to 64
+dmesg_usb-uhci.c: USB UHCI at I/O 0xef40, IRQ 11
+dmesg_usb-uhci.c: Detected 2 ports
+dmesg_usb.c: new USB bus registered, assigned bus number 1
+dmesg_hub.c: USB hub found
+dmesg_hub.c: 2 ports detected
+dmesg_PCI: Found IRQ 10 for device 00:1f.4
+dmesg_PCI: Setting latency timer of device 00:1f.4 to 64
+dmesg_usb-uhci.c: USB UHCI at I/O 0xef80, IRQ 10
+dmesg_usb-uhci.c: Detected 2 ports
+dmesg_usb.c: new USB bus registered, assigned bus number 2
+dmesg_hub.c: USB hub found
+dmesg_hub.c: 2 ports detected
+dmesg_usb-uhci.c: v1.275:USB Universal Host Controller Interface driver
+dmesg_eepro100.c:v1.09j-t 9/29/99 Donald Becker http://www.scyld.com/network/eepro100.html
+dmesg_eepro100.c: $Revision: 1.36 $ 2000/11/17 Modified by Andrey V. Savochkin <saw@saw.sw.com.sg> and others
+dmesg_ich2rom: firmware access control, I can't enable writes
+dmesg_i810_rng: RNG not detected
+dmesg_hw_random: RNG not detected
+dmesg_e100: eth1 NIC Link is Up 100 Mbps Full duplex
+dmesg_parport0: PC-style at 0x378 [PCSPP,TRISTATE,EPP]
+dmesg_lp0: using parport0 (polling).
+dmesg_apm: BIOS version 1.2 Flags 0x03 (Driver version 1.16)
+dmesg_inserting floppy driver for 2.4.26-1-386
+dmesg_Floppy drive(s): fd0 is 1.44M
+dmesg_FDC 0 is a post-1991 82077
+ifconfig: eth0      Protokoll:Ethernet  Hardware Adresse 00:04:76:DC:7A:55  
+          inet Adresse:10.27.210.18  Bcast:10.27.255.255  Maske:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:109522 errors:0 dropped:0 overruns:1 frame:0
+          TX packets:2272 errors:0 dropped:0 overruns:0 carrier:0
+          Kollisionen:0 Sendewarteschlangenlänge:1000 
+          RX bytes:9600303 (9.1 MiB)  TX bytes:201218 (196.5 KiB)
+          Interrupt:11 Basisadresse:0xcc00 
+
+eth0:0    Protokoll:Ethernet  Hardware Adresse 00:04:76:DC:7A:55  
+          inet Adresse:10.27.210.204  Bcast:10.27.255.255  Maske:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          Interrupt:11 Basisadresse:0xcc00 
+
+eth1      Protokoll:Ethernet  Hardware Adresse 00:D0:B7:85:E9:A3  
+          inet Adresse:192.168.1.3  Bcast:192.168.1.255  Maske:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:10225 errors:0 dropped:0 overruns:0 carrier:0
+          Kollisionen:0 Sendewarteschlangenlänge:1000 
+          RX bytes:0 (0.0 b)  TX bytes:1580163 (1.5 MiB)
+          Interrupt:9 Basisadresse:0xcf00 Speicher:ff8ff000-ff8ff038 
+
+lo        Protokoll:Lokale Schleife  
+          inet Adresse:127.0.0.1  Maske:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:252626 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:252626 errors:0 dropped:0 overruns:0 carrier:0
+          Kollisionen:0 Sendewarteschlangenlänge:0 
+          RX bytes:48202472 (45.9 MiB)  TX bytes:48202472 (45.9 MiB)
+
+
+FINISH

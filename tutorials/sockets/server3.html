@@ -1,0 +1,2180 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>3 Netzwerkprogrammierung</H1>
+Internetanwendungen werden nach dem Client-Server-Prinzip erstellt. Der Client ist hier
+in den meisten F&auml;llen das Benutzer-Interface und nimmt vom Server bestimmte Dienste in
+Anspruch. Er baut in Abh&auml;ngigkeit vorher definierter Ereignisse (z.B. dem Starten einer
+Internetanwendung durch einen Anwender) die Verbindung zum Server auf und ist somit
+der aktive Teil.<BR>
+Der Server stellt nun den gew&uuml;nschten Dienst zur Verf&uuml;gung. Er mu&szlig; sich 
+st&auml;ndig in einem Zustand befinden, in dem er Verbindungsaufforderungen von Clients 
+entgegennehmen kann - er ist der passive Teil. Ein Server darf niemals einen Dienst vom 
+Client anfordern.<BR>
+Client und Server m&uuml;ssen die gleiche Sprache sprechen: Sie m&uuml;ssen sich also 
+an einem gemeinsamen Protokoll orientieren. Das unterschiedliche Verhalten von Client 
+und Server l&auml;&szlig;t allerdings eine Asymetrie entstehen, die sich in der 
+Verwendung unterschiedlicher Schnittstellen-Befehle bei der Realisierung
+einer Client- oder Serverapplikation niederschl&auml;gt.
+<P>
+<A NAME="3.1"></A>
+<H2>3.1 Die Socket-Netzwerkschnittstelle</H2>
+Anfang der 80er Jahre wurde mit 4.2BSD in UNIX-Systemen die sogenannte "Socket"-Schnittstelle
+f&uuml;r die Kommunikation zwischen Prozessen eingef&uuml;hrt. Ein "Socket" ist dabei 
+der Name f&uuml;r einen Endpunkt einer Kommunikationsverbindung. Seine Schnittstelle 
+ist im wesentlichen konzipiert f&uuml;r:
+<UL>
+<LI>verbindungsorientierte Kommunikation, aufsetzend auf TCP (<TT>SOCK_STREAM</TT>)
+<LI>verbindungslose Kommunikation, aufsetzend auf UDP (<TT>SOCK_DGRAM</TT>)
+<LI>direkten Zugriff auf die IP-Schicht (<TT>SOCK_RAW</TT>)
+<LI>Kommunikation zwischen lokalen Prozessen (<TT>AF_UNIX</TT>)
+<LI>Kommunikation zwischen im TCP/IP-Netz verteilten Prozessen (<TT>AF_INET</TT>)
+<LI>Kommunikation f&uuml;r andere Protokoll- und Adressierungsfamilien 
+</UL>
+Dabei gibt es normalerweise ein Programm, das Anfragen von anderen Programmen
+entgegennimmt und sie beantwortet (ein sog. Server-Socket) und beliebig
+viele andere Programme, die ihre Anfragen an das Server-Socket schicken
+und mit den Antworten weiterarbeiten (die sog. Client-Sockets). Das ganze
+System ist auch bekannt als Client-Server-Programmierung.
+Ein sehr typisches Beispiel sind Webserver: der Webserver
+wartet auf Anfragen von Browsern (oder User Agents o.&auml;.) und gibt
+Webseiten zur&uuml;ck. Die Browser arbeiten dann mit diesen Webseiten weiter,
+indem sie sie anzeigen und Operationen darauf erlauben (Anzeigen des Quelltextes
+etc.).
+<P>
+Die Socket-Schnittstelle ist zwar von keiner Institution genormt, stellt aber den
+Industriestandard dar. Wichtige Gr&uuml;nde sind u.a.:
+<P>
+<UL>
+<LI>leicht verst&auml;ndliches Konzept
+<LI>leicht zu handhaben und zu programmieren
+<LI>f&uuml;gt sich harmonisch in die UNIX-Welt ein
+<LI>verf&uuml;gbar f&uuml;r viele Systeme, z.B. die Windows Sockets, 
+WinSock von Microsoft und anderen Firmen aus der PC-Welt definiert und kompatibel 
+zu den UNIX-sockets.
+</UL>
+<P>
+Um mit einem bestimmten Dienst (Programm) auf einem anderen Rechner
+zu kommunizieren, reicht es allerdings nicht, einfach den anderen Rechner
+als solchen anzusprechen. Es ist vielmehr jedes Server-Programm
+auf einer bestimmten Port-Nummer zu erreichen. Jeder Client mu&szlig; dem 
+entfernten Rechner diese Port-Nummer mitteilen, damit dieser die Anfrage dem 
+richtigen Programm zuleiten kann.
+<P>
+Die Netz-Ein- und Ausgabe wurde an die Datei-Ein- und Ausgabe angelehnt und
+etliche Ein- und Ausgabe-Systemaufrufe lassen sich auf Dateien und Sockets
+anwenden. Es gibt jedoch einige Unterschiede:
+<UL>
+<LI>Die typische Client-Server-Beziehung ist unsymmetrisch. Zur Einrichtung
+einer Netzverbindung mu&szlig; ein Programm seine Rolle kennen (Client oder Server).
+<LI>Eine Netzverbindung kann verbindungsorientiert oder verbindungslos sein.
+Der erste Fall &auml;hnelt einer Datei-E/A, der zweite Fall kennt kein "open"
+oder dergleichen.
+<LI>Namen spielen bei Netzverbindungen eine gr&ouml;&szlig;ere Rolle. So kann ein
+Kindproze&szlig; einen vom Elternproze&szlig; &uuml;bergebenen Dateideskriptor
+verwenden, ohne den Dateinamen zu kennen.
+<LI>Es gibt mehr Parameter zur Spezifizierung einer Netzverbindung als bei der
+Date-E/A. Eine Verbindung wird durch f&uuml;nf Parameter beschrieben:
+  <OL>
+  <LI>Protokoll
+  <LI>lokale Adresse
+  <LI>lokaler Proze&szlig;
+  <LI>ferne Adresse
+  <LI>ferner Proze&szlig;
+  </OL>
+<LI>Das Netz-Interface mu&szlig; mehrere Kommunikationsprotokolle unterst&uuml;tzen
+und daher allgemeing&uuml;tiger gehalten werden.
+</UL>
+<P>
+
+<h3>Verbindungsorientierte und verbindungslose Kommunikation</h3>
+<UL>
+<LI>Die "verbindungsorientierte Kommunikation" geht davon aus, da&szlig; vor dem 
+eigentlichen Datentransfer vom Client-Prozess eine logische Verbindung aufgebaut 
+wird, &uuml;ber die dann in der Folge beliebig
+viele Datenpakete hin und her geschickt werden k&ouml;nnen - so lange bis
+einer der beiden Partner die Verbindung wieder abbricht ("hangup"). Bei
+dieser Art der Kommunikation wird Empf&auml;nger- und Absenderadresse nur
+beim Verbindungsaufbau angegeben - danach erfolgt die Kommunikation &uuml;ber
+Verbindungsnummern, die vom Betriebssystem zugeteilt werden. Die Telefonie
+funktioniert nach diesem Prinzip.<BR>
+Diese Form der Kommunikation eignet sich besser f&uuml;r Anwendungen, bei denen
+gro&szlig;e Datenmengen &uuml;bertragen werden. Der Verbindungsaufbau dauert
+zwar etwas, die eigentlichen Daten werden allerdings vollst&auml;ndig
+und in der richtigen Reihenfolge von der Quelle zum Ziel &uuml;bermittelt.
+<LI>Bei der "verbindungslosen Kommunikation" gibt es - wie der Name sagt
+- keine bestehende Verbindung zwischen den Partnern. Die Datenpakete werden
+einzeln mit den vollst&auml;ndigen Adressangaben versehen und auf den Weg
+gebracht. Im t&auml;glichen Leben entspricht dies der Kommunikation mittels
+Briefen.<BR>
+Bei diesem Modell - man spricht dabei auch von "Datagrammen" - wird vom 
+Betriebssystem die korrekte Reihenfolge der einzelnen Datenpakete nicht garantiert.
+Es ist noch nicht mal gew&auml;hrleistet, da&szlig; ein Paket &uuml;berhaupt
+ankommt. Da jedoch der zeitaufwendige Verbindungsaufbau entf&auml;llt,
+ist es in F&auml;llen, bei denen es mehr auf Schnelligkeit als auf Sicherheit
+ankommt, oft die bessere Wahl. Eventuell n&ouml;tige Reihenfolge-&Uuml;berpr&uuml;fungen
+bzw. Zeit&uuml;berwachngen m&uuml;ssen dann aber vom Anwendungsprozess
+selbst vorgenommen werden.
+</UL>
+<P>
+
+<h3>Sockets</h3>
+Zur Kommunikation zwischen Prozessen, die auch auf verschiedenen Rechnern
+ablaufen k&ouml;nnen, wurde mit den Sockets im BSD-Unix ein leistungsf&auml;higer 
+Mechanismus der Daten&uuml;bertragung definiert. Sockets sind heute Grundlage der 
+meisten h&ouml;heren Daten&uuml;bertragungsprotokolle und in fast allen 
+Betriebssystemen realisiert.
+Sie stellen die Schnittstelle zwischen Anwendungsprogramm und den
+Betriebssystemroutinen zur Datenkommunikation dar. Dabei besteht der Vorteil f&uuml;r
+den Benutzer darin, da&szlig; einem Socket ein Dateideskriptor zugeordnet wird,
+&uuml;ber den das Anwendungsprogramm fast genauso kommunizieren kann, wie
+&uuml;ber Pipes oder normale Dateien. Im Gegensatz zu einer Pipe, die grunds&auml;tzlich 
+nur in einer Richtung betrieben werden kann, ist ein Socket-Deskriptor jedoch 
+bidirektional - wie eine zum Lesen und Schreiben ge&ouml;ffnete Datei.
+Sockets sind, wie die Client-Server-Beziehung, unsymmetrisch: Einer der beiden 
+beteiligten Prozesse ist "Server", der andere "Client". Der Server (Diensterbringer)
+wartet darauf, da&szlig; irgendein Client (Kunde) mit ihm Kontakt aufnehmen
+m&ouml;chte. Der Client ist der aktive Part und veranlasst den Beginn der
+Kommunikation.
+<p>
+&Uuml;ber Sockets kann der Datenaustausch auf zweierlei Art erfolgen:
+<ol>
+<li>
+Datenstr&ouml;me (Streams): Zwischen Client und Server wird eine Verbindung aufgebaut,
+die einzelnen Datenpakete werden gesichert und in korrekter Reihenfolge &uuml;bertragen 
+und zum Schlu&szlig; wird die Verbindung wieder abgebaut. Dies entspricht dem Zyklus 
+"open" - "read"/"write" - "close" bei einer normalen Datei. Bei einer Verbindung 
+&uuml;ber IP wird daf&uuml;r TCP benutzt. 
+<li>
+Einzelpakete (Datagrams): Datagramme werden gleichsam als "Pakete" mit
+Absender- und Empf&auml;ngeradresse verschickt. Das entsprechende Internet-Protokoll
+hei&szlig;t UDP. Es wird keine Verbindung zwischen den beiden Prozessen aufgebaut, 
+weshalb UDP wesentlich schneller ist.
+Allerdings gibt es keine Garantie f&uuml;r das Ankommen des Paketes bei
+der Gegenseite und keine Gew&auml;hr f&uuml;r die Einhaltung der richtigen
+Reihenfolge.
+</ol>
+Sockets sind noch &uuml;ber verschiedenen "Dom&auml;nen" definiert: Es gibt neben der 
+"Internet-Dom&auml;ne" noch weitere Dom&auml;nen, z. B.die "Unix-Dom&auml;ne" f&uuml;r 
+die Kommunikation zwischen reinen Unix-Prozessen. Thema der Vorlesung ist aber 
+ausschlie&szlig;lich die Internet-Dom&auml;ne.
+<P>
+
+<H3>Die Systemaufrufe im &Uuml;berblick</H3>
+Einige wichtige Socket-Primitive bzw. -Systemcalls sind:
+<UL>
+<LI><I>Erstellen eines Socket:</I><BR> 
+<TT>s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)</TT>
+zum Er&ouml;ffnen einer verbindungsorientierten Kommunikation im Internet
+<LI><I>Verbindungsaufbau:</I><BR> 
+<TT>bind(s, address, addresslength)</TT>
+zum Verbinden des Sockets mit der lokalen Endpunktadresse<BR>
+<TT>cs = connect(s, address, addresslength)</TT>
+zum Verbindungsaufbau &uuml;ber einen virtuellen Kanal zum entfernten Prozess
+<LI><I>Kommunikation:</I><BR>
+<TT>nwrite = write(s, buffer, nbytes)</TT> (bzw. <TT>send(...)</TT>) und<BR>
+<TT>nread = read(s, buffer, maxbytes)</TT> (bzw. <TT>recv(...)</TT>
+zum Schreiben bzw. Lesen auf/vom virtuellen Kanal
+<LI><I>Verbindungsabbau:</I><BR>
+<TT>close(s)</TT>
+</UL>
+<P>
+Die folgende Tabelle gibt einen &Uuml;berblick &uuml;ber die wichtigsten
+Socket-Systemcalls in Client- und Serverprogrammen:
+<P>
+<TABLE BORDER=1 CELLPADDING=4 WIDTH="80%">
+<TR><TH ALIGN=LEFT>Phase</TH>
+     <TH ALIGN=LEFT>Client</TH>
+     <TH ALIGN=LEFT>Server</TH></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Endpunkt erzeugen</TD>         
+     <TD VALIGN=TOP ALIGN=LEFT>socket()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>socket()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Binden einer Adresse</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>bind()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>bind()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Verbindung aufbauen</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>connect()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>&nbsp;</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Warteschlange festlegen</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>&nbsp;</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>listen()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Warten auf Verbindung</TD>     
+     <TD VALIGN=TOP ALIGN=LEFT>&nbsp;</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>accept()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Daten senden</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>write()<BR>send()<BR>sendto()<BR>sendmsg()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>write()<BR>send()<BR>sendto()<BR>sendmsg()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Daten empfangen</TD>           
+     <TD VALIGN=TOP ALIGN=LEFT>read()<BR>recv()<BR>recvfrom()<BR>recvmsg()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>read()<BR>recv()<BR>recvfrom()<BR>recvmsg()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Verbindung schlie&szlig;en</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>shutdown()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>shutdown()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Endpunkt abbauen</TD>          
+     <TD VALIGN=TOP ALIGN=LEFT>close()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>close()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Ereignisse annehmen</TD>       
+     <TD VALIGN=TOP ALIGN=LEFT>select()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>select()</TD></TR>
+<TR><TD VALIGN=TOP ALIGN=LEFT>Verschiedenes</TD>             
+     <TD VALIGN=TOP ALIGN=LEFT>getpeername()<BR>getsockname()<BR>getsockopt()<BR>setsockopt()</TD>
+     <TD VALIGN=TOP ALIGN=LEFT>getpeername()<BR>getsockname()<BR>getsockopt()<BR>setsockopt()</TD></TR>
+</TABLE>
+<P>
+F&uuml;r die Kommunikation bei verbindungslosen, d.h. UDP-basierten Socketanwendungen 
+sind die speziellen <TT>send()</TT>- und <TT>receive()</TT>-Systemcalls empfehlenswert, 
+w&auml;hrend bei TCP-Verbindugen daneben die Standard-Systemcalls <TT>read()</TT> 
+und <TT>write()</TT> einsetzbar sind.
+<P>
+Eine TCP/IP-Verbindung ist, wie wir gesehen haben, durch eine Client-Server-Architektur
+gepr&auml;gt und damit asymetrisch. Vor der Programmierung mu&szlig; die Verbindung 
+stehen. Das betrifft einmal die Verbindung zwischen den Rechnern, als auch jene zwischen 
+den Prozessen. Die Adressierung der Rechner erfolgt per Hostname, der vom
+System auf die IP-Nummer umgesetzt wird.
+<P>
+Vom Client aus mu&szlig; nicht nur der richtige Rechner, sondern auch der richtige 
+Serverproze&szlig; angesprochen werden k&ouml;nnen. Dazu bindet sich der Serverproze&szlig; 
+an einen festen Port, &uuml;ber den er erreichbar ist. Damit die
+Nummer des Ports mit einem Namen versehen werden kann, verwendet man
+die Datei <tt>/etc/services</tt>. Im Programm wird die Servicenummer durch den 
+Aufruf der Systemfunktion <tt>getservbyname()</tt> bestimmt.
+<p>
+Der Client braucht keinen festen Port. Er erbittet sich auf der lokalen
+Maschine eine freie Nummer und ruft damit den Port des Servers. Der Server
+erf&auml;hrt die Nummer des Clients aus der Anfrage und kann ihm unter diesem
+Port antworten. Das Szenario zwischen Server und Client sieht wie folgt aus:
+<p>
+<CENTER><IMG SRC="serverclient.gif"></CENTER>
+<p>
+Betrachten wir beispielhaft einmal das Listing eines ganz einfachen
+Servers in der Programmiersprache C. Die einzelnen Systemaufrufe werden 
+weiter unten genauer behandelt, das Listing soll zun&auml;chst nur einen
+&Uuml;berblick des Ablaufs geben:
+<pre>
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;netinet/tcp.h&gt;
+#include &lt;netdb.h&gt;
+
+#define MAXPUF 1023
+
+main()
+  {
+  int MySocket, ForeignSocket;
+  struct sockaddr_in AdrMySock, AdrPartnerSocket;
+  struct servent *Service;
+  int AdrLen;
+
+  char Puffer[MAXPUF];
+  int MsgLen;
+
+  /* Socket einrichten */
+  MySocket = socket(AF_INET, SOCK_STREAM, 0);
+
+  /* Socket an Port-Nummer binden */
+  AdrMySock.sin_family = AF_INET;         /* Internet-Protokolle */
+  AdrMySock.sin_addr.s_addr = INADDR_ANY; /* akzept. jeden Client-Host */
+  Service = getservbyname("echo","tcp");   /* bestimme Port */
+  AdrMySock.sin_port = Service->s_port;   /* (Get Service by Name) */
+  bind(MySocket, &AdrMySock, sizeof(AdrMySock));
+
+  /* Empfangsbereitschaft signalisieren und warten */
+  listen(MySocket, 5);
+
+  for (;;) /* forever */ 
+    {
+    /* Verbindungswunsch vom Client annehmen */
+    ForeignSocket = accept(MySocket, &AdrPartnerSocket, &AdrLen);
+    /* Datenaustausch zwischen Server und Client */
+    MsgLen = recv(ForeignSocket, Puffer, MAXPUF, 0); /* String empfangen */
+    send(ForeignSocket, Puffer, MsgLen, 0); /* und zuruecksenden */
+    /* Verbindung beenden und wieder auf Client warten */
+    close(ForeignSocket);
+    }
+  }
+</pre>
+
+Dieser Server bearbeitet jede Anfrage, die &uuml;ber den Port
+"echo" an ihn gestellt wird. Nach jeder Anfrage wird die Verbindung wieder
+gel&ouml;st und ein anderer Client kann anfragen. Ein solcher Server d&uuml;rfte
+auf jedem Betriebssystem arbeiten k&ouml;nnen, das TCP/IP unterst&uuml;tzt, selbst
+wenn es kein Multitasking beherrscht.
+<P>
+Es gibt zwei Variablen pro Socket. Die eine ist wie bei Dateizugriffen
+ein einfaches Handle (<TT>MySocket</TT>), die andere h&auml;lt die Adresse der 
+Verbindung (<TT>AdrSock</TT>), also die IP-Nummer des Rechners und die Nummer des 
+verwendeten Ports. Der Server erlaubt Verbindungen von jedem Rechner aus,
+weil die Konstante <tt>INADDR_ANY</TT> benutzt wird. 
+<P>
+Der zugeh&ouml;rige Client gibt dagegen die Adresse des anzusprechenden Servers an.
+Das Programm sieht wie folgt aus:
+<pre>
+#include &lt;sys/types.h>
+#include &lt;sys/socket.h>
+#include &lt;netinet/in.h>
+#include &lt;netinet/tcp.h>
+#include &lt;netdb.h>
+
+#define MAXPUF 1023
+
+main()
+  {
+  int MySocket;               /* Socket-Handle */
+  struct sockaddr_in AdrSock; /* Socketstruktur */
+  int len;                    /* Die Laenge der Socketstruktur */
+
+  struct hostent *RechnerID;  /* ferner Rechner */
+  struct servent *Service;    /* Dienst auf dem fernen Rechner */
+
+  char Puffer[MAXPUF] = "Wir erschrecken zu guten Zwecken!";
+
+  MySocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  /* Bestimme den Zielrechner */
+  RechnerID = gethostbyname("server");
+  bcopy(RechnerID->h_addr,&AdrSock.sin_addr.s_addr,RechnerID->h_length);
+
+  /* Bestimme den Port */
+  Service = getservbyname("echo","tcp");
+  AdrSock.sin_port = Service->s_port;
+
+  connect(MySocket, (struct sockaddr *)&AdrSock, sizeof(AdrSock));
+  send(MySocket, Puffer, MAXPUF, 0);  /* String senden */
+  recv(MySocket, Puffer, MAXPUF, 0);  /* und wieder empfangen */
+  printf("%s\n", Puffer);             /* ausgeben */
+  close(MySocket);
+  }
+</pre>
+Die <TT>recv</TT>-Funktion liefert als R&uuml;ckgabewert die Gr&ouml;&szlig;e 
+des versandten Speicherbereichs (max. 1 KByte, siehe unten).
+<P>
+Grunds&auml;tzlich liefern fast alle Netz-Funktionen bei Fehlern den Wert 0 
+zur&uuml;ck. In den obigen Beispiel-Listing fehlt jegliche Fehlerbehandlung,
+damit das Prinzip &uuml;bersichtlich dargestellt werden kann. Im "richtigen"
+Programm ist eine umfassende Fehlerbehandlung unumg&auml;nglich. 
+<P>
+Das Server-Programm hat noch einen Nachteil. Nach dem Start des Servers ist
+die Konsole oder das Shell-Fenster f&uuml;r weitere Zwecke blockiert. Auch
+fehlt eine korrekte M&ouml;glichkeit, den Server zu beenden. Bei einem Abbruch
+des Programms wird es dem Betriebssystem &uuml;berlassen, den Socket zu schlie&szlig;en.
+Zweckm&auml;ssigerweise wird vom Programm ein D&auml;mon erzeugt, der per
+<TT>fork</TT>-Aufruf in den Hintergrund gestellt.
+<P>
+
+<A NAME="3.2"></A>
+<H2>3.2 Parallelit&auml;t und Signale</H2>
+<H3>Parallelit&auml;t</H3>
+Ein Server wird im allgemeinen in einer Multitasking-Umgebung gestartet werden. 
+Er soll schlie&szlig;lich mehrere Anfragen parallel abarbeiten k&ouml;nnen
+(concurrent server). Unter UNIX gibt es dazu den <TT>fork</TT>-Mechanismus.
+<UL><I>New processes are created by other processes, just like new humans. 
+         New humans are created by other humans, of course, not by processes. 
+         (Unix System Administration Handbook) </I></UL>
+<P>
+Die Systemaufrufe <TT>fork()</TT>, <TT>exec()</TT> und <TT>wait()</TT> haben 
+mit der Generierung von Kindprozessen zu tun und erlauben die Synchronisation zwischen 
+Eltern- und Kindprozessen. An dieser Stelle wird nur soweit darauf eingegangen, wie 
+es zum Verst&auml;ndnis der folgenden Abschnitte n&ouml;tig ist. 
+<p>
+<CENTER><IMG SRC="fork.gif"></CENTER>
+<P>
+<UL>
+<LI><TT>fork()</TT> erzeugt einen Kindproze&szlig;,
+der ein vollst&auml;ndiges Abbild des Elternprozesses ist und der beim
+gleichen Stand des Befehlsz&auml;hlers fortgesetzt wird. Eltern- und Kindproze&szlig;
+wird jedoch die M&ouml;glichkeit geboten, festzustellen, ob es sich um
+Eltern- oder Kindproze&szlig; handelt: Der Kindproze&szlig; bekommt als
+R&uuml;ckgabewert 0, der Elternproze&szlig; die PID (Proze&szlig;-ID) des Kindprozesses.
+<UL>
+<LI> Etliche Systemprozesse schlie&szlig;en stdin, stdout und stderr, treten
+also in den Hintergrund. Solche Prozesse nennt man Daemonprozesse.
+<LI> Terminiert der Elternproze&szlig; vor dem Kindproze&szlig;, wird dieser
+zum 'Waisenkind'. Normalerweise wird er dann vom Init-Proze&szlig; 'adoptiert'.
+<LI> Hat der Kindproze&szlig; dann auch noch den Kontakt zum
+Terminal (Standardausgabe und -eingabe) verloren wird er zum 'Zombie'. 
+</UL>
+<LI><TT>wait()</TT> erm&ouml;glicht dem Elternproze&szlig; das Warten auf die 
+Beendigung des/der Kindprozess(e). Der Elternproze&szlig; wird verdr&auml;ngt und
+erst durch das Ende eines Kindprozesses wieder "aufgeweckt". Zur Unterscheidung
+mehrerer Kindprozesse liefert die Funktion <TT>wait()</TT> die PID des "gestorbenen"
+Kindprozesses zur&uuml;ck. Gibt es keinen Kindproze&szlig;, ist das Ergebnis -1. 
+<LI>Bei <TT>exec()</TT> wird der urspr&uuml;ngliche Proze&szlig;
+durch einen neuen Proze&szlig; ersetzt (eine R&uuml;ckkehr zum aufrufenden
+Proze&szlig; ist daher logischerweise nicht m&ouml;glich). <TT>exec()</TT> ist der
+komplizierteste Aufruf, da der komplette Proze&szlig;adre&szlig;raum ersetzt
+werden mu&szlig;. 
+</UL>
+Dazu ein erstes Beispiel in Perl:
+<pre>
+#!/usr/bin/perl -w
+
+# Kindprozess starten
+$chld_pid=fork();
+
+if ($chld_pid &lt; 0)
+  {
+  die "Fork fehlgeschlagen: $!\n";
+  }
+
+if($chld_pid == 0)          # I am the child.
+  {
+  print "CHILD: Here I am.\n";
+  sleep 1;
+  print "CHILD: terminating.\n";
+  exit(1); # Exit-Status 1
+  }
+
+else                       # I am the parent
+  {
+  print "PARENT: Kind wurde erzeugt. Warte...\n";
+  waitpid($chld_pid,0);
+  print "PARENT: Kind terminiert. Exit status: $?\n";
+  }
+</pre>
+
+<TT>waitpid</TT> wartet darauf, da&szlig; der Kind-Proze&szlig; mit der
+angegebenen Proze&szlig;-ID terminiert und nimmt den R&uuml;ckgabewert
+entgegen (in Perl in der Variablen <TT>$?</TT>). Die Null ist ein
+Flag-Byte; hier kann man angeben, ob <TT>waitpid</TT> auch f&uuml;r
+gestoppte Kindprozesse zur&uuml;ckkehren soll, oder ob <TT>waitpid</TT>
+einfach nur nachsehen soll, ob der Kindproze&szlig; mit der angegebenen PID
+terminiert hat, ohne zu warten, falls das nicht der Fall war. Daneben
+gibt's noch die Funktion <TT>wait</TT>, die wartet, bis irgend ein
+Kindproze&szlig; terminiert, und dann dessen PID zur&uuml;ckgibt. 
+<P>
+In welchem Teil sich das Programm befinden, kann wir anhand des R&uuml;ckgabewerts 
+von <TT>fork()</TT> 
+festgestellt werden. Beim Kindproze&szlig; ist dieser Null, beim Elternproze&szlig;
+die PID des Kind-Prozesses. Beide Prozesse haben zun&auml;chst denselben Eingabe- 
+und Ausgabekanal, und teilen sich auch alle anderen Filedeskriptoren. Wenn sie nun 
+beide wahllos auf den Ausgabekanal schreiben, werden die beiden Ausgaben einfach
+durcheinandergemischt. Wenn sie beide von der Eingabe lesen, gewinnt der Schnellere, 
+wenn eine neue Eingabe ansteht. Um nun wirklich kommunizieren zu k&ouml;nnen, 
+m&uuml;ssen <I>vor</I> dem <TT>fork()</TT> ein Paar (oder auch mehrere) von 
+zus&auml;tzlichen Kan&auml;len geschaffen werde, von denen einer benutzt wird, 
+damit der Elternproze&szlig; Daten an den Kindproze&szlig; senden kann, und ein 
+anderer, damit der Kindproze&szlig; Daten an den Elternproze&szlig; senden kann. 
+Es gibt hierf&uuml;r zwei verschiedene Systemfunktionen. Die erste hei&szlig;t 
+<TT>pipe()</TT> und erzeugt ein Paar von zusammengeh&ouml;rigen Filedeskriptoren, 
+wobei auf dem ersten gelesen und auf dem zweiten geschrieben wird. Der zweite hei&szlig;t
+<TT>socketpair()</TT> und erzeugt zwei Sockets f&uuml;r den gleichen Zweck. 
+<P>
+Der fork-Mechanismus l&ouml;st auf einfache Weise das Problem der Bearbeitung mehrerer
+paralleler Anfragen. Der Proze&szlig; erzeugt einen Sohn, der auch den Socket
+erbt, &uuml;ber den die Verbindung zum Client erhalten bleibt. Die Endlosschleife
+des C-Serverprogramms mu&szlig; dazu ge&auml;ndert werden:
+<pre>
+ for (;;) 
+   {
+   ForeignSocket = accept(MySocket, &AdrPartnerSocket, &len);
+
+   if (fork() == 0) /* Das ist der Kindprozess */ 
+     {
+     MsgLen = recv(ForeignSocket, Puffer, MAXPUF, 0);
+     send(ForeignSocket, Puffer, MsgLen, 0);
+     close(ForeignSocket);
+     exit(0);       /* Kindprozess wird beendet */
+     }
+
+   close(ForeignSocket); /* der Elternprozess schliesst die Verbindung */
+   }
+</pre>
+<P>
+Vorteile:
+<ul>
+<li>
+Die Programmierung ist sehr, sehr einfach, da Parent und Child sehr klare,
+abgesteckte Aufgaben haben.
+<li>
+Da Parent und Child v&ouml;llig unabh&auml;ngig voneinander sind, sind mit 
+<TT>fork()</TT> arbeitende Server typischerweise sehr stabil: St&uuml;rzt ein
+Client ab, hat dies keinerlei Konsequenzen f&uuml;r die anderen Childs
+oder den Parent.
+</ul>
+Dem stehen als Nachteile gegen&uuml;ber:
+<ul>
+<li>Eine Kommunikation zwischen Parent und den verschiedenen Childs ist nur
+schwer m&ouml;glich und schlecht portabel. 
+<li><TT>fork()</TT> steht typischerweise nur unter Unix zur Verf&uuml;gung.
+</ul>
+<P>
+
+<H3>Signale</H3>
+Mit Signalen k&ouml;nnen Prozesse veranla&szlig;t werden, von ihrem "normalen"
+Ablauf abzuweichen. Sie k&ouml;nnen beispielsweise durch Ausf&uuml;hrung
+eines fehlerhaften Befehls - wie Division durch 0, Zugriff auf einen gesch&uuml;tzten
+Speicherbereich, etc. - verursacht werden, aber auch durch "asynchrone"
+Ereignisse, wie das Dr&uuml;cken der Taste Ctrl-C, oder dadurch, da&szlig;
+ein Proze&szlig; einem anderen ein Signal zusendet. Letzteres ist beispielsweise
+n&ouml;tig, wenn ein Proze&szlig; abgebrochen werden soll, da es in Unix grunds&auml;tzlich
+nicht m&ouml;glich ist, den Zustand eines Prozesses "von au&szlig;en" zu
+ver&auml;ndern. Der Proze&szlig; mu&szlig; &uuml;ber die gew&uuml;nschte Zustands&auml;nderung
+informiert werden, um diese dann selbst durchzuf&uuml;hren. In Linux sind beispielsweise 
+32 Signale definiert (<TT>/usr/include/signum.h</TT>). Einige wichtige sind hier
+aufgelistet:
+<pre>
+#define SIGHUP   1  // "Auflegen" - z.B. bei einer Terminalleitung
+#define SIGINT   2  // Interrupt - z.B. Ctrl-C
+#define SIGILL   4  // Falscher Befehlscode
+#define SIGBUS   7  // Busfehler
+#define SIGKILL  9  // "T&ouml;ten" eines Prozesses
+#define SIGSEGV 11  // Fehlerhafter Speicherzugriff
+#define SIGALRM 14  // Timer-Signal
+#define SIGCHLD 17  // "Vater, eines deiner Kinder ist tot"
+#define SIGCONT 18  // Proze&szlig; fortsetzen (aus Zustand "stopped")
+#define SIGSTOP 19  // Proze&szlig; anhalten -> Zustand "stopped"
+</pre>
+Das Senden eines Signales an einen Proze&szlig; entspricht im Wesentlichen dem
+Setzen des entsprechenden Bits in einem daf&uuml;r vorgesehenen Speicherwort
+des Proze&szlig;kontrollblockes. Der Proze&szlig; kann zu jedem
+beliebigen Zeitpunkt festlegen, ob beim Empfang eines bestimmten Signales
+<ul>
+<li>die vom System standardm&auml;&szlig;ig vorgesehene Reaktion ausgel&ouml;st
+werden soll (meist Beenden des Prozesses),
+<li>ob stattdessen eine im Anwenderprogramm bereitgestellte Bearbeitungsroutine 
+durchgef&uuml;hrt wwerden soll, 
+<li>ob das Signal ignoriert wird.
+</ul>
+Letzteres ist allerdings nicht bei allen Signalen m&ouml;glich.
+<p>
+Was macht man, wenn beispielsweise 25 Kindprozesse aktiv sind, und sich im
+Prinzip jeder jederzeit beenden kann, man aber nicht die &Uuml;bersicht
+verlieren will?  Wenn der Kindproze&szlig; stirbt, schickt er dem 
+Elternproze&szlig; ein Signal, SIGCHLD. 
+Solange der Elternproze&szlig; dieses Signal nicht annimmt, kann der Kindproze&szlig; 
+nicht aus der Proze&szlig;tabelle entfernt werden, obwohl es nicht mehr aktiv
+ist. Solche Prozesse nennt man "Zombie-Prozesse". Erst wenn der Elternproze&szlig; 
+mit <TT>waitpid()</TT> oder <TT>wait()</TT> das Signal des Kindes
+beachtet und dessen R&uuml;ckgabewert entgegengenommen hat, wird das Kind
+aus der Proze&szlig;tabelle entfernt. Stirbt hingegen der Elternproze&szlig; und
+verwaist das Kind, so erbt der Proze&szlig; mit Proze&szlig;-ID 1 - in aller Regel
+init - diesen Proze&szlig;. Die PPID wird entsprechend abge&auml;ndert. 
+<P>
+Wenn man f&uuml;r SIGCHLD einen Signalhandler setzt, kann das Problem ganz einfach
+gel&ouml;st werden. Dazu m&uuml;ssen wir uns aber zuerst mit Signalen besch&auml;ftigen.
+Signale sind die wohl einfachste Form der Proze&szlig;kommunikation. Jeder Proze&szlig; 
+kann seinen Kindern und auch allen anderen Prozessen desselben Anwenders Signale
+schicken. Ein Proze&szlig; mit Root-Rechten kann jedem Proze&szlig; Signale
+schicken. Wann immer ein Proze&szlig; vom Scheduler aktiviert wird oder vom Aufruf
+einer Systemfunktion zur&uuml;ckkehrt, wird nachgesehen, ob irgendwelche Signale 
+angekommen sind, und gegebenenfalls die hierf&uuml;r eingetragenen Signalhandler 
+aktiviert. Man kann alle Signale mit Ausnahme von SIGKILL und SIGSTOP ignorieren. 
+Signalhandler, laufen unter besonderen Bedingungen, weshalb sie so klein und einfach 
+wie m&ouml;glich gehalten werden sollten.
+<P>
+Sehen wir uns hierzu das folgende Perl-Programm an:
+<pre>
+#!/usr/bin/perl -w
+
+my $count = 0;
+
+$SIG{INT} = sub
+  {
+  $count++;
+  warn "Oops! Das ist schon die Unterbrechung $count\n";
+  };
+
+while ($count &lt; 5)
+  {
+  print "Ratzepuehh!\n";
+  sleep(3);
+  }
+</pre>
+Das Programm gibt alle drei Sekunden "Ratzepuehh!" aus und schl&auml;ft dann 
+weiter. Immer wenn die Taste <TT>Control-C</TT> gedr&uuml;ckt wird, l&ouml;st dies
+einen Interrupt aus. F&uuml;r diesen Interrupt (Signal <TT>INT</TT>) wurde ein
+Signalhandler installiert, der eine Warnung ausgibt und die ANzahl der Unterbrechungen 
+hochz&auml;hlt. Nach mehr als f&uuml;nf Umterbrechungen beendet sich der Prozess.
+Der magische Hash <TT>%SIG</TT> enth&auml;lt zu jedem Signal eine Subroutine,
+die aufgerufen wird, wenn dieses Signal ankommt. Mit der Anweisung 
+<TT>$SIG{INT} = sub { ... }</TT> setzen wir einen eigenen Signalhandler f&uuml;r
+das Signal <TT>INT</TT>. F&uuml;r die Aktionen eines Signalhandlers bieten sich
+folgende M&ouml;glichkeiten:
+<P>
+<TABLE BORDER=0 CELLPADDING=5 CELLSPACING=0>
+<TR><TD><TT>$SIG{INT} = 'IGNORE';</TT></TD><TD>Ignoriert SIGINT</TD></TR>
+<TR><TD><TT>$SIG{INT} = 'DEFAULT';</TT></TD><TD>Setzt die Default-Action f&uuml;r SIGINT</TD></TR>
+<TR><TD><TT>$SIG{INT} = \&catcher;</TT></TD><TD>f&uuml;hrt den Code in sub catcher aus</TD></TR>
+<TR><TD><TT>$SIG{INT} = sub { $counter++; };</TT></TD><TD>f&uuml;hrt den Code der anonymen sub aus</TD></TR>
+</TABLE>
+<P>
+Signale sind asynchrone Ereignisse. Das laufende Programm wird unterbrochen und 
+die Anweisungen im Signalhandler werden ausgef&uuml;hrt. Je nachdem wo sich Ihr 
+Programm im Code gerade befindet, wenn ein Signal eintritt, k&ouml;nnen unterschiedliche 
+Ereignisse auftreten. Perl ist nicht reentrant, zumindest nicht im Bereich der
+Low-Level-Systemzugriffe. Wenn ein Signal auftaucht, w&auml;hrend Perl seine interne 
+Datenstruktur &auml;ndert (z.B. malloc) ist ein Absturz die Regel. Auch deshalb
+sollten Signalhandler so kurz und einfach wie m&ouml;glich sein. Probieren wir
+ein Beispiel (in Perl) mit mehreren Prozessen:
+<pre>
+#!/usr/bin/perl -w
+$|=1;
+
+my ($i, $pid, $time);
+my %child_pids = (); # Hash fuer Prozessnummern
+
+# Signalhandler fuer Childs
+$SIG{CHLD} = sub 
+  {
+  my $pid=wait();
+  print "Terminated: $pid\n";
+  delete $child_pids{$pid};
+  };
+
+# Machen wir mal 10 Kinder
+for($i = 0; $i &lt; 10; $i++)
+  {
+  $pid = fork();
+  if($pid == 0) # KIND
+    {
+    sleep rand(20);
+    exit(0);
+    }
+  else          # ELTERN
+    {
+    print "$pid wurde gestartet\n";
+    $child_pids{$pid} = 1; # merken
+    }
+  }
+
+# Warten, bis alle Kinder terminiert sind
+$time = 0;
+while(0 + keys(%child_pids)) 
+  {
+  print "TIME: $time\n";
+  sleep 1;
+  $time++;
+  }
+</pre>
+Der Signalhandler wird jedesmal beim Terminieren eines Kindes aufgerufen, da
+der Erlternproze&szlig; ein <TT>SIGCHLD</TT>-Signal erh&auml;lt. Der Aufruf
+von <TT>wait()</TT> beseitigt dann alle Spuren des Kindes (wobei hier auch
+der R&uuml;ckgabewert ignoriert wird). <TT>wait()</TT> wartet ja auf das
+Ende eines Kindprozesses und liefert dessen ID zur&uuml;ck.
+Man sollte erwarten, da&szlig; dieses Programm korrekt arbeitet. Es kommt je nach 
+Rechner h&auml;ufiger oder seltener vor, da&szlig; der Elternproze&szlig; nicht 
+mitbekommt, da&szlig; ein Kind terminiert ist, und am Schlu&szlig; ewig wartet. 
+Das h&auml;ngt damit zusammen, da&szlig;
+<UL>
+<LI>w&auml;hrend ein Signal-Handler l&auml;uft, bestimmte Signale blockiert werden,
+(insbesondere das durch diesen Handler verarbeitete Signal, sonst m&uuml;&szlig;te 
+der Signalhandler reentrant sein).
+<LI>manchmal zwei gleiche Signale kurz hintereinander wie eins gewertet werden
+k&ouml;nnen, falls der Proze&szlig; nicht dazwischen Gelegenheit hatte, das erste
+Signal entgegenzunehmen.
+<LI>Ein Kind wird gestoppt und gleich wieder gestartet.
+</UL>
+Man kann sich beispielsweise behelfen, indem der Signalhandler passend erweitert wird.
+Statt <TT>wait()</TT> kommt nun <TT>waitpid()</TT> zum Einsatz. Diese Funktion kann
+&uuml;ber einen Parameter im Verhalten gesteuert werden. Werte f&uuml;r diesen Parameter
+befinden sich im POSIX-Modul, weshalb dieses im folgenden Programm eingebunden wird.
+Der Parameter <TT>WNOHANG</TT> versetzt <TT>waitpid()</TT> in den "nonblocking mode".
+Die Funktion liefert entweder die ID eines terminierten Kindes oder -1. falls keines
+existiert. Ein anderer n&uuml;tzlicher Wert ist <TT>WUNTRACED</TT>, der PIDs von
+gestoppten und terminierten Kindern liefert. Im obigen Programm mu&szlig; also
+nur der Signalhandler ge&auml;ndert werden:
+<pre>
+#!/usr/bin/perl -w
+
+use POSIX ":sys_wait_h";
+
+$|=1;
+
+my ($i, $pid, $time);
+my %child_pids = ();
+
+$SIG{CHLD} = sub 
+  {
+  my($pid);
+  foreach $pid (keys(%child_pids))
+    {
+    if(waitpid($pid,WNOHANG))
+	  {
+	  print "Terminated: $pid\n";
+	  delete $child_pids{$pid};
+      }
+    }
+  };
+
+# Machen wir mal 10 Kinder
+for($i = 0; $i &lt; 10; $i++)
+  {
+  $pid = fork();
+  if($pid == 0) # KIND
+    {
+    sleep rand(20);
+    exit(0);
+    }
+  else          # ELTERN
+    {
+    print "$pid wurde gestartet\n";
+    $child_pids{$pid} = 1; # merken
+    }
+  }
+
+# Warten, bis alle Kinder terminiert sind
+$time = 0;
+while(0 + keys(%child_pids)) 
+  {
+  print "TIME: $time\n";
+  sleep 1;
+  $time++;
+  }
+</pre>
+Ein grunds&auml;tzliches Problem mit Kindprozessen ist, da&szlig; man stets damit
+rechnen mu&szlig;, da&szlig; Eltern- oder Kindproze&szlig; aus unterschiedlichsten 
+Gr&uuml;nden verstirbt, und sei es nur, weil der Anwender ihm  ein <TT>SIGKILL</TT>
+geschickt hat. F&uuml;r einen Elternproze&szlig; ist es relativ einfach, verstorbene 
+Kinder auszumachen. Verwaiste Kinder werden hingegen nicht per Signal benachrichtigt.
+<P>
+BSD und POSIX-konforme Systeme verf&uuml;gen &uuml;ber verl&auml;&szlig;liche Signale.
+Manche Systeme, z. B. (&auml;ltere) System V verf&uuml;gen &uuml;ber keine 
+zuverl&auml;ssige Bibliothek zur Signalbehandlung. F&uuml;r solche Systeme (und ggf. aus 
+Portabilit&auml;tsgr&uuml;nden) m&uuml;ssen Sie die Signalhandler nach jedem Auftreten 
+des Signals neu installieren.
+<PRE>
+#!/bin/perl
+
+# globale Variablen initalisieren
+my $sig = '';
+
+# ALLE Signale erhalten einen Signalhandler
+@sigs = keys %SIG;
+for (@sigs) 
+  { $SIG{$_} = \&catcher; }
+
+# Signalhandler
+sub catcher 
+  {
+  $sig = shift; 
+  print STDERR "SIGNAL $sig \n";
+  # reinstall handler
+  $SIG{$sig} = \&catcher;           
+  }
+</PRE>
+<P>
+F&uuml;r Neugierige gibt es eine <A HREF="syscalls.html"><B>Einf&uuml;hrung
+der C-Systemaufrufe zur Behandlung von Prozessen</B></A> als Hintergrundinformation.
+<P>
+<A NAME="3.3">
+<H2>3.3 TCP/IP-Sockets: Die Funktionen</H2>
+Da die Programmierung von Client und Server prim&auml;r in Perl stattfinden wird,
+erfolgt die Vorstellung der Systemfunktionen recht kurz. Die &Auml;hnlichkeit
+der sp&auml;ter besprochenen Perl-Funktionen und -Methoden mit den C-Systemaufrufen
+ist jedoch nicht rein zuf&auml;llig.
+<P>
+Mit Sockets l&auml;&szlig;t sich der Austausch von Nachrichten zwischen Prozessen 
+verbindungsorientiert oder mit Datagrammen recht einfach programmieren. Durch Angabe 
+eines Sockettyps wird die Art der Kommunikation festgelegt: SOCK STREAM: verbindungsorientiert, 
+SOCK DGRAM: Datagramm (daneben gibt es noch weitere Typen).
+Die kommunizierenden Prozesse k&ouml;nnen auf demselben Rechner ablaufen oder auf vernetzten 
+Maschinen. Die Programmierschnittstelle unterst&uuml;tzt verschiedene Protokollfamilien und,
+daran gekoppelt, verschiedene Adressierungsarten. Ein Beispiel f&uuml;r eine Adressfamilie ist 
+AF_UNIX. Sie definiert einen Adressierungsmechanismus f&uuml;r die rechnerinterne Kommunikation 
+zwischen UNIX-Prozessen. Als Adressobjekte werden Pfade im Dateisystem verwendet, genau wie 
+bei Pipes. Welche Adressfamilien unterst&uuml;tzt werden, h&auml;ngt davon ab, welche 
+Netzwerkprotokolle das Betriebssystem beherrscht. UNIX-Systeme werden zumindest AF_UNIX und 
+AF_INET unterst&uuml;tzen.
+<P>
+<H4>Kommunikationsendpunkt: socket</H4>
+Um mit Sockets zu arbeiten, mu&szlig; zuerst eine Verbindung ge&ouml;ffnet
+werden. Hier gibt es Analogien zu Dateizugriffen. Als erstes mu&szlig; also 
+ein Socket vom Betriebssystem angefordert werden. Dies geschieht mit dem 
+<TT>socket()</TT>-Systemaufruf. Der Aufruf entspricht einem <TT>fopen</TT> 
+bei Dateien. Die Funktion <TT>socket()</TT> hat drei Parameter:
+<PRE>
+int socket(int Family, int Sockettype, int Protocol);
+</PRE>
+<UL>
+<LI><TT>Family</TT> legt die Protokoll-Familie fest:
+  <UL>
+  <LI><TT>AF_UNIX&nbsp;&nbsp;&nbsp;</TT>: UNIX-interne Protokolle
+  <LI><TT>AF_INET&nbsp;&nbsp;&nbsp;</TT>: Internet-Protokolle 
+  <LI><TT>AF_NS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Xerox-NS-Protokolle
+  <LI><TT>AF_IMPLINK</TT>: IMP-Link-Schicht
+  </UL>
+  Wir werden nur mit <TT>AF_INET</TT> zu tun haben.
+  <P>
+<LI><TT>Sockettype</TT> legt den Typ des Sockets (und damit auch teilweise 
+das Protokoll) fest (in Klammern die Anwendung f&uuml;r die Familie <TT>AF_INET</TT>):
+  <UL>
+  <LI><TT>SOCK_STREAM&nbsp;&nbsp;&nbsp;</TT>: Stream-Socket (TCP)
+  <LI><TT>SOCK_DGRAM&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Datagramm-Socket (UDP)
+  <LI><TT>SOCK_RAW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Raw-Socket (IP)
+  <LI><TT>SOCK_SEQPACKET</TT>: Paket-Socket  
+  <LI><TT>SOCK_RDM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Nachrichten-Socket 
+  </UL>
+  <P>
+<LI><TT>Protocol</TT> legt das genaue Protokoll fest. F&uuml;r <TT>AF_INET</TT>
+sind die m&ouml;glichen Werte:
+  <UL>
+  <LI><TT>IPPROTO_UDP&nbsp;</TT>: UDP-Protokoll (<TT>SOCK_DGRAM</TT>)
+  <LI><TT>IPPROTO_TCP&nbsp;</TT>: TCP-Protokoll (<TT>SOCK_STREAM</TT>) 
+  <LI><TT>IPPROTO_ICMP</TT>:  ICMP-Protokoll (<TT>SOCK_RAW</TT>) 
+  <LI><TT>IPPROTO_RAW&nbsp;</TT>: Raw-IP-Protokoll (<TT>SOCK_RAW</TT>)  
+  </UL>
+</UL>
+<P>
+Der <TT>socket()</TT>-Systemaufruf liefert einen Integerwert zur&uuml;ck, der
+einem Dateidescriptor &auml;hnelt. Dieser Wert wird daher "Socketdeskriptor" oder 
+"sockfd" genannt. Im Fehlerfall hat er den Wert -1. Beispiel:
+<pre>
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+
+int MySocket, ForeignSocket;
+...
+
+MySocket = socket(AF_INET, SOCK_STREAM, IPPPROTO_TCP);
+...
+
+close(MySocket);
+</pre>
+Nach Aufruf von "socket" ist der Socket jedoch noch nicht betriebsbereit.
+Es muss jetzt noch festgelegt werden, f&uuml;r welchen Port (d.h. f&uuml;r
+welches Protokoll der Anwendungsebene) der Socket zust&auml;ndig sein soll,
+ob es sich um einen Server- oder Client-Socket handeln soll, etc.
+<P>
+Jeder er&ouml;ffnete Socket mu&szlig; auch wieder geschlossen werden. Eine 
+Nachl&auml;ssigkeit an dieser Stelle kann sich bitter r&auml;chen, da 
+insbesondere bei Serverprozessen Verbindungen sehr oft er&ouml;ffnet werden 
+und die Systemresourcen f&uuml;r Netzverbindungen irgendwann zur Neige gehen,
+was meist zum Stillstand des Servers f&uuml;hrt.
+Das Schlie&szlig;en des Sockets erfolgt unter UNIX mit dem <TT>close</TT>-Aufruf.
+<P>
+
+<H4>Socket einrichten: bind</H4>
+Der Serverprozess mu&szlig; von au&szlig;en erreichbar sein. Dazu bekommt
+er einen sogenannten <I>well known port</I>. Diese Nummer ist also
+den Clientprozessen bekannt. Um einen Socket an diese Nummer zu
+binden, wird der <TT>bind</TT>-Aufruf verwendet. Als Parameter verwendet 
+<TT>bind</TT> den Socket und eine Struktur <tt>sockaddr_in</tt>, die diesen
+Port beschreibt.
+<pre>
+int bind (int sockfd, struct sockaddr *Myaddr, int Addrlen);
+</pre>
+Mit dem Aufruf wird ein Speicherbereich bereitgestellt, der zur Festlegung der 
+Protokoll-Familie und der Portnummer vorgesehen ist. Bei einem Server-Socket 
+erfolgt damit die Zuordnung zu dem gew&uuml;nschten Port - er erkl&auml;rt sich damit
+zust&auml;ndig f&uuml;r ein bestimmtes Anwender-Protokoll. Der Aufruf von
+"bind" ist sowohl bei Datenstr&ouml;men als auch bei Datagrammen erforderlich.
+Der Parameter "sockfd" ist ein Dateideskriptor, der mit einem vorangegangenen
+"socket"-Aufruf erzeugt wurde.
+Der zweite Parameter ist ein Zeiger auf eine protokollspezifische Adresse und
+der dritte Parameter gibt die Gr&ouml;&szlig;e der Adre&szlig;struktur an.
+<TT>bind</TT> wird in drei F&auml;llen angewendet:
+<OL>
+<LI>Server registrieren ihre eigene Adresse innerhalb des Systems.
+<LI>Ein Client kann eine spezifische Adresse selbst speichern.
+<LI>Ein verbindungsloser Client mu&szlig; vom System eine individuelle
+Adresse anfordern, damit er eine g&uuml;ltige Adresse f&uuml;r die 
+R&uuml;ckantwort hat.
+</OL>
+<TT>bind</TT> f&uuml;llt also im oben angef&uuml;hrten F&uuml;nfertupel die 
+Felder "lokale Adresse" und "lokaler Proze&szlig;".
+<P>
+<TT>struct sockaddr</TT> ist eine allgemeing&uuml;ltige Datenstruktur, die 
+f&uuml;r verschieden Protokollfamilien existiert. Bei Verwendung der 
+Internet-Protokollfamilie kann sie vom Anwenderprogramm &uuml;berlagert werden
+durch eine Struktur <TT>sockaddr_in</TT>, die ausschlie&szlig;lich f&uuml;r 
+IP geeignet ist. Unter der Annahme, da&szlig; der Anwender eine Variable
+vom Typ "sockaddr_in" in der Form <tt>struct sockaddr_in adresse;</tt>
+deklariert hat, enth&auml;lt "adresse" u. a. die folgenden Komponenten:
+<PRE>
+adresse.sin_family      /* vorzeichenlose 16bit-Ganzzahl (Protokoll-Familie) */
+adresse.sin_port        /* vorzeichenlose 16bit-Ganzzahl (Portnummer) */
+adresse.sin_addr.s_addr /* vorzeichenlose 32bit-Ganzzahl (Internetadresse) */
+</PRE>
+In die Komponente <TT>sin_family</TT> wird die Konstante AF_INET (2) eingetragen.
+In die Komponente <TT>sin_port</TT> ist die Portnummer einzutragen - allerdings
+in sog. "Netzwerk-Anordnung": Portnummer und Internetadresse sind Zahlen,
+die &uuml;ber das Netz verschickt werden und demnach unabh&auml;ngig von
+der internen Zahlendarstellung des jeweiligen Rechners sein m&uuml;ssen 
+(siehe sp&auml;ter).
+<P>
+<PRE>
+struct sockaddr_in adresse;
+
+adresse.sin_family = AF_INET; /* Internet-Protokoll-Familie */
+adresse.sin_port = htons(80); /* Port festlegen */
+adresse.sin_addr.s_addr = 0;  /* Internetadresse irrelevant */
+
+int ergebnis = bind(descriptor,(struct sockaddr *)&amp;adresse,sizeof(adresse));
+</PRE>
+Der "Typecast"-Operator <TT>(struct sockaddr *)</TT> ist erforderlich, wenn der
+Compiler auf strenge Typpr&uuml;fung eingestellt ist. Die Funktion <TT>bind()</TT>
+erwartet ja einen Zeiger vom Typ <TT>struct sockaddr *</TT>. Beispiel:
+<PRE>
+   .
+   .
+   .
+  s = socket(AF_INET, SOCK_STREAM, 0);
+  if (s &lt; 0)
+    {
+    fprintf(stderr, "Error: Socket\n");
+    return -1;
+    }
+
+  my_addr.sin_family = AF_INET;
+  my_addr.sin_port = htons(4711); /* Portnummer */
+  my_addr.sin_addr.s_addr = INADDR_ANY; /* An jedem Device warten */
+
+  if (bind(s, (struct sockaddr *)&my_addr, sizeof(my_addr)) &lt; 0)
+    {
+    close(s);
+    fprintf(stderr, "Error: bind\n");
+    return -1;
+    }
+   .
+   .
+   .
+</PRE>
+<P>
+
+<H4>Warteschlange festlegen: listen</H4>
+Der <TT>listen</TT>-Aufruf gibt an, wieviele Anfragen gepuffert werden 
+k&ouml;nnen. In fast allen Programmen wird hier ein Wert von 5 f&uuml;r 
+<i>backlog</i> verwendet (der derzeitige H&ouml;chstwert).
+<pre>
+int listen(int sockfd, int backlog);
+</pre>
+<TT>listen</TT> folgt normalerweise nach <TT>socket</TT> und <TT>bind</TT>
+und unmittelbar vor <TT>accept</TT>.
+<p>
+Falls die <TT>listen()</TT>-Warteschlange voll ist, werden weitere Verbindungsw&uuml;nsche
+von Clients abgewiesen. Ein Server f&uuml;r Datagramme (UDP) braucht <TT>listen()</TT> nicht 
+aufzurufen, da er keine Verbindungen zu Clients einrichtet.
+<P>
+
+<H4>Verbindungswunsch entgegennehmen: accept</H4>
+Der <TT>accept</TT>-Aufruf wartet auf eine Anfrage eines Clients.
+Der Aufruf von <TT>accept()</TT> liefert als R&uuml;ckgabewert die Socket-ID des Partners.
+Des weiteren wird per Parameter in einer Variablen der Struktur <tt>sockaddr_in</tt> 
+die Adresse des Partners geliefert.
+<pre>
+int accept(int sockfd, struct sockaddr_in *Peer, int *Addrlen);
+</pre>
+<TT>accept</TT> nimmt die erste Anforderung von der Warteschlange und generiert einen
+weiteren Socket mit der gleichen Eigenschaft wie <TT>sockfd</TT>. 
+Der Parameter <TT>Peer</TT> verweist auf einen Speicherbereich, dessen Inhalt
+beim Aufruf undefiniert sein kann. In diesen tr&auml;gt <TT>accept()</TT> die Internetadresse
+des Absenders eines eintreffenden Verbindungswunsches ein (die Adresse
+des Clients). Auf diese Datenstruktur kann genauso zugegriffen werden,
+wie dies bereits  bei <TT>bind()</TT> erkl&auml;rt wurde. <TT>Peer</TT> und <TT>Addrlen</TT> 
+liefern also die Felder "ferne Adresse" und "ferner Proze&szlig;" des F&uuml;nfertupels. 
+Der Parameter "Addrlen" ist die Adresse eines Variablen-Parameters: Vor dem Aufruf mu&szlig; 
+dort die maximale L&auml;nge des Speicherbereiches stehen, auf den der Parameter <TT>Peer</TT>
+zeigt. Nach dem Aufruf enth&auml;lt er die Anzahl Bytes, die das Betriebssystem 
+tats&auml;chlich dort eingetragen hat.
+<P>
+<TT>accept</TT> generiert (bei einem concurrent server) automatisch einen neuen 
+Socketdescriptor f&uuml;r die aktuelle Verbindung. 
+Der R&uuml;ckgabewert von <TT>accept()</TT> ist also ein neuer Dateideskriptor, &uuml;ber
+den in der Folge die Kommunikation mit dem Client erfolgt (z.B. mit <TT>read()</TT>
+und <TT>write()</TT>). Der als erster Parameter
+angegebene Deskriptor bleibt f&uuml;r weitere Verbindungsw&uuml;nsche reserviert.
+Zum Beispiel:
+<pre>
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+
+int MySocket, ForeignSocket, Partnerlen;
+struct sockaddr_in AdrMySock, AdrPartnerSocket;
+...
+
+  MySocket = socket(AF_INET, SOCK_STREAM, IPPPROTO_TCP);
+...
+
+  AdrMySock.sin_family = AF_INET;
+  AdrMySock.sin_addr.s_addr = INADDR_ANY; /* akzept. jeden */
+  AdrMySock.sin_port = PortNr;	/* wird per getservbyname bestimmt */
+  bind(MySocket, &AdrMySock, sizeof(AdrMySock));
+  listen(MySock, 5);
+  for(;;)
+    {
+    ForeignSocket = accept(MySocket, &AdrPartnerSocket, &Partnerlen);
+    ...
+    close(ForeignSocket);
+    }
+...
+</pre>
+Nicht vergessen: <TT>ForeignSocket</TT> mu&szlig; nach Ende der Kommunikation
+geschlossen werden, sonst gehen dem System nach einiger Zeit die Sockets aus.
+<p>
+
+<H4>Clientaufruf: connect</H4>
+Sobald der Server l&auml;uft, kann der Client Verbindung zum <I>well known port</I>
+des Servers aufnehmen. Der entsprechende Aufruf lautet <TT>connect</TT>. 
+<pre>
+int connect(int sockfd, struct sockaddr_in *ServAddr, int Addrlen);
+</pre>
+Der Parameter <TT>sockfd</TT> ist nat&uuml;rlich wieder der Socket-Deskriptor. 
+Die weiteren Parameter entsprechen jenen von <TT>bind</TT>. F&uuml;r die meisten
+verbindungsorientierten Protokolle richtet <TT>connect</TT> eine Verbindung
+vom lokalen zum fernen Rechner ein.<BR>
+Allerdings mu&szlig; diesmal in der Datenstruktur, auf die <TT>ServAddr</TT> zeigt,
+die Internetadresse des gew&uuml;nschten Servers eingetragen werden. Die Verbindung 
+erfolgt zu dem angegebenen Rechner. Weiterhin ist ein Port anzugeben. Der Ziel-Server
+wird durch seine IP-Nummer festgelegt. Diese steht in der Struktur <TT>sockaddr_in</TT> 
+im Element <tt>sin_addr</tt>.
+Beispiel:
+<pre>
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+
+struct sockaddr_in AdrSock;
+...
+  AdrSock.sin_family = AF_INET;
+  AdrSock.sin_addr = HostID;
+  AdrSock.sin_port = htons(PortNr);
+  connect(MySocket, (struct sockaddr *)&AdrSock, sizeof(AdrSock));
+...
+</pre>
+<P>
+<TT>HostID</TT> stellt eine 32-Bit-Ganzzahl dar. Im Normalfall liegt die
+Host-Adresse nat&uuml;rlich nicht Ganzzahl vor, sondern als Zeichenkette der 
+Form "<tt>www.netzmafia.de</tt>" oder "<tt>192.168.234.77</tt>".
+Zu korrekten Umwandlung in eine ganze Zahl, die in Netzwerk-Anordnung
+vorliegen muss, stehen in der C-Bibliothek zwei Routinen zur Verf&uuml;gung,
+<TT>gethostbyname()</TT> und <TT>inet_addr()</TT>, die weiter unten besprochen werden.
+<P>
+Das folgende Beispiel zeigt den kompletten Verbindungsaufbau eines Clients:
+<PRE>
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+
+struct sockaddr_in server;
+
+/* Deklaration des Sockets */
+int descr = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+
+/* Datenstruktur "server" vorbereiten */
+server.sin_family = AF_INET;    /* Internet-Protokoll-Familie */
+server.sin_port = htons(80);    /* Port 80 festlegen (HTTP) */
+
+/* 1.Versuch die Internetadresse zu ermitteln, Form: "a.b.c.d" */
+server.sin_addr.s_addr = inet_addr(server_name);
+if (server.sin_addr.s_addr == -1) /* keine korr. Punktnotation */
+  {
+  /* 2. Versuch: symbolisch */
+  struct hostent *host = gethostbyname(server_name);
+  if (host != NULL)
+    {
+    server.sin_addr.s_addr = *((unsigned long*)host->h_addr_list[0]);
+    }
+  else
+    { 
+    printf("Internetadresse nicht gefunden\n");
+    exit(1);
+    }
+  }
+
+/* jetzt kann verbunden werden */
+int i = connect(descr, (struct sockaddr *)&amp;server, sizeof(server));
+if (i == 0)
+  { /* jetzt steht die Verbindung! */
+  ...
+  }
+</PRE>
+<P>
+
+<H4>Datenaustausch: send, sendto, recv und recvfrom</H4>
+Mit diesen Aufrufen werden Daten &uuml;ber die bestehenden Verbindungen transportiert. 
+Unter UNIX k&ouml;nnten daf&uuml;r auch die Dateiaufrufe <TT>read</TT> und 
+<TT>write</TT> verwendet werden.
+<pre>
+int send(int sockfd, char *Buffer, int NBytes, int Flags);
+
+int sendto(int sockfd, char *Buffer, int NBytes, int Flags,
+           struct sockaddr_in *To, int AddrLen);
+
+int recv(int sockfd, char *Buffer, int NBytes, int Flags);
+
+int recvfrom(int sockfd, char *Buffer, int NBytes, int Flags,
+           struct sockaddr_in *From, int AddrLen);
+
+</pre>
+Die ersten drei Parameter dieser vier Systemaufrunfe sind den ersten drei Parametern von
+<TT>read</TT> und <TT>write</TT> &auml;hnlich. 
+Der Parameter <TT>sockfd</TT> identifiziert wieder den gew&uuml;nschten Socket,
+<TT>Buffer</TT> ist ein Zeiger auf einen beliebigen Speicherpuffer, <TT>NBytes</TT> 
+bestimmt die Anzahl der zu &uuml;bertragenden Bytes und <TT>Flags</TT> hat im Normalfall 
+den Wert Null oder er stellt das das Resultat einer Oder-Verkn&uuml;pfung mit einer der 
+folgenden Konstanten dar:
+<UL>
+<LI><TT>MSG_OOB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Sende/empfange Out-of-Band-Daten
+<LI><TT>MSG_PEEK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>: Peek auf ankommende Nachricht (<TT>recv, recvfrom</TT>)
+<LI><TT>MSG_DONTROUTE</TT>: Leite Routing um (<TT>send, sendto</TT>)
+</UL>
+Wird <TT>Flags</TT> beispielsweise auf den Wert 1 gesetzt (MSG_OOB), dann
+soll die &Uuml;bertragung "out of band" erfolgen. Bei dieser &Uuml;bertragung
+werden nach M&ouml;glichkeit bisher bereits abgeschickte Daten &uuml;berholt.
+Es handelt sich dann beispielsweise um hochpriore Informationen, wie beispielsweise
+das Abbruchsignal Crtl-C beim Telnet-Protokoll.
+<P>
+Alle Funktionen liefern als R&uuml;ckgabewert die Gr&ouml;&szlig;e der empfangenen bzw.
+gesendeten Datenmenge. Die <TT>recv</TT>-Funktion liefert die Sendung in  Bl&ouml;cken 
+von maximal 1 KByte Gr&ouml;&szlig;e. Wurden gr&ouml;&szlig;ere Pakete verschickt, 
+m&uuml;ssen sie st&uuml;ckweise gelesen werden. Das Senden ist nicht beschr&auml;nkt.
+Da der R&uuml;ckgabewert nichts &uuml;ber die Gr&ouml;sse des tats&auml;chlich
+gesendeten Pakets aussagt, mu&szlig; dies vom Programm geregelt werden. Wenn die Pakete
+nicht immer gleiche Gr&ouml;&szlig;e besitzen, wird die Paketl&auml;nge meist in den
+ersten Bytes des ersten Paketes kodiert.
+<P>
+F&uuml;r den Normalfall (Flags gleich Null) kann statt <tt>send()</TT> auch die
+Systemfunktion <TT>write</TT> verwendet werden. Zum Beispiel kann statt
+<pre>
+send(sock,"Hello World",11,0);
+</pre>
+auch wie folgt programmiert werden:
+<pre>
+write(sock,"Hello World",11);
+</pre>
+Dar&uuml;berhinaus besteht nat&uuml;rlich die M&ouml;glichkeit, eine Datei
+f&uuml;r Standard-Ein/Ausgabe &uuml;ber dem betreffenden Deskriptor zu definieren:
+<pre>
+FILE *f = fdopen(descr,"rw");
+</pre>
+wodurch nun auch mit Routinen der "stdio"-Bibliothek auf den Socket
+zugegriffen werden kann, z. B.:
+<pre>
+fprintf(f,"Hello World");
+</pre>
+Dies ist insbesondere wichtig, wenn die Standardeingabe oder Standardausgabe
+eines beliebigen Programmes auf einen Socket umgeleitet werden soll.
+<p>
+Der R&uuml;ckgabewert von <TT>recv()</TT> gibt Auskunft &uuml;ber die 
+tats&auml;chliche Anzahl empfangener Bytes. Ist dieser Wert -1, handelt es sich 
+um einen Fehler, beim Wert 0 wurde die Verbindung von der Gegenseite geschlossen.
+Andernfalls ist der Wert immer gr&ouml;&szlig;er 0 und kleiner gleich dem Parameter
+<TT>NBytes</TT>.<BR>
+Bei Verwendung des Flags <TT>MSG_PEEK</TT> w&auml;hrend des Empfangs werden die 
+Daten zwar zum Anwenderprogramm &uuml;bertragen, sie verbleiben jedoch auch noch 
+in der Empfangswarteschlange, so da&szlig; sie mit einem nachfolgenden 
+<TT>recv()</TT>-Aufruf nochmals gelesen werden k&ouml;nnen.<BR>
+Ruft der Empf&auml;nger die  <TT>recv()</TT>-Funktion mit <TT>NBytes &gt; 0</TT>
+auf und stehen im Empfangspuffer bereits Daten bereit (aber weniger als erwartet - 
+beispielsweise weil der Rest noch nicht angekommen ist), dann kehrt die Funktion
+trotzdem sofort zur&uuml;ck und &uuml;bergibt die tats&auml;chliche Anzahl
+der &uuml;bertragenen Bytes. Erfordert es die Logik des Anwenderprogrammes,
+da&szlig; vor einer Fortsetzung die Gesamtzahl der erwarteten Bytes eingetroffen
+ist, so mu&szlig; der Aufruf von <TT>recv()</TT> so lange wiederholt werden, bis
+alle Daten eingetroffen sind. Die Daten m&uuml;ssen vom Empf&auml;nger in geeigneter 
+Form zusammengesetzt werden.<BR>
+Wird <TT>recv()</TT> mit <TT>Flags = 0</TT> aufgerufen, kann stattdessen
+die Systemfunktion <TT>read()</TT> verwendet werden.
+<p>
+Die Funktionen <TT>sendto()</TT> und <TT>revcfrom()</TT> dienen dazu, Daten 
+auf einer UDP-Verbindung zu senden und zu empfangen. 
+Die ersten vier Parameter haben die gleiche Bedeutung wie bei <TT>send()</TT> 
+und <TT>recv()</TT>. Beim vorletzten Parameter von <TT>sendto()</TT> muss 
+man einen Pointer auf eine Variable vom Typ <TT>struct sockaddr_in</TT>, in der 
+festgehalten ist, wohin das Paket genau gesendet werden soll. Der letzte Parameter 
+gibt die genaue L&auml;nge der vorangegangenen Variablen an. In der Funktion 
+<TT>recvfrom()</TT> dient der Parameter <TT>From</TT> als Platzhalter, in den bei 
+einem empfangenen Paket Informationen über den Sender gespeichert und an das 
+Programm zurückgegeben werden.
+<P>
+Wenn Sie f&uuml;r eine UDP-Verbindung vorher <TT>connect()</TT>aufgerufen haben, 
+so k&ouml;nnen Sie einfach <TT>send()</TT> und <TT>recv()</TT> verwenden.
+<P>
+
+<H4>Socket schlie&szlig;en: close</H4>
+Eine bidirektionale Socket-Verbindung kann mit dem Aufruf
+<pre>
+int shutdown(int sockfd, int how);
+</pre>
+geschlossen werden. Dabei legt der Parameter <TT>how</TT> fest, ob k&uuml;nftig
+keine Daten mehr empfangen werden sollen (how=0), keine mehr gesendet werden 
+(how=1), oder beides (how=2). Wird statt <TT>shutdown()</TT> die Systemfunktion
+<TT>close()</TT> benutzt, dann entspricht dies einem <TT>shutdown(sock,2)</TT>.
+<pre>
+int close(int sockfd);
+</pre>
+<P>
+
+<H4>Zahlenformat: ntoh und hton</H4>
+Portnummer und Internetadresse sind Zahlen, die &uuml;ber das Netz verschickt werden 
+und demnach unabh&auml;ngig von der internen Zahlendarstellung des jeweiligen Rechners 
+sein m&uuml;ssen.
+Die Reihenfolge der Bytes eines Datenwortes ist auf den verschiedenen Computern 
+unterschiedlich definiert. So besteht eine Variable vom Typ <TT>short</TT> aus zwei 
+Byte. Auf einer Maschine mit Intel-Architektur kommt dabei das niederwerte Byte 
+zuerst ("little endian"), w&auml;hrend es auf einem 68000-Prozessor oder einer Sun
+genau umgekehrt ist.
+Aus diesem Grund wurde eine eindeutige Netzwerk-Anordnung der
+zu &uuml;bertragenden Bytes definiert (h&ouml;herwertige Bytes zuerst!).
+<P>
+Bei Rechnerarchitekturen, bei denen der Speicher nach der Host-Order ausgewertet wird 
+(das niederwertige Byte also vor dem höherwertigen im Speicher steht), ist es notwendig, 
+alle Werte mit dem Type LONG oder WORD vor der &Uuml;bergabe an den Treiber in die 
+Network-Order zu konvertieren. Um Zahlen der Maschine in die 
+passende Form f&uuml;r das Netz zu bringen und die Programme portabel zu halten, gibt 
+es die Makros <TT>ntoh()</TT> (Net to Host) und <TT>hton()</TT> (Host to Net). Beide 
+wirken auf <TT>short</TT>-Variablen. F&uuml;r <TT>long</TT>-Variablen gibt es die 
+analog funktionierenden Makros <TT>htonl()</TT> und <TT>ntohl()</TT>. Vorsicht ist 
+auch bei Vergleichen geboten: Sie liefern in Network- und Host-Order nicht das gleiche 
+Ergebnis!
+<UL>
+<LI><tt>unsigned long int htonl(unsigned long int hostlong);</tt>
+wandelt eine lange Ganzzahl (32bit) von der Rechner-Anordnung ("host
+order") in die Netzwerk-Anordnung um.
+<LI><tt>unsigned short int htons(unsigned short int hostshort);</tt>
+wandelt eine kurze Ganzzahl (16bit) von der Rechner-Anordnung
+("host order") in die Netzwerk-Anordnung um.
+<LI><tt>unsigned long int ntohl(unsigned long int netlong);</tt>
+wandelt eine lange Ganzzahl (32bit) von der Netzwerk-Anordnung
+("host order") in die Rechner-Anordnung um.
+<LI><tt>unsigned short int ntohs(unsigned short int netshort);</tt>
+wandelt einekurze Ganzzahl (16bit) von der Netzwerk-Anordnung
+("host order") in die&nbsp; Rechner-Anordnung um.
+</UL>
+<P>
+<CENTER><IMG SRC="order.gif"></CENTER>
+<P>
+Das Socket-Interface stellt hier eine Reihe von Konvertierungs-Funktionen zur Verfügung.
+Die Funktionen <TT>inet_addr()</TT> und <TT>inet_ntoa()</TT> weichen etwas von den 
+anderen ab. Sie wandeln eine Internetadresse, die als String im "dotted quad"-Format 
+vorliegt, in einen 32-Bit-Wert und umgekehrt.
+<p>
+Um beispielsweise den Port des POP3-Dienstes (110) numerisch an die Struktur 
+<TT>sock_add_in</TT> zu &uuml;bergeben, w&uuml;rde man <TT>hton</TT> verwenden 
+(eigentlich sollte man dazu <TT>getservbyname</TT> verwenden):
+<pre>
+struct sockaddr_in AdrSock;
+...
+   AdrSock.sin_port = hton(110);
+...
+</pre>
+<P>
+
+<H4>Byte-Operationen</H4>
+In den verschiedenen Socket-Adre&szlig;strukturen existieren unterschiedliche 
+Byte-Felder, die alle behandelt werden m&uuml;ssen. Einige dieser Felder sind, 
+wie auch immer, keine C-Integer-Felder, so da&szlig; hier andere Techniken 
+angewandt werden m&uuml;ssen, um mit ihnen allen gleich operieren zu k&ouml;nnen.
+BSD definiert die folgenden drei Routinen, die auf benutzerdefinierten 
+Byte-Strings basieren. Darunter ist zu verstehen, da&szlig; es sich um 
+keine Standard-Strings in C handelt, die bekannterma&szlig;en mit einem Nullbyte 
+abgeschlossen werden, sondern die benutzerdefinierten Byte-Strings k&ouml;nnen 
+innerhalb des Strings durchaus Nullbytes besitzen. Deshalb mu&szlig; die L&auml;nge
+des Strings den Funktionen als Parameter mitgegeben werden.
+<pre>
+bcopy (char *Src, char *Dest, int NBytes);
+</pre>
+Kopiert NBytes vom Ursprung (SRC) zum Ziel (Dest). Achtung: Parameterreihenfolge
+anders als bei <TT>strcpy</TT>.
+<pre>
+bzero (char *Dest, int NBytes);
+</pre>
+Schreibt NBytes Null-Bytes an das angegebene Ziel.
+<pre>
+int bcmp (char *Ptrl, char *Ptr2, int NBytes);
+</pre>
+vergleicht zwei Byte-Strings. der R&uuml;ckgabewert ist gleich Null, wenn beide
+Byte-Strings gleich sind, sonst ungleich Null (also auch anders als bei 
+<TT>strcmp</TT>).
+<P>
+
+<H3>Namensaufl&ouml;sung</H3>
+Computer und Dienste werden unter TCP/IP immer &uuml;ber die IP-Nummern angesprochen.
+F&uuml;r den Menschen ist jedoch ein (Domain-)Name bequemer. Allerdings gibt es f&uuml;r 
+beides Mechanismen zur Namensaufl&ouml;sung. Im Programm ruft man entsprechende 
+Funktionen auf.
+<P>
+Normalerweise sind der gew&uuml;nschte Dienst und der Name des Hosts bekannt, der 
+bez&uuml;glich des Dienstes angesprochen werden soll. Daher zuerst ein Blick auf 
+den Host.
+<pre>
+#include &lt;netdb.h&gt;
+...
+
+struct hostent *gethostbyname (char *hostname);
+...
+</pre>
+Die <TT>gethostbyname</TT>-Funktion gibt einen Zeiger auf eine 
+<TT>hostent</TT>-Struktur zur&uuml;ck:
+<pre>
+struct hostent 
+  {
+  char *h_name;       /* official name of host */
+  char **h_aliases;   /* alias list */
+  int h_addrtype;     /* host address type */
+  int h_length;       /* length of address */
+  char **h_addr_list; /* a NULL terminates the list */
+  };
+
+#define h_addr h_addr_list[0]; /* first address in list */
+</pre>
+
+Gegenw&auml;rtig enth&auml;lt das Feld <TT>h_addrtype</TT> immer den Wert <TT>A_INET</TT> 
+und analog das Feld <TT>h_length</TT> immer den Wert 4 (ist gleich der L&auml;nge der 
+Internet-Adressse). Bei Internet-Adressen besteht die Matrix der Zeiger 
+<TT>h_addr_list[0], h_addr_list [1], ...</TT> nicht aus Zeigern auf Zeichen, sondern 
+aus Zeigern auf Strukturen vom Typ <TT>in_addr</TT>. Die <TT>hostent</TT>-Struktur 
+ist sehr allgemein gehalten, wobei momentan vieles davon noch nicht verwendet 
+wird. <BR>
+Das wichtigste Element der <TT>hostent</TT>-Struktur ist das Feld <TT>h_addr_list</TT>,
+das in einem Array die IP-Nummer des Rechners enth&auml;lt. Das Makro <TT>h_addr</TT>
+liefert die Nummer, wie sie in fr&uuml;heren Versionen &uuml;blich war. Das Feld 
+<TT>h_length</TT> liefert die Gr&ouml;&szlig;e einer IP-Nummer.<BR>
+Ein Host kann mehr als einen Namen tragen, denn ein universell einsetzbarer Host 
+kann mehr als eine Internet-Schnittstelle besitzen, jede mit einer eindeutigen 
+IP-Adresse. Das folgende Beispiel zeigt die Verwendung der 
+<TT>gethostbyname</TT>-Funktion.
+<pre>
+/* Print the "hostent" information for every host whose name is
+ * specified on the command line. (nach Stevens)
+ */
+#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;netdb.h&gt;       /* for struct hostent */
+#include &lt;sys/socket.h&gt;  /* for AF-INET */
+#include &lt;netinet/in.h&gt;  /* for struct in_addr */
+#include &lt;arpa/inet.h&gt;   /* for inet_ntoa() */
+
+void pr_inet(char **listptr, int length);
+
+int main(int argc, char **argv)
+  {
+  char *ptr;
+  struct hostent *hostptr;
+
+  while (--argc &gt; 0) 
+    {
+    ptr = *++argv;
+    if ((hostptr = gethostbyname(ptr)) == NULL)
+      {
+      printf("gethostbyname error for host %s\n",ptr);
+      continue;
+      }
+    printf ("official host name: %s\n", hostptr-&gt;h_name);
+    /* go through the list of aliases */
+    while ((ptr = *(hostptr-&gt;h_aliases)) != NULL)
+      {
+      printf("    alias: %s\n", ptr);
+      hostptr-&gt;h_aliases++;
+      }
+    printf("    addr type = %d, addr length = %d\n",
+           hostptr-&gt;h_addrtype, hostptr-&gt;h_length);
+    switch (hostptr-&gt;h_addrtype) 
+      {
+      case AF_INET: pr_inet(hostptr-&gt;h_addr_list, hostptr-&gt;h_length);
+                    break;
+      default:      printf("unknown address type\n");
+                    break;
+      }
+    }
+  return 0;
+  }
+      
+void pr_inet(char **listptr, int length)
+/* Go through a list of internet addresses,
+   printing each one in dotted-decimal notation. */
+  {
+  struct in_addr *ptr;
+  while ( (ptr = (struct in_addr *) *listptr++) != NULL)
+    printf (" Internet address: %s\n", inet_ntoa(*ptr));
+  }
+</pre>
+Es gibt auch den Fall, da&szlig; ein Server die Internet-Adresse des Clients wei&szlig;, 
+aber dessen Namen wissen m&ouml;chte. Die Funktion <TT>gethostbyaddr</TT> erledigt 
+in diesem Fall die Konvertierung von Adresse zu Namen:
+<pre>
+#include &lt;netdb.h&gt;
+...
+
+struct hostent *gethostbyaddr (char *Addr, int Len, int Type);
+...
+</pre>
+Der <TT>Addr</TT>-Parameter ist ein Zeiger auf eine <TT>sockaddr_in</TT>-Struktur, 
+welche die Internet-Adresse enth&auml;lt. <TT>Len</TT> ist die Gr&ouml;&szlig;e dieser 
+Struktur. <TT>Type</TT> mu&szlig; mit <TT>AF_INET</TT> angegeben werden. &Auml;hnlich 
+wie bei der <TT>gethostbyname</TT>-Funktion gibt es auch hier viel Allgemeing&uuml;ltiges, 
+von dem jedoch nicht viel verwendet wird. 
+<P>
+Die Funktion <TT>getservbyname</TT> sucht nach einem Dienst - letztendlich 
+nach einem Port:
+<pre>
+#include &lt;netdb.h&gt;
+...
+struct servent *getservbyname(char *Servicename, char *Protname);
+
+...
+</pre>
+Diese Funktion gibt einen Zeiger auf folgende Struktur zur&uuml;ck:
+<pre>
+struct servent 
+  {
+  char *s_name;      /* official service name */
+  char **s_aliases;  /* alias list */
+  int s_port;        /* port number, network byte order */
+  char *s_proto;     /* protocol to use */
+  }
+</pre>
+Die Information f&uuml;r diese Funktion wird der Datei <TT>/etc/services</TT> 
+entnommen. In dieser Datei wird eine Suche nach dem geforderten Service 
+(<TT>Servicename</TT>) gestartet. Ist auch ein Protokoll angegeben 
+(d. h. <TT>Protname != NULL</TT>), dann mu&szlig; der entsprechende Eintrag 
+f&uuml;r dieses Protokoll in der Datei vorliegen. Es gibt einige Internet-Dienste, 
+die entweder von TCP oder UDP unterst&uuml;tzt werden (z. B. der Echodienst),
+und andere, die nur ein Protokoll unterst&uuml;tzen (FTP erfordert beispielsweise TCP). 
+Das Hauptaugenmerk innerhalb der <TT>servent</TT>-Struktur liegt auf der 
+Internet-Portnummer. Zu beachten ist, da&szlig; diese Struktur Integer-Portnummern 
+handhaben kann, sogar Intenet-Portnummern in 16 bit-Gr&ouml;&szlig;e. Beispiel:
+<pre>
+struct hostent *RechnerID;
+struct servent *Service;
+...
+
+  RechnerID = gethostbyname("server");    /* Bestimme den Rechner */
+  Service = getservbyname("echo","tcp");  /* Bestimme den Port */
+...
+
+</pre>
+Das wichtigste Element der <TT>servent</TT>-Struktur ist das Feld <TT>s_port</TT>.
+es enth&auml;lt die Nummer des Ports, wie sie von der Funktion <TT>connect</TT>
+verwendet wird.
+<p>
+<CENTER><IMG SRC="netzfunk.gif"></CENTER>
+<P>
+
+Nichtprivilegierte Programme (d. h. Programme ohne Root-Rechte) d&uuml;rfen keine 
+Server-Sockets auf Ports kleiner 1024 &ouml;ffnen. So wird ein minimaler Schutz 
+davor gew&auml;hrleistet, da&szlig; irgend welche Programme normaler Anwender Ports
+kidnappen oder auf Ports eigene Services hochfahren, die die Maschine normalerweise 
+nicht bieten w&uuml;rde. Andererseits ist es aus Sicherheitsaspekten nicht sinnvoll,
+wenn alle Serverprozesse mit root-Privilegien laufen. Die L&ouml;sung des Problems
+ist einfach: sobald man die Server-Sockets gebunden hat, kann man mit <TT>setreuid(2)</TT> 
+die Sonderprivilegien gegen "normale" Userprivilegien tauschen. Alternativ kann man 
+Beispielsweise sicherheitsrelevante setuid-Programme in einem 
+<TT>chroot(2)</TT>-Gef&auml;ngnis ablaufen lassen, oder das Programm in zwei Prozesse 
+aufteilen, so da&szlig; nicht alles mit root-Rechten laufen mu&szlig;. 
+<P>
+Wenn man kurz nachdem ein Programm eine Server-Socket geschlossen hat versucht, einen 
+neuen Socket an denselben Port wie den alten Server-Socket zu binden, erh&auml;lt
+man einen "Address already in use"-Fehler. Der Grund daf&uuml;r ist, da&szlig;
+m&ouml;glicherweise im Netz noch Pakete herumgeistern, die f&uuml;r den alten Socket 
+bestimmt sind und es deshalb sinnvoll ist, erst einmal zu warten, bis sich das Netz 
+beruhigt hat. Wenn man eine Socket sofort an einen Port binden will, verwendet man 
+die "Reuse"-Option.
+<P>
+
+<H4>Beispiele:</H4>
+<UL>
+<li><A HREF="tcp-server.c">TCP-Server in C</A>
+<li><A HREF="tcp-client.c">TCP-Client in C</A>
+<li><A HREF="udp-server.c">UDP-Server in C</A>
+<li><A HREF="udp-client.c">UDP-Client in C</A>
+</UL>
+<P>
+
+<A NAME="3.4">
+<H2>3.4 Der Internet-Superserver</H2>
+Rein theoretisch m&uuml;&szlig;te jeder Daemon bei Systemstart hochgefahren werden, 
+f&uuml;r die eine Anforderung eines entfernten Rechner (Host) auftreten k&ouml;nnte. 
+Dies w&uuml;rde aber die Zahl der laufenden Prozesse unn&ouml;tig in die H&ouml;he 
+treiben und Systemresourcen verbrauchen. Deshalb wurde der Daemon <TT>inetd</TT>, 
+der Internet-Superserver, entwickelt. Er "lauscht" auf alle Diensteanforderungen, 
+die an dem von ihm &uuml;berwachten Ports eingehen. Tritt eine solche Anforderung auf, 
+pr&uuml;ft der Daemon die Zugriffsberechtigung (exakt: Die Kontrolle wird an den 
+TCP-Warapper <TT>tcpd</TT> &uuml;bergeben und dieser macht weiter) und startet 
+im positivem Fall den entsprechenden Daemon, der dann die Anforderungen des 
+Clients bearbeitet. Die Konfigurationsdatei ist <TT>/etc/inetd.conf</TT>. 
+In ihr sind alle Dienste und die entsprechenden D&auml;monen mit Parametern 
+verzeichnet. 
+<P>
+Der <TT>inetd</TT> vereinfacht zudem das Schreiben von Server-Daemonen, da etliche
+Start-Details bereits durch den <TT>inetd</TT> selbst abgehandelt werden. Der
+Nachteil besteht darin, da&szlig; der <TT>inetd</TT> f&uuml;r jede Anfrage
+sowohl ein <TT>fork</TT> als auch ein <TT>exec</TT> ausf&uuml;hren mu&szlig;,
+um den aktuellen Serverproze&szlig; zu starten. Der Ablauf entspricht in etwa
+folgendem Schema:
+<OL>
+<LI>Beim Starten liest der Daemon die Datei <TT>/etc/inetd.conf</TT> und generiert 
+f&uuml;r jeden der angegebenen Server einen Socket.
+<LI>Danach wird f&uuml;r jeden Socket ein <TT>bind()</TT> ausgef&uuml;hrt.
+<LI>F&uuml;r jeden Stream-Socket wird nun ein <TT>listen()</TT> ausgef&uuml;hrt.
+<LI>Nun wird auf einen Verbindungswunsch von au&szlig;en gewartet (per
+<TT>select()</TT>-Aufruf). 
+<LI>Kommt ein Verbindungswunsch, wird er mit <TT>accept()</TT> angenommen.
+<LI>Nun erzeugt der <TT>inetd</TT> einen Kondproze&szlig; zum Bearbeiten der
+Anforderung. Das Kind schlie&szlig;t alle Dateideskriptoren (au&szlig;er dem
+Socket). Mittels <TT>dup2()</TT>  wird der Socket dupliziert und Deskriptoren
+f&uuml;r <tt>stdin</TT>, <tt>stdout</TT> und <tt>stderr</TT> angelegt.
+Anschlie&szlig;end wechselt der Proze&szlig; die Benutzeridentit&auml;t und
+startet schlie&szlig;lich mittels <TT>exec()</TT> den Proze&szlig; f&uuml;r
+den gew&uuml;nschten Dienst.
+<LI>Bei eine Stream-Socket wird der angeschlossene Socket geschlossen.
+</OL>
+<P>
+Der <TT>inetd</TT> und die von ihm gestarteten Server st&uuml;ten sich auf 
+folgenden Dateien.
+<UL>
+<LI>Die Datei <TT>/etc/inetd.conf</TT> hat folgende Zeilenstruktur:
+<pre>
+Programmname Sockettyp Protokoll Flags User Programmpfad Programmargumente
+</pre>
+<UL>
+<LI>Der Programmname ist frei w&auml;hlbar, aber es ist darauf zu achten, dass 
+der gleiche Name auch in der Datei <TT>/etc/services</TT> benutzt wird.
+<LI>Als Sockettyp kommen <TT>stream</TT>, <TT>dgram</TT>, <TT>raw</TT>, 
+<TT>rdm</TT> und <TT>seqpacket</TT> in Frage.
+<LI> Das Protokoll gibt eines der in der Datei <TT>/etc/protocols</TT> aufgelisteten
+Protokolle an. 
+<LI>M&ouml;gliche Flags sind <TT>wait, nowait, udp</TT> und <TT>tcp</TT>.
+<LI>Danach folgt der User, unter dessen Rechten das Programm ausgef&uuml;hrt wird. 
+<LI>Der Programmpfad gibt an, wo das Programm zu finden ist.
+<LI>Schlie&szlig;lich folgen eventuelle Parameter f&uuml;r das Programm.
+</UL>
+Beispiel:
+<pre>
+  ...
+  ftp     stream  tcp  nowait  root  /usr/sbin/in.ftpd     in.ftpd
+  telnet  stream  tcp  nowait  root  /usr/sbin/in.telnetd  in.telnetd
+  ...
+  shell   stream  tcp  nowait  root  /usr/sbin/in.rshd     in.rshd
+  login   stream  tcp  nowait  root  /usr/sbin/in.rlogind  in.rlogind
+  exec    stream  tcp  nowait  root  /usr/sbin/in.rexecd   in.rexecd
+  ...
+  #tftp    dgram   udp  wait    root  /usr/sbin/in.tftpd    in.tftpd -s /tftpboot
+  ...
+</pre>
+Nach &Auml;nderungen der Konfiguration (z.B. Ein- und Ausschalten des 
+TFTP-Dienstes durch Entfernen bzw. Hinzuf&uuml;gen des Kommentarzeichens)
+mu&szlig; der <TT>inetd</TT> nicht neu gestartet werden, sondern kann durch das
+Versenden des Signal <TT>SIGHUP</TT> angewiesen werden, sich neu zu konfigurieren.
+<P>
+Das Hauptproblem beim Einsatz des <TT>inetd</TT> ist die Reaktionszeit auf 
+Dienstanforderungen. Das ist bei Diensten wie Telnet oder FTP unproblematisch, 
+kann aber z.B. bei HTTP-Servern sehr kritisch werden, da ja HTTP f&uuml;r jede 
+einzelne Datein eines Webdokuments eine Verbindung aufbaut, demnach f&uuml;r jede
+einzelne Datei der <TT>httpd</TT> vom <TT>inetd</TT> neu gestartet werden 
+mu&szlig;. Daher werden zeitkritischen Dienste und Server als Standalone-Server 
+betrieben.
+<P>
+<LI>Die Datei <TT>/etc/services</TT> hat folgende Zeilenstruktur:
+<pre>
+Programmname Port/Protokoll
+</pre>
+<TT>Programm</TT> mu&szlig; der gleiche Name sein wie er in <TT>/etc/inetd.conf</TT>
+an erster Position angegeben wurde. <TT>Port/Protokoll</TT> bezeichnet den Port, auf 
+dem gelauscht werden soll, und das dazugeh&ouml;rigen Protokoll, z. B.:
+<pre>
+37 telnet/tcp
+</pre>
+<P>
+<LI>Der TCP-Wrapper und die Dateien <TT>/etc/hosts.allow</TT> und <TT>/etc/hosts.deny</TT>:
+<P>
+Im <TT>inetd</TT> selbst sind keinerlei Sicherheitsmechanismen implementiert. 
+Deswegen wurde ein Filter geschaffen, der vom <TT>inetd</TT> anstelle des f&uuml;r 
+den Port zust&auml;ndigen Dienstes gestartet wird, der sogenannte TCP-Wrapper
+<TT>tcpd</TT>. Er erh&auml;lt den Programmnamen des Dienstes als Argument. 
+Der <TT>tcpd</TT> arbeitet f&uuml;r Server und Client transparent, er wird durch den 
+zu startenden Dienst ersetzt. Zuvor protokolliert und &uuml;berpr&uuml;ft er die 
+Zul&auml;ssigkeit des Zugriffs. 
+<P>
+<CENTER><IMG SRC="tcpd.gif"></CENTER>
+<P>
+Falls also in <TT>inetd.conf</TT> an der vorletzten Position zus&auml;tzlich noch der 
+tcp-Wrapper (<TT>tcpd</TT>) aufgerufen wird (also beispielsweise statt 
+<TT>/etc/ftpd</TT> nun <TT>/etc/tcpd /etc/ftpd</TT>), wird vom <TT>tcpd</TT> 
+vor dem Programmaufruf gepr&uuml;ft, ob der entsprechende Host &uuml;berhaupt das 
+Recht besitzt, Serverdienste in Anspruch zu nehmen. Dazu werden die Dateien 
+<TT>/etc/hosts.allow</TT> und <TT>/etc/hosts.deny</TT> herangezogen.
+<UL>
+<LI>In keiner der beiden Dateien verzeichnete Hosts, Domains oder Dienste 
+werden immer zugelassen.
+<P>
+<LI><TT>/etc/hosts.deny</TT><BR>
+Hier verzeichnete Hosts, Domains oder Dienste werden <B>nicht</B> zugelassen.
+Will man nur einige B&ouml;sewichte aussperren, wird man diese in dieser Datei
+eintragen uns alles andere zulassen, z.B.:
+<PRE>
+# Host sperren
+192.168.0.2: ALL
+# Domain sperren
+.boese.org: ALL
+</pre>
+Sicherer ist es jedoch, in dieser Datei alles zu sperren, was nicht ausdr&uuml;cklich
+erlaubt ist:
+<PRE>
+ALL: ALL
+</PRE>
+<P>
+<LI><TT>/etc/hosts.allow</TT><BR>
+Hier verzeichnete Hosts, Domains oder Dienste werden zugelassen. Man kann wahlweise
+Dienste sperren oder Hosts und Domains nach IP-Nummer oder Namen. Als Beispiel 
+eine aktuelle Datei:
+<PRE>
+# See tcpd(8) and hosts_access(5) for a description.
+sshd:           ALL     : ALLOW
+proftpd:        ALL     : ALLOW
+sendmail:       ALL     : ALLOW
+popper:         ALL     : ALLOW
+in.telnetd:     localhost : ALLOW
+bcpd:           e-technik.fh-muenchen.de, ariacenter.rz.fh-muenchen.de : ALLOW
+</PRE>
+Die Daemons f&uuml;r SSH, FTP, SMTP und POP sind f&uuml;r alle offen, Telnet
+ist nur am lokalen Rechner erlaubt (Das ":ALLOW" kann man auch weglassen) und der
+Backup-CLient (<TT>bcpd</TT>) darf nur innerhalb des Fachbereichs und vom
+Backupserver des Rechenzentrums angesprochen werden. 
+</UL>
+Eine Zeile in den beiden Dateien hat folgenden Aufbau:
+<PRE>
+Dienst : Rechner : [Kommando]
+</PRE>
+An Stelle von <TT>Dienst</TT> kann entweder ein <TT>Programmname</TT> stehen oder das
+Schl&uuml;sselwort <TT>ALL</TT>, falls die Zeile alle Dienste betreffen soll. Einem 
+<TT>ALL</TT> kann ein <TT>EXCEPT Dienstname</TT> folgen, dann sind alle Dienste mit 
+Ausnahme der benannten gemeint. Per Komma getrennt, lassen sich mehrere Dienste angeben.
+Die m&ouml;glichen Eintr&auml;ge sind Rechnernamen, IP-Adressen oder die folgenden
+Schl&uuml;sselworte:
+<UL>
+<LI>ALL: Alle Rechner
+<LI>KNOWN: Rechner, deren Namen der <TT>tcpd</TT> ermitteln kann (DNS und reverse DNS)
+<LI>LOCAL: Alle Rechner, deren Namen keinen Punkt enthalten (Rechner, die in <TT>/etc/hosts</TT> 
+       unter einem Kurznamen aufgef&uuml;hrt sind)
+<LI>UNKOWN: Rechner, deren Namen der <TT>tcpd</TT> nicht ermitteln kann.
+<LI>PARANOID: Alle Rechner, deren Namens- und Adressaufl&ouml;sung &uuml;ber DNS 
+       widerspr&uuml;chliche Angaben ergibt.
+</UL>
+<p>
+Schlie&szlig;lich kann ein optionales Kommando angegeben werden, das immer dann 
+ausgef&uuml;hrt wird, wenn diese Zeile f&uuml;r eine Anforderung zutrifft. Falls auf 
+diese M&ouml;glichkeit zur&uuml;ckgegriffen wird, dann meist f&uuml;r ein detailliertes 
+Protokoll. Im Argument des Kommandos k&ouml;nnen einige Sonderzeichen verwendet werden:
+<P>
+<UL>
+<b>%a</b> liefert die IP des rufenden Rechners<BR>
+<b>%c</b> gibt den Namen des Nutzers und Rechners zur&uuml;ck (sofern ermittelbar)<BR>
+<b>%d</b> Name des gew&uuml;nschten Dienstes<BR>
+<b>%h</b> Name des zugreifenden Rechners oder dessen IP<BR>
+<b>%n</b> Name des zugreifenden Rechners (oder unknown oder paranoia)<BR>
+<b>%p</b> Prozessnummer des Dienstes<BR>
+<b>%s</b> Name des Serves in Verbindung mit dem Rechnernamen<BR>
+<b>%u</b> Name des Nutzers auf Clientseite, sofern er ermittelt werden kann<BR>
+</UL>
+<P>
+Die Konfiguration kann mit dem Kommando <TT>tcpdchk</TT> &uuml;berpr&uuml;ft werden
+(Unstimmigkeiten in <TT>inetd.conf</TT>, Syntaxfehler in <TT>hosts.deny / hosts.allow</TT>,
+unbekannte Rechnernamen).
+</UL>
+<P>
+
+<A NAME="3.5">
+<H2>3.5 Ein-/Ausgabe-Polling mit <TT>select()</TT></H2>
+In Unix steht ein leistungsf&auml;higer Mechanismus zur Verf&uuml;gung,
+der es einem Anwenderprogramm erm&ouml;glicht, verschiedene Eingabekan&auml;le
+"abzuhorchen", dar&uuml;ber festzustellen, ob mindestens einer davon Daten
+"anbietet" (oder zur Aufnahme von Daten bereit ist - s.u.), und im Anschluss
+daran diesen zum Lesen bzw. Schreiben auszuw&auml;hlen. Ein solches Szenario
+ist beispielsweise dann gegeben, wenn das Programm auf Daten wartet, die
+ihm ein anderes &uuml;ber eine Pipe liefern soll, und es gleichzeitig auf
+Tastatureingaben reagieren m&ouml;chte. In diesem Fall sind ja zwei Dateideskriptoren
+betroffen: Der Deskriptor 0 f&uuml;r die Standardeingabe und der Eingabedeskriptor der 
+Pipe. Schematisch k&ouml;nnte man dies wie folgt beschreiben:
+<PRE>
+Wiederhole:
+  |  Warte bis an der Standardeingabe ODER an der Pipe Daten anliegen
+  |
+  |  WENN Tastaturdaten vorliegen
+  |       lies diese ein
+  |       verarbeite sie
+  |
+  |  WENN an der Pipe Daten anliegen
+  |       lies diese ein
+  |       verarbeite sie
+bis "fertig";
+</PRE>
+Au&szlig;erdem kann <TT>select()</TT> verwendet werden, wenn ein Server als
+einzelner Proze&szlig; mehrere Clients bedienen soll, da hier der Server erkennen kann, 
+auf welchem Socket etwas gesendet oder empfangen werden soll. Dies ist notwendig, da der 
+Aufruf von <TT>recv()</TT> so lange wartet, bis etwas empfangen wurde (er ist also 
+blockierend). Der Server w&uuml;rde nun stehen bleiben, und das beim ersten Socket den er 
+&uuml;berpr&uuml;ft. Eine weitere M&ouml;glichkeit w&auml;re nichtblockierende
+Ein-/Ausgabe (siehe <TT>fcntl()</TT>), die jedoch mehr Ressourcen braucht.
+<TT>select()</TT> wartet, bis etwas auf einem Socket aus der Socket-Liste ankommt bzw. 
+gesendet werden kann.
+Nicht zuletzt kann man <TT>select()</TT> verwenden, um den Programmfluss f&uuml;r 
+eine bestimmte Zeit zu unterbrechen (wie <TT>sleep()</TT> respektive <TT>usleep()</TT>). 
+Zuerst die Deklaration von <TT>select()</TT> und dazugeh&ouml;riger Makros:
+<pre>
+#include &lt;sys/time.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+int select(int n, fd_set *readfds, fd_set *writefds, 
+                   fd_set *exceptfds, struct timeval *timeout);
+
+FD_CLR(int fd, fd_set *set);
+FD_SET(int fd, fd_set *set);
+FD_ZERO(fd_set *set);
+FD_ISSET(int fd, fd_set *set);
+</pre>
+Die Parameter dieser Funktion haben die folgende Bedeutung:
+<UL>
+<LI><B><TT>n</TT></B> ist der h&ouml;chste ben&ouml;tigte Datei-Deskriptor plus 1. 
+Wenn der h&ouml;chste relevante Deskriptor beispiesweise 7 ist, so mu&szlig;
+das Bitmuster zu seiner Verwaltung acht Bits lang sei (0 bis 7) - n ist dann 
+als 8 anzugeben.
+<P>
+<LI><B><TT>readfds</TT></B> ist (wie auch <TT>writefds</TT> und <TT>exceptfds</TT>) 
+ein Zeiger auf ein Bitmuster, bei dem jedes gesetzte Bit einer Deskriptornummer entspricht. 
+Wenn beispielsweise in <TT>*readfds</TT> die Bits 0 und 5 gesetzt sind, so bedeutet dies, 
+da&szlig; der aufrufende Proze&szlig; warten m&ouml;chte, bis entweder &uuml;ber den 
+Dateideskriptor 0 oder &uuml;ber den Deskriptor 5 Daten gelesen werden k&ouml;nnen.
+<P>
+<LI>In <B><TT>*writefds</TT></B> bringt ein gesetztes Bit zum Ausdruck, da&szlig;
+gewartet werden soll, bis die entsprechende Datei zur Aufnahme von Daten
+bereit ist. Bei "normalen" Dateien geht das nat&uuml;rlich immer. Anders verh&auml;lt 
+es sich bei Deskriptoren, die auf eine Pipe oder auf einen Socket verweisen: Wenn der 
+Sender seine Daten wesentlich schneller produziert, als sie vom Empf&auml;nger verarbeitet 
+werden k&ouml;nnen, laufen die vom Betriebssystem bereitgestellte Puffer irgendwann voll.
+Der Sender mu&szlig; nun warten, bis wieder Platz zur Verf&uuml;gung steht.
+<P>
+<LI><B><TT>*exceptfds</TT></B> nimmt Bits auf, die eine Fortsetzung des aufrufenden 
+Prozesses dann veranlassen, wenn an den betreffenden Dateideskriptoren Fehlerzust&auml;nde 
+auftreten - in diesem Fall kann werder geschrieben noch gelesen werden, es besteht aber 
+die M&ouml;glichkeit, auf die Fehlersituation geeignet zu reagieren.
+<P>
+<LI><B><TT>timeout</TT></B> ist der Zeiger auf eine Datenstuktur, die einen Timeout
+vereinbart - also die Zeit, die <TT>select()</TT> verstreichen lassen soll bevor sie 
+mit 0 zur&uuml;ckkehrt.<br> 
+Bei manchen Implementationen wird hier die Restzeit gespeichert wenn vor dem Ablaufen 
+auf einem Deskriptor die geforderten Bedingungen zutreffen. Man sollte sich nicht darauf 
+verlassen, jedoch ist es f&uuml;r portable Programme unbedingt notwendig, da&szlig;
+der Timeout vor einem erneuten Aufruf von <TT>select()</TT> wieder gesetzt wird, da 
+er eventuell doch ver&auml;ndert worden sein kann. Die Struktur timeval ist in 
+&lt;sys/time.h&gt; wie folgt deklariert:
+<pre>
+struct timeval 
+  {
+  long tv_sec;  /* seconds      */
+  long tv_usec; /* microseconds */
+  };
+</pre>
+Wenn die darin angegebene Zeit 0 ist (<TT>tv_sev == 0</TT> und <TT>tv_usec == 0</TT>), 
+blockiert <TT>select()</TT> &uuml;berhaupt nicht, sondern kehrt sofort zur&uuml;ck. 
+Wenn der Parameter "timeout" selbst gleich NULL ist (Nullzeiger), wartet <TT>select()</TT> 
+unbegrenzt lange - bis sich auf einem der angesprochenen Dateideskriptoren etwas tut.
+</UL>
+<p>
+In der Manpage von <TT>select()</TT> unter Linux ist folgendes Beispiel angegeben:
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;sys/time.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(void)
+  {
+  fd_set rfds;
+  struct timeval tv;
+  int retval;
+
+  /* Watch stdin (fd 0) to see when it has input. */
+  FD_ZERO(&rfds);
+  FD_SET(0, &rfds);
+  /* Wait up to five seconds. */
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
+
+  retval = select(1, &rfds, NULL, NULL, &tv); 
+  /* Don't rely on the value of tv now! */
+
+  if (retval)
+    printf("Data is available now.\n"); 
+    /* FD_ISSET(0, &rfds) == true */
+  else
+    printf("No data within five seconds.\n");
+  exit(0);
+  }
+</pre>
+Auch hier wird darauf hingewiesen, da&szlig; man nach dem Aufruf von <TT>select()</TT> 
+nicht mehr auf den Wert in der Struktur <TT>timeval</TT> verlassen kann.
+<P>
+Nach Ausf&uuml;hrung von <TT>select()</TT> enthalten auch die drei Bitmuster-Parameter
+nicht mehr die <b>vor</b> dem Aufruf gesetzten Bits, sondern es sind nur noch diejenigen
+gesetzt, deren zugeordnete Kan&auml;le die Fortsetzung des Prozesses veranlasst
+haben. <BR>
+Der <B>R&uuml;ckgabewert</B> von <TT>select()</TT> enth&auml;lt die Gesamtzahl der 
+(noch) gesetzten Bits. Dieser Wert kann auch 0 sein, wenn der Timeout abgelaufen ist, 
+ohne da&szlig; eine Verbindung eingegangen wurde. Bei einem Fehler wird -1 
+zur&uuml;ckgegeben.
+<p>
+Beispiel:
+<P> 
+<table BORDER=0 WIDTH="80%" CELLSPACING=0 CELLPADDING=1 ALIGN=CENTER>
+<tr>
+<th><tt>Bitnummer</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>7</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>6</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>5</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>4</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>3</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>2</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>1</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>0</tt></th>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable IBM:</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>1</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>1</tt></td>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable OBM:</tt></td>
+<td align=center valign=top><tt>1</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable EBM:</tt></td>
+<td align=center valign=top><tt>1</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+</tr>
+</table>
+<p>
+Mit dem Aufruf
+<PRE>
+int i = select(8, &amp;IBM, &amp;OBM, &amp;EBM, NULL);
+</PRE>
+wird ohne Zeitbeschr&auml;nkung darauf gewartet, da&szlig; entweder auf den 
+"Kan&auml;len" 0 oder 4 Eingabedaten zur Verf&uuml;gung stehen, oder da&szlig; auf "Kanal" 
+7 ein Schreiben m&ouml;glich ist (oder ein Fehler auftrat).
+Nach dem Verlassen der Funktion mit R&uuml;ckgabewert 1 (nur noch 1 Bit gesetzt) sehen
+die Variablen wie folgt aus:
+<P> 
+<table BORDER=0 WIDTH="80%" CELLSPACING=0 CELLPADDING=1 ALIGN=CENTER>
+<tr>
+<th align=center valign=top><tt>Bitnummer</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>7</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>6</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>5</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>4</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>3</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>2</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>1</tt></th>
+<th align=center valign=top WIDTH="3%"><tt>0</tt></th>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable IBM:</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>1</tt></td>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable OBM:</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+</tr>
+<tr>
+<td align=center valign=top><tt>Variable EBM:</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+<td align=center valign=top><tt>0</tt></td>
+</tr>
+</table>
+<p>
+Die C-Bibliothek stellt Makros zur Verf&uuml;gung, die das Setzen, L&ouml;schen
+und Abfragen von Bits in den bei <TT>select()</TT> benutzten Bitmuster erleichtern.
+Die Deklaration ist oben schon aufgelistet. Hier einige Beispiele:
+<ul>
+<li><tt>FD_SET(4,&amp;IBM)</tt> setzt das Bit 4 im Bitmuster IBM
+<li><tt>FD_CLR(2,&amp;OBM)</tt> l&ouml;scht das Bit 2 im Bitmuster OBM
+<li><tt>FD_ISSET(4,&amp;IBM)</tt> liefert "wahr", wenn Bit 4 in IBM gesetzt ist
+<li><tt>FD_ZERO(&amp;EBM)</tt> setzt EBM auf 0
+</ul>
+<P>
+Abschlie&szlig;end noch ein Beispiel: Ein Programm soll auf Eingaben
+von der Tastatur warten, aber alle 3 Sekunden den Benutzer zur Eingabe
+auffordern, wenn er nicht reagiert.
+<PRE> 
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/time.h&gt;
+
+fd_set EBM;
+struct timeval Zeit;
+char buffer[1000];
+
+int main() 
+  {
+  do 
+    {
+    printf("\nGibs mir:");
+    fflush(stdout);                    /* Ausgabepuffer leeren */
+    
+    FD_ZERO(&amp;EBM);   /* Eingabebitmuster = 0 */
+    FD_SET(0,&amp;EBM);  /* Bit 0 setzen         */
+
+    Zeit.tv_sec=3;                     /* Timeout = 3 Sekunden */
+    Zeit.tv_usec=0;
+    } 
+  while (!select(1, &amp;EBM, NULL, NULL, &amp;Zeit));
+    
+  /* Wenn <TT>select()</TT> mit 0 zur&uuml;ckkommt, ist 
+     die Uhr abgelaufen andernfalls steht eine Eingabe an */
+
+  fgets(buffer,1000,stdin);
+  printf("Eingabe war: %s\n",buffer);
+}
+</PRE>
+
+Der Aufruf <TT>fflush(stdout)</TT> wird in diesem Beispiel eingesetzt, damit
+die Eingabeaufforderung sofort auf dem Bildschirm erscheint. 
+<p>
+Noch ein Beispiel: <TT>select()</TT> erlaubt es beispielsweise, ein Programm zu 
+schreiben, das auf einem Port wartet und alle engehenden Daten an einen anderen 
+Port weitergibt. Fertig ist der Proxy-Server! Angenommen man hat einen Rechner der 
+per Modem eine Verbindung zum  Internet aufgebaut hat als Gateway f&uuml;r ein 
+lokales Netz dient (mittels IP-Masquerading).
+Nur der Gateway ist von aussen sichtbar, die Rechner des lokalen Netzes jedoch dahinter 
+versteckt. Nehmen wir weiter an, da&szlig; auf einem der lokalen Rechner ein Web-Server 
+l&auml;uft, der nach aussen Daten anbieten soll. Man braucht also ein Programm, das die 
+Anfragen die an Port 80 des Gateway gelangen, zum Web-Server weitergereicht werden sollen
+(was einen einfachen Portforwarder aus dem Rennen wirft). Um das zu verwirklichen, braucht 
+man also ein Programm das zwei Sockets ge&ouml;ffnet hat: einen zum Benutzer ausserhalb 
+des Netzes, und einen zweiten der zum Web-Server f&uuml;hrt. Das Programm mu&szlig; 
+erkennen, auf welchem Socket gerade etwas ankommt und diese Daten dann &uuml;ber den 
+anderen Socket schicken. Eine L&ouml;sungsm&ouml;glichkeit w&auml;re es, einen Firewall 
+zu installieren. Mit <TT>select()</TT> geht es aber auch.
+<P>
+Das folgende Programmfragment zeigt, wie es geht. 
+<pre>
+        
+int data_interchange(int src, int dest)
+  {
+  /* Implementierung der Polling-Methode + select() um
+   * Systemressourcen zu sparen */
+
+  char buffer[BUFFER_SIZE];
+  int src_sent, src_recvd, dest_sent, dest_recvd, max, total, i;
+  fd_set rfds;
+  struct timeval tv;
+    
+  if (src > dest) max = src;
+  else            max = dest;
+  
+  total = 0;  
+  fcntl(src, F_SETFL, O_NONBLOCK);
+  fcntl(dest, F_SETFL, O_NONBLOCK);
+  
+  for (;;)
+    {
+    FD_SET(src, &rfds);
+    FD_SET(dest, &rfds);
+    tv.tv_sec = 300;
+    tv.tv_usec = 0;
+    select(max + 1, &rfds, NULL, NULL, &tv);
+    
+    src_recvd = recv(src, buffer, sizeof(buffer), 0);
+    dest_recvd = recv(dest, buffer, sizeof(buffer), 0);
+    
+    if (src_recvd > 0)
+      send(dest, buffer, src_recvd, 0);
+    
+    if (dest_recvd > 0)
+      send(src, buffer, dest_recvd, 0);
+    
+    if ((src_recvd == 0) || (dest_recvd == 0))
+      break;
+    }
+  return 0; 
+  }
+</pre>
+Wie man sieht, wartet <TT>select()</TT> darauf, da&szlig; von einem der beiden 
+Sockets gelesen werden kann. Ist dies der Fall, wird gelesen. Man h&auml;tte auch mit 
+<TT>FD_ISSET()</TT> testen k&ouml;nnen, von welchem Socket gelesen werden kann, doch 
+so haben wir gleich noch ein Beispiel f&uuml;r nicht-blockierende Ein-/Ausgabe. Durch 
+den Aufruf von <TT>fcntl()</TT> mit dem Attribut <TT>O_NONBLOCK</TT> blockiert 
+ein <TT>recv()</TT>-Aufruf nicht, bis Daten eingetroffen sind, sondern kehrt sofort 
+zur&uuml;ck. Die beiden if-Abfragen &uuml;berpr&uuml;fen, von welchem der Sockets 
+eingetroffen sind (Wert > 0). Falls von keinem der beiden Sockets Daten kommen, ist
+ein Timeout aufgetreten. Das bedeutet, da&szlig; der Server-Proze&szlig;  nach f&uuml;nf
+Minuten Inaktivit&auml;t automatisch endet.
+
+
+<P>
+<A NAME="3.6"></A>
+<H2>3.6 Erste Perl-Server und Clients</H2>
+Die in diesem und den folgenden Kapiteln einfachen Beispielserver wird auch wieder
+die Fehlerbehandlung nur eingeschr&auml;kt verwendet. Das ist beim Erweitern
+der Programme f&uuml;r eigene Anwendungen zu ber&uuml;cksichtigen.
+<P>
+Mit den Perl-Modul <TT>IO::Socket::INET</TT> kann man relativ einfach 
+Socketverbindungen programmieren.
+Zum Einbinden reicht der Perl-Befehl <TT>use IO::Socket</TT>. Die 
+Generierung eines konkreten Sockets geschieht &uuml;ber den Konstruktor von
+<TT>IO::Socket::INET</TT>, dessen Argumente dar&uuml;ber entscheiden, ob es ein 
+Server- oder ein Client-Socket wird.
+<P>
+Beispiel f&uuml;r das Einrichten eines Client-seitigen Socket:
+<PRE>
+my $socket = IO::Socket::INET -> new(PeerAddr => $remote_host,
+                                     PeerPort => $remote_port,
+                                     Proto    => "tcp",
+                                     Type     => SOCK_STREAM)
+  or die "Couldn't connect to $remote_host:$remote_port: $@\n";
+</pre>
+
+Beispiel f&uuml;r  das Einrichten eines Server-seitigen Socket:
+<pre>
+$server = IO::Socket::INET -> new(LocalPort => $server_port,
+                                  Type      => SOCK_STREAM,
+                                  Reuse     => 1,
+                                  Listen    => SOMAXCONN)
+   or die "Couldn't be a tcp server on port $server_port : $@\n";
+</pre>
+<p>
+Beim Server-Socket braucht man keine Rechneradresse angeben, das ist ja 
+automatisch die Adresse des Rechners, auf der das Socket l&auml;uft; nur 
+einen Port mu&szlig; man festlegen.<BR> 
+Wird der Server-Socket nicht ordnungsgem&auml;&szlig; geschlossen, so kann 
+normalerweise derselbe Port nicht sofort wieder benutzt, sondern auf einen
+Timeout gewartet werden.  Dies kann man allerdings durch Setzen des Parameters 
+<TT>Reuse</TT> umgehen, was insbesondere f&uuml;r die Phase der Programmentwicklung 
+n&uuml;tzlich ist, wo man den Server &ouml;fter mal abbricht.<br>
+'Listen' gibt an, bis zu wie viele Anfragen in eine Warteschleife
+aufgenommen werden sollen. Ist diese Warteschleife voll, so wird die Anfrage
+nicht bearbeitet und der Client erh&auml;lt eine entsprechende Meldung.
+<TT>SOMAXCONN</TT> ist eine Systemkonstante die angibt, wie viele Anfragen 
+das System maximal in der Warteschleife zul&auml;sst. 
+<p>
+Auf der Client-Seite ist das &Ouml;ffnen des Socket praktisch schon alles. Man
+kann <TT>$socket</TT> jetzt wie ein Filehandle benutzen, d.h. hineinschreiben, 
+auslesen und es schlie&szlig;en, mit denselben Befehlen, die man auch f&uuml;r
+Filehandles benutzt. Hier ein Beispiel f&uuml;r ein Client-Programm, das einen 
+Socket einrichtet, in eine Meldung hineinschreibt, die Antwort ausliest
+und den Socket wieder schlie&szlig;t:
+<pre>
+#!/usr/bin/perl -w
+
+use IO::Socket;
+use strict;
+
+my $remote_host = "atlas.ee.fhm.edu";
+my $remote_port = 2000;
+my $socket = IO::Socket::INET->new(PeerAddr => $remote_host,
+                                   PeerPort => $remote_port,
+                                   Proto    => "tcp",
+                                   Type     => SOCK_STREAM)
+   or die "Couldn't connect to $remote_host:$remote_port: $@\n";
+
+print $socket "Hallo\n";
+my $answer = &lt;$socket&gt;;
+print "Receiving: $answer\n";
+close($socket);
+</pre>
+Der Server wartet gew&ouml;hnlich in einer Endlos-Schleife auf hereinkommende 
+Anfragen. Die Methode daf&uuml;r ist <TT>accept</TT>. Solange
+keine Anfrage erfolgt, bleibt das Programm beim 'accept'-Aufruf stehen.
+Kommt dann eine Anfrage, gibt 'accept' die neue Verbindung zum anfragenden
+Client zur&uuml;ck und die Anfrage kann bearbeitet werden. Hier ein Beispiel:
+<pre>
+#!/usr/bin/perl -w
+
+use IO::Socket;
+use strict;
+
+my $server_port = 2000;
+my $server = IO::Socket::INET->new(LocalPort => $server_port,
+                                   Type      => SOCK_STREAM,
+                                   Reuse     => 1,
+                                   Listen    => SOMAXCONN )
+      or die "Couldn't be a tcp server on port $server_port : $@\n";
+while (my $client = $server->accept()) 
+  {
+  # $client is the new connection
+  my $request = &lt;$client&gt;;
+  chomp($request);
+  print "Request: $request\n";
+  print $client "Selber $request\n";
+  close($client);
+  print "\nWaiting for the next connection ...\n\n";
+  }
+close($server);
+</pre>
+Beide Programme verlassen sich darauf, da&szlig; die zu erwartende Nachricht nur 
+aus einer Zeile besteht. Sonst m&uuml;sste man wie bei einem Filehandle auch 
+eine Schleife &uuml;ber &lt;client&gt; laufen lassen.
+<P>
+
+<H3>Gepufferte Ein- und Ausgabe</H3>
+Bevor Daten an ein Filehandle geschrieben werden, puffert sie das Betriebssystem. 
+Es wird also gewartet, bis eine bestimmte Menge Daten zusammengekommen ist, und erst
+dann werden die Daten tats&auml;chlich &uuml;bertragen. Bei Sockets ist
+dies gew&ouml;hnlich so lange kein Problem, wie Zeilen &uuml;bertragen
+werden. Sollen Zeichen oder Zeichenketten ohne abschlie&szlig;endes Newline 
+&uuml;bertragen werden, mu&szlig; man daf&uuml;r sorgen, da&szlig; die Puffer 
+geleert werden. Dies kann man &uuml;ber Einstellen der Perl-Variablen <TT>$|</TT> 
+erreichen. Ist diese Systemvariable auf 1 gesetzt, dann wird der Bufferinhalt nach 
+jedem Ausgabe-Befehl losgeschickt. F&uuml;r die Standardausgabe gen&uuml;gt also die 
+Zeile
+<PRE>
+$| = 1;
+</PRE>
+<P>
+Um andere Handles genauso zu behandeln, bedient man sich eines Tricks. Man wechselt
+das Handle und STDOUT, so da&szlig; die Zuweisung auf das Datei- oder Socket-Handle
+wirkt. Danach wird wieder die urspr&uuml;ngliche Zuordnung hergestellt. Dazu wird
+das Filehandle von STDOUT zwischengespeichert. Den Wechsel erreicht man mit 
+<TT>select()</TT>:
+<PRE>
+my $old_fh = select(SOCK);                         # Ungepufferte Ausgabe 
+$| = 1;                                            # fuer SOCK einstellen
+select($old_fh);
+</PRE>
+<P>
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server2.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server4.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+<H6><I>Letzte Aktualisierung: 30. Oct 2004</I></H6>
+</BODY>
+</HTML>

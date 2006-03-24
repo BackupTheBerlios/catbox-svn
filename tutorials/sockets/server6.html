@@ -1,0 +1,1540 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<A NAME="4"></A>
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate<BR>und J&ouml;g Holzmann</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>6 Fortgeschrittene CGI-Programmierung</H1>
+
+<A NAME="6.1"></A>
+<H2>6.1 Session-Tracking</H2>
+Ein Problem bei CGI-Programmen ist, da&szlig; es sich bei HTTP um ein
+zustandsloses Protokoll handelt. Bei jeder Interaktion wird ein CGI-Programm
+aufs Neue aufgerufen. Ohne besondere Ma&szlig;nahmen ist nur eine Anfrage des
+Browsers, gefolgt von einer Antwort des CGI-Programms, m&ouml;glich. So lassen 
+sich viele Anwendungen nicht realisieren. Stellen Sie sich ein Bestellsystem 
+vor. Dieses erlaubt es, Waren in einen virtuellen Warenkorb zu stellen. Dieser 
+Vorgang kann sich &uuml;ber mehrere Aufrufe des CCI-Programms erstrecken und wird 
+entweder mit einem Abbruch der Aktion oder mit dem "Bezahlen" an der "Kasse" 
+abgeschlossen. Ein solches System ist jedoch nicht durch einfache Frage/Antwort-Folgen 
+zu realisieren.
+<P>
+Man mu&szlig; also Methoden finden, mit denen der Zustand zwischen mehreren Aufrufen 
+des CGI-Programms erhalten bleibt, und die ein zustandsloses (stateless) Protokoll 
+nutzen um ein zustandsbehaftetes (stateful) Protokoll dar&uuml;ber implementieren.
+Ein CGI-Programm selbst kann zun&auml;chst keinen Zustand halten. Wir wollen aber die 
+mehrfache Ausf&uuml;hrung eines CGI-Programms als ein virtuelles Programm auffassen, das 
+bei jedem CGI-Aufruf in einen neuen Zustand &uuml;bergeht.
+<P>
+Ein einfaches Beispiel:<BR>
+Bei jedem Aufruf des CGI-Programms soll eine Zahl (Session-Kennung) angezeigt werden. 
+Diese Zahl ist bei jedem neuen Aufruf zu inkrementieren. Jeder Browser bzw. Benutzer 
+soll eine eigene Kennung besitzen, so da&szlig; es nicht ausreicht, einen globalen Z&auml;hler 
+serverseitig zu erh&ouml;hen.
+<P>
+Der Z&auml;hler repr&auml;sentiert den Session-Zustand. Diesen m&uuml;ssen wir jeweils zwischen 
+zwei aufeinanderfolgenden Aufrufen des CCI-Programms erhalten. Da der Zustand pro 
+Browser bzw. User gilt, mu&szlig; dieser mehrfach gespeichert werden. Zur Speicherung
+des Zustands gibt es zwei M&ouml;glichkeiten:
+<UL>
+<LI>Der komplette Zustand wird clientseitig gespeichert. Hierbei kann er in 
+einer Browsersitzung versteckt sein oder aber auch in Form von Cookies auf der 
+Festplatte des Browsers liegen.
+<LI>Der Zustand aller Clients wird serverseitig gespeichert. Es ist dabei notwendig, 
+bei den Clients noch eine minimale Zustandsinformation zu hinterlegen. Diese Informationsmenge 
+wird auch Sitzungsschl&uuml;ssel genannt.
+</UL>
+Die clientseitige Speicherung des gesamten Zustandes hat den Vorteil, da&szlig; die 
+Informationen vieler Clientsitzungen auch bei den Clients gespeichert sind und 
+somit f&uuml;r den Server keinen Speicherbedarf bedeuten. Ein Nachteil ist, da&szlig; die 
+Information auf der Clientseite eingesehen oder sogar ver&auml;ndert werden kann. 
+Da der Zustand bei jeder Interaktion &uuml;bertragen werden mu&szlig;, kann dies bei 
+vielen gleichzeitig aktiven Clients Server und Netz belasten. Ein dritter Nachteil 
+ist, da&szlig; keine Statistiken &uuml;ber die einzelnen Zust&auml;nde herzustellen sind, da die
+Info bei den Clients gespeichert ist.
+<P>
+Ein Vorteil der serverseitigen Speicherung ist, da&szlig; die gesamte Information &uuml;ber 
+alle Clients sicher beim Server aufgehoben ist und auch analysiert werden kann. 
+Positiv ist weiterhin, da&szlig; die Zustandsinformation nicht mehr komplett beim User 
+gespeichert wird. Im Folgenden werden einige M&ouml;glichkeiten der Zustandsspeicherung
+vorgestellt.
+<P>
+
+<H3>Zustandsspeicherung &uuml;ber PATH_INFO</H3>
+Eine M&ouml;glichkeit, den Zustand zu erhalten, benutzt die URL. Am Anschlu&szlig; an den Namen 
+des CGI-Scriptes wird die URL fortgef&uuml;hrt. In obigem Beispiel w&auml;re dies:
+<PRE>
+http://www.netzmafia.de/cgi-bin/state.pl/1 
+http://www.netzmafia.de/cgi-bin/state.pl/2 
+http://www.netzmafia.de/cgi-bin/state.pl/3
+</PRE>
+usw.
+<P> 
+Hier sind <TT>/l, /2</TT> und <TT>/3</TT> zus&auml;tzliche Pfadinformationen, die den 
+Zustand repr&auml;sentieren. Innerhalb derselben Browsersitzung kann jeweils durch 
+Anklicken der n&auml;chsten dynamisch erzeugten URL zum n&auml;chsten Zustand gewechselt 
+werden. Ein Programm gelangt an diese Pfadinformation durch das Auslesen der 
+Umgebungsvariablen <TT>PATH_INFO</TT>. Wie das geschieht, zeigt folgendes
+Programm, das auch noch einen weiteren Kniff demonstriert. Über die Umgebungsvariablen
+<I>SERVER_NAME</I> und <I>SCRIPT_NAME</I> kann man automatisch den WWW-Server und
+den Pfad zum Skript ermitteln. Damit sind diesbez&uuml;glich keine &Auml;nderungen
+von Hand n&ouml;tig, wenn das Skript auf einem anderen Server laufen soll. Die komplette
+URL des Skripts ergibt sich aus
+<TT>'http://' . $ENV{'SERVER_NAME'} . $ENV{'SCRIPT_NAME'};</TT>
+<P>
+<PRE>
+#!/usr/bin/perl
+# Zustandserhaltung mit PATH_INFO ohne CGI-Modul.
+
+use strict;
+
+use constant INITSTATE =&gt; 1;
+
+my $url = $ENV{'SERVER_NAME'} . $ENV{'SCRIPT_NAME'};
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print "Content-type: text/html\n\n";
+print "&lt;HTHL&gt;", "\n";
+print "&lt;HEAD&gt;&lt;TITLE&gt;Status mit Pathinfo&lt;/TITLE&gt;&lt;/HEAD&gt;\n";
+print "&lt;BODY&gt;\n";
+print "&lt;B&gt;Zustand: ", $state,"&lt;/B&gt;&lt;P&gt;";
+print $saveaction;
+print "&lt;/BODY&gt;&lt;/HTML&gt;\n";
+
+
+sub retrieve_state 
+  {
+  my $state = $ENV{'PATH_INFO'} || INITSTATE;
+  $state =~ s/^\///;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_me_back = "&lt;A HREF=\"http://$url/$newstate\"&gt; [Weiter] &lt;/A&gt;";
+  return $send_me_back;
+  }
+</PRE>
+Verwendet man das Perl-Modul <I>CGI</I>, wird das Programm einfacher zu schreiben, 
+man sieht aber nicht mehr so genau, was geschieht: 
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit PATH_INFO.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Pathinfo');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print $saveaction;
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = $ENV{'PATH_INFO'} || INITSTATE;
+  $state =~ s/^\///;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_me_back = a({-href =&gt; url() . "/$newstate"}, , " [Weiter] ");
+  return $send_me_back;
+  }
+</PRE>
+
+Nachteil dieser L&ouml;sung ist, da&szlig; beim Beenden (oder Absturz) des Browsers alle
+Pfad-Info verloren ist. Weiterhin kann der Benutzer in der URL-Zeile des
+Browser beliebige Angaben machen und so einen beliebigen Zustand eingeben.
+Durch diese Methode des Session-Tracking k&ouml;nnen die statischen HTML-Seiten der
+weiterhin von Internet-Suchmaschinen verarbeitet (indexiert) werden, was eventuell
+auch nicht erw&uuml;nscht ist.
+<P>
+
+<H3>URL-Coding per Parameter</H3>
+Bei dieser Methode wird die SessionID an jede Internet-Adresse (Link) als Parameter 
+angeh&auml;ngt (z. B. <TT>http://www.server.de/cgi-bin/forum.cgi?state=4</TT>). 
+Der Wert des Parameters wird dann per GET-Methode geholt. Die Seitenabrufe sehen
+dann beispielsweise so aus:
+<PRE>
+http://www.netzmafia.de/cgi-bin/state.pl
+http://www.netzmafia.de/cgi-bin/state.pl?state=2 
+http://www.netzmafia.de/cgi-bin/state.pl?state=3
+</PRE>
+usw.
+<P> 
+Das Programm gleicht fast dem vorhergehenden, nur dass hier
+statt einer Pfadangabe ein Query-String angeh&auml;ngt wird
+- im Prinzip das, was bei einer Formulareingabe geschieht.
+<PRE>
+#!/usr/bin/perl
+# Zustandserhaltung mit QUERY_STRING.
+
+use strict;
+
+use constant INITSTATE =&gt; 1;
+
+my %FORM = ();
+my $url = $ENV{'SERVER_NAME'} . $ENV{'SCRIPT_NAME'};
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print "Content-type: text/html\n\n";
+print "&lt;HTHL&gt;", "\n";
+print "&lt;HEAD&gt;&lt;TITLE&gt;Status mit Query-String&lt;/TITLE&gt;&lt;/HEAD&gt;\n";
+print "&lt;BODY&gt;\n";
+print "&lt;B&gt;Zustand: ", $state, "&lt;/B&gt;&lt;P&gt;";
+print $saveaction;
+print "&lt;/BODY&gt;&lt;/HTML&gt;\n";
+
+
+sub retrieve_state 
+  {
+  &parse_form;
+  my $state = $FORM{'state'} || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_back = "&lt;A HREF=\"http://$url?state=$newstate\"&gt; [Weiter] &lt;/A&gt;";
+  return $send_back;
+  }
+
+sub parse_form 
+  {
+  my ($buffer, @pairs, $pair, $name, $value);
+  $buffer = $ENV{'QUERY_STRING'};
+  @pairs = split(/&/, $buffer);
+  foreach $pair (@pairs)
+    {
+    ($name, $value) = split(/=/, $pair);
+    $value =~ tr/+/ /;
+    $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+    $FORM{$name} = $value;
+    }
+  }
+</PRE>
+Auch hier die Alternative mit dem <I>CGI</I>-Modul. Nun f&auml;llt z. B. die
+Parse-Routine weg:
+<PRE>
+#!/usr/bin/perl
+# Zustandserhaltung mit QUERY_STRING.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Query-String');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print $saveaction;
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = param('state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_back = a({-href =&gt; url() . "?state=$newstate"}, " [Weiter] ");
+  return $send_back;
+  }
+
+</PRE>
+Auch bei dieser Methode kann der Benutzer den Zustand beliebig &auml;ndern. Trotzdem
+wird sie h&auml;ufig verwendet. Au&szlig;erdem ist bei einem Beenden/Absturz des Browsers 
+der Status verloren. 
+<P>
+
+<H3>Zustand &uuml;ber Hidden-Felder in Formularen</H3>
+Man codiert den Zustand innerhalb eines Formulars &uuml;ber Felder, die nicht angezeigt
+werden (<TT>&lt;INPUT TYPE="HIDDEN" ...&gt;></TT>). Sie werden vom Browser
+generiert und mit Information versehen (<TT>VALUE=...</TT>). Sendet der
+Benutzer das Formular zur&uuml;ck, wird auch der neue Zustand geliefert. Das folgende
+Programm zeigt, wie es geht:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Hidden-Feldern.
+
+use strict;
+
+use constant INITSTATE =&gt; 1;
+
+my %FORM = ();
+my $url = 'http://' . $ENV{'SERVER_NAME'} . $ENV{'SCRIPT_NAME'};
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print "Content-type: text/html\n\n";
+print "&lt;HTHL&gt;", "\n";
+print "&lt;HEAD&gt;&lt;TITLE&gt;Status mit hidden fields&lt;/TITLE&gt;&lt;/HEAD&gt;\n";
+print "&lt;BODY&gt;\n";
+print "&lt;B&gt;Zustand: $state &lt;/B&gt;&lt;P&gt;";
+print "&lt;FORM METHOD=\"POST\" ACTION=\"$url\"&gt;\n";
+print $saveaction;
+print '&lt;INPUT TYPE="submit" NAME="submit" VALUE=" Abschicken "&gt;';
+print "&lt;/FORM&gt;\n";
+print "&lt;/BODY&gt;&lt;/HTML&gt;\n";
+
+
+sub retrieve_state 
+  {
+  &parse_form;
+  my $state = $FORM{'state'} || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $send_back = "&lt;INPUT TYPE=\"hidden\" NAME=\"state\" VALUE=\"$newstate\"&gt;";
+  return $send_back;
+  }
+
+sub parse_form 
+  {
+  my ($buffer, @pairs, $pair, $name, $value);
+  if ($ENV{'REQUEST_METHOD'} eq 'GET') 
+    { @pairs = split(/&/, $ENV{'QUERY_STRING'}); }
+  elsif ($ENV{'REQUEST_METHOD'} eq 'POST') 
+    {
+    @pairs = split(/&/, $buffer);
+    read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+    }
+  @pairs = split(/&/, $buffer);
+  foreach $pair (@pairs)
+    {
+    ($name, $value) = split(/=/, $pair);
+    $value =~ tr/+/ /;
+    $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+    $FORM{$name} = $value;
+    }
+  }
+</PRE>
+Die Version mit dem <I>CGI</I>-Modul ist auch hier wieder k&uuml;rzer:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Hidden-Feldern.
+
+use strict;
+use CGI qw(:standard);
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header;
+print start_html('Status mit Hidden Fields');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print '&lt;FORM METHOD="POST"&gt;\n';
+print $saveaction;
+print '&lt;INPUT TYPE="submit" NAME="submit" VALUE=" Abschicken "&gt;';
+print '&lt;/FORM&gt;\n';
+print end_html;
+
+
+sub retrieve_state 
+  {
+  my $state = param('state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  
+  my $send_back = '&lt;INPUT TYPE="hidden" NAME="state" VALUE=';
+  $send_back .= "\"$newstate\"&gt;";
+  return $send_back;
+  }
+</PRE>
+Auch bei dieser Methode kann der Benutzer den Zustand beliebig &auml;ndern. Trotzdem
+wird sie ebenso h&auml;ufig wie die vorstehende verwendet. Au&szlig;erdem ist auch
+bei einem Beenden/Absturz des Browsers der Status verloren. Man kann zur Not den
+Formularcharakter verbergen, wenn der Submit-Button durch ein Bild getarnt wird.
+Ein Vorteil ist, da&szlig; sich mehr Info in der Statusvariablen verbergen l&auml;&szlig;t.
+<P>
+Man kann das Verfahren verbessern, indem man die Session-Ids nicht voraussagbar macht,
+also nicht 1,2, ... wie in den virhergehenden Beispielen. Man erzeugt vielmehr eine
+m&ouml;glichst zuf&auml;llige Session-Kennung. Da die random-Funktion von Perl nur
+Zufallszahlen liefert, st&uuml;tzt sich das folgende Beispiel auf das Random-Device
+von Linux (<tt>/dev/urandom</tt>). Der Aufruf zum &Ouml;ffnen des Devices wird
+mittels <tt>eval</tt> gekapselt, damit im Fehlerfall nicht das ganze Programm abst&uuml;rzt.
+<PRE> 
+sub make_session_id 
+  {
+  # $id = &make_session_id;
+  # Erzeugt eine zufaellige Session ID.
+  # Zurueckgegeben werden 24 Zeichen aus dem 64-Zeichen-Satz [A-Za-z0-9.-]
+  # oder undef im Fehlerfall.
+  # Plattformen ohne /dev/urandom koennen diese Routine nicht benutzen
+
+  my $len = 24;
+  my @session_chars = ('A' .. 'Z', 'a' .. 'z', 0 .. 9, '.', '-');
+  my $id;
+  eval 
+    { open(RANDOM, "/dev/urandom") or die; };
+  return (-1) if ($@);
+  return (-1) unless (read(RANDOM, $id, $len) == $len);
+  close(RANDOM);
+  $id =~ s/(.)/$session_chars[ord($1) & 63]/esg;
+  return $id;
+  }
+</PRE>
+<P>
+
+<H3>Zustand &uuml;ber Cookies</H3>
+Cookies sind Informationen in Form einfacher ASCII-Texte, die von einem WWW-Server 
+auf dem Rechner des Clients gespeichert und sp&auml;ter wieder abgerufen werden k&ouml;nnen. 
+Der Zustand kann clientseitig gespeichert werden und bei Bedarf von der jeweiligen
+Dienst-Applikation vom Client wieder abgerufen werden. Cookies sind aber in Verruf
+geraten, weil sie f&uuml;r User-Tracking verwendet wurden. Sie werden deshalb gerne
+im Browser deaktiviert und garantieren somit kein durchg&auml;ngiges Session-Tracking,
+obwohl sie von Netscape eigens f&uuml;r diesen Zweck konzipiert worden sind. Sie stellen
+jedoch kein Sicherheitsrisiko dar. Session-Tracking &uuml;ber Cookies stellt die einfachste 
+Methode dar und findet auch bei vielen Anwendungen Verwendung. Das folgende
+Programm zeigt, wie Cookies eingesetzt werden. Die Cookies werden netterweise schon
+in der Umgebungsvariablen <I>HTTP_COOKIE</I> bereitgestellt. Das Setzen eines Cookies erfolgt
+im HTTP-Header. Es mu&szlig; daher vor der Zeile <TT>Content-type: text/html</TT> stehen! Die
+Zeile zum Setzen eines Cookies hat folgenden Aufbau:
+<PRE>
+Set-Cookie: <I>Name=Wert</I>, expires=<I>Verfallsdatum</I>, path=<I>Pfad</I>, domain=<I>Domain</I>
+</PRE>
+Die Kombination <I>Name=Wert</I> wird beim Client gespeichert und ist abfragbar. Das 
+Verfallsdatum ist ein Standard-Datumsstring (Beispiel siehe unten im Listing), als Pfad
+kann man in der Regel "/" verwenden und die Domain legt fest, von wo aus das Cookie
+abgerufen werden darf. Hier kann ein einzelner Rechnername oder eine Domain (z. B. ".netzmafia.de")
+stehen.
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Cookies.
+
+use strict;
+
+use constant INITSTATE =&gt; 1;
+
+my $url = $ENV{'SERVER_NAME'} . $ENV{'SCRIPT_NAME'};
+my $Cookie_Domain = $ENV{'SERVER_NAME'};
+my $ExpDate = "Monday, 31-Dec-2035 23:59:59 GMT"; # cookie expire date
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print "Content-type: text/html\n\n";
+print "&lt;HTHL&gt;", "\n";
+print "&lt;HEAD&gt;&lt;TITLE&gt;Status mit Cookies&lt;/TITLE&gt;&lt;/HEAD&gt;\n";
+print "&lt;BODY&gt;\n";
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print "Bitte 'Reload Page' bet&auml;tigen";
+print "&lt;/BODY&gt;&lt;/HTML&gt;\n";
+
+sub retrieve_state 
+  {
+  # must be before "content-type"-line
+  my $state = &GetMakeCookie;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  SetCookie("State", $newstate, $ExpDate, "/", $Cookie_Domain);
+  }
+
+sub SetCookie
+  {
+  my ($name, $val, $exp, $path, $dom) = @_;
+  print "Set-Cookie: ";
+  print "$name=$val, expires=$exp, path=$path, domain=$dom\n";
+  }
+
+sub GetCookies
+  {
+  my %cookies;
+  my $cookie;
+  foreach $cookie (split (/; /,$ENV{'HTTP_COOKIE'}))
+    {
+    my($key) = split(/=/, $cookie);
+    $cookies{$key} = substr($cookie, index($cookie, "=")+1);
+    }
+  return(%cookies);
+  }
+
+sub GetMakeCookie
+  {
+  my $State = '';
+  my %Cookies = GetCookies();
+  $State = $Cookies{'State'};
+  $State =~ s/,.*//;
+  # No Cookie Data? Establish one!
+  if ($State eq '')
+    {
+    $State = INITSTATE;
+    SetCookie("State", $State, $ExpDate, "/", $Cookie_Domain);
+    }
+  return($State);
+  }   
+</PRE>
+Will man nicht nur unseren Beispiel-Status, sondern etwa eine Kunden-Kennung speichern,
+sollte der Wert anders gew&auml;hlt werden. Da sich der Kunde eventuell noch gar nicht
+angemeldet hat, fallen Kundennummern etc. weg. Andererseits sollten die vergebenen
+Kennungen einmalig sein, sonst vermischen sich zwei Bestellungen. Die folgende Variation 
+der Funktion <I>GetMakeCookie</I> schliesst so etwas nicht aus, ist aber hinreichend
+variabel. Sie nimmt den aktuellen UNIX-Zeitstempel und zwei Zufallszahlen. Damit sind auch
+Kunden unterscheidbar, die sich in der gleichen Sekunde anmelden. Ausserdem verschleiern die
+Zufallszahlen den Zeitstempel:
+<PRE>
+sub GetMakeCookie
+  {
+  my %Cookies = ();
+
+  $Customer = '';
+  %Cookies = GetCookies();
+  $Customer = $Cookies{'Customer'};
+  $Customer =~ s/,.*//;
+  # No Cookie Data? Establish one!
+  if ($Customer eq '')
+    {
+    srand(time % 1000);
+    $Customer = int(rand(999)) . time() . $$ . int(rand(999));
+    SetCookie("Customer", $Customer, $ExpDate, "/", $Cookie_Domain);
+    }
+  }   
+</PRE>
+Das war jetzt die h&auml;ndische L&ouml;sung. Dank des Moduls <TT>CGI::Cookie</TT> 
+ist die Cookie-Programmierung aber genauso einfach, wie die anderen gezeigten 
+Methoden. Das folgende Programm zeigt die Anwendung des Moduls:
+<PRE>
+#!/usr/bin/perl
+#Zustandserhaltung mit Cookies.
+
+use strict;
+use CGI qw(:standard);
+use CGI::Cookie;
+
+use constant INITSTATE =&gt; 1;
+
+my $state      = retrieve_state();
+my $nextstate  = compute_next_state($state);
+my $saveaction = save_state($nextstate);
+
+# Tue etwas abhaengig von $state:
+print header(-cookie =&gt; $saveaction);
+print start_html('Status mit Cookies');
+print '&lt;B&gt;Zustand: ', $state,'&lt;/B&gt;&lt;P&gt;';
+print "Bitte 'Reload Page' bet&amp;auml;tigen";
+print end_html;
+
+sub retrieve_state 
+  {
+  my $state = cookie(-name =&gt; 'state') || INITSTATE;
+  return $state;
+  }
+
+sub compute_next_state 
+  {
+  my $current_state = shift;
+  return $current_state + 1;
+  }
+
+sub save_state 
+  {
+  my $newstate = shift;
+  my $cookie   = new CGI::Cookie(-name    =&gt; 'state',
+				                 -value   =&gt; $newstate,
+			                     -expires =&gt; '+5m'); 
+			                     # diesmal nur 5 Minuten Haltbarkeit
+  return $cookie;
+  }
+</PRE>
+Das Cookie wird im Header der HTTP-Antwort des Servers &uuml;bermittelt. Es
+darf auch h&ouml;chstens einige hundert Bytes lang werden. Auch hat jeder
+Bowser eine Obergrenze f&uuml;r die Anzahl der verwalteten Cookies. Auch
+k&ouml;nnen erfahrene Benutzer durch Editieren der Datei <TT>cookies.txt</TT>
+auch die Statusinformation im Cookie ver&auml;ndern. Da w&uuml;rde es nur helfen,
+die Cookie-Information zu verschl&uuml;sseln oder mit einer Signatur zu versehen.
+<P>
+Serverseitiges Session-Tracking erfordert eine Datenbankanbindung und wird im
+Rahmen dieser Vorlesung nicht besprochen.
+<P>
+
+<A NAME="6.2"></A>
+<h2>6.2 Fileupload per Perl/CGI</h2>
+Eine Datei soll &uuml;ber ein Formular und per HTTP auf einen Server geladen 
+werden, da ein FTP-Zugang nicht zur Verf&uuml;gung steht oder nicht eingesetzt 
+werden soll. F&uuml;r den Upload wird beim Formular die Codierung 
+<TT>multipart/form-data</TT> verwendet, die es erlaubt, ein mehrteiliges
+Formular per <TT>POST</TT>-Methode zum Server zu senden. Der eine Teil sind
+die normalen Formulareingaben, der andere Teil ist der Inhalt der hochgeladenen
+Datei. Selbst mehrere Dateien k&ouml;nnen so auf einmal hochgeladen werden.
+Auf den Server wird zun&auml;chst eine tempor&auml;re Datei angelegt, die dann
+vom CGI-Script verarbeitet werden mu&szlig;. Das Formular hat zwei Eingabefelder,
+eines zur Auswahl der lokalen Datei und eines zur Angabe des Namens der Datei auf
+dem Server (letztere k&ouml;nnte auch aus dem Originalnamen abgeleitet oder
+automatisch generiert werden):
+<pre>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Upload&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;H1&gt;Datei-Upload&lt;/H1&gt;
+&lt;form action="/cgi-bin/upload.pl" method="post" enctype="multipart/form-data"&gt;
+Lokaler Dateiname: &lt;input type="file" name="datei" size=40&gt;&lt;BR&gt;
+Dateiname auf dem Server: &lt;input type="text" name="dateiname" size="40"&gt;&lt;BR&gt;
+&lt;input type="Submit" value="Upload"&gt;
+&lt;input type="reset" value="L&ouml;schen"&gt;
+&lt;/form&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</pre>
+Betrachtet man sich das Formular mit dem Browser, sieht man einen Button "Browse"
+neben der ersten Eingabezeile:
+<p>
+<img src="uploadform.gif">
+<p>
+Durch den Eingabetyp "file" kann durch Anklicken des Buttons ein Fenster zum 
+Durchsuchen der Platte ge&ouml;ffnet werden wie man es von anderen Windows-Programmen
+her kennt. Nach Eingabe der Daten und Anklicken des "Submit"-Buttons erfolgt der 
+Upload. 
+<P>
+Der folgende Perl-Quellcode enth&auml;lt ein Beispiel f&uuml;r ein Upload-Script.
+Die Parameter stellen sowohl ein Filehandle, als auch den Dateinamen der 
+hochgeladenen Datei zur Verf&uuml;gung.
+In der <TT>while</TT>-Schleife wird die Datei in 1024 KByte gro&szlig;en
+Bl&ouml;cken eingelesen und in die angegebene Datei geschrieben. Beide sind im 
+Bin&auml;r-Modus ge&ouml;ffnet, weil nicht bekannt ist, ob die Daten, die ankommen, 
+Bin&auml;r- oder Text-Daten sind. Zuletzt wird noch eine Best&auml;tigung an den 
+User zur&uuml;ckgegeben, da&szlig; die Datei erfolgreich gesichert wurde.
+<pre>
+!/usr/bin/perl
+# Einfaches Script fuer File-Upload
+
+use strict;
+use CGI qw(:standard);
+
+# Upload Dir, kein Slash am Ende!
+my $updir = "/home/httpd/htdocs/upload";
+
+# Referer (mit .htaccess geschuetztes Verzeichnis wo das Formular liegt)
+my $ref = "http://myhost.tld/upload/upload.html";
+
+my $data; # Lesepuffer
+
+##### BITTE BEACHTEN ######################################################
+# Die Felder des Formulars
+#   &lt;form action="/cgi-bin/ups.pl" method="post" enctype="multipart/form-data"&gt;
+#   Lokaler Dateiname:
+#   &lt;input type="file" name="datei" size=40&gt;&lt;BR&gt;
+#   Dateiname auf dem Server:
+#   &lt;input name="dateiname" size="40"&gt;
+#   &lt;input type="Submit" value="Upload"&gt;
+#   &lt;input type="reset" value="L&amp;ouml;schen"&gt;
+#   &lt;/form&gt;
+
+print header;
+print start_html('Datei-Upload');
+
+if ($ENV{'HTTP_REFERER'} ne $ref)
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Es wurde versucht, ohne Erlaubnis hochzuladen! Abbruch...";
+  print $ENV{'HTTP_REFERER'};
+  print end_html;
+  exit;
+  }
+
+my $datei = param('datei');
+my $dateiname = param('dateiname');
+
+if (! $datei or ! $dateiname)
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Datei oder Dateiname fehlt! Abbruch...";
+  print end_html;
+  exit;
+  }
+
+if (! open WF, "&gt;$updir/$dateiname")
+  {
+  print "&lt;H1&gt;Fehler!&lt;/H1&gt;\n";
+  print "Datei kann nicht geschrieben werden! Abbruch...";
+  print end_html;
+  exit;
+  }
+
+
+binmode $datei;
+binmode WF;
+while(read $datei,$data,1024)
+  { print WF $data; }
+close WF;
+
+
+print "&lt;H1&gt;Upload O. K.&lt;/H1&gt;\n";
+print "Die Datei wurde hochgeladen.&lt;BR&gt;\n";
+print "Remote Path and Filename: $updir/$dateiname\n";
+
+print end_html;
+exit;
+</pre>
+
+Dieses Script ist <b>nicht</b> f&uuml;r den praktischen Gebrauch gedacht, 
+es dient lediglich als Beispiel. Sonst m&uuml;ssten die Sicherheits-Vorkehrungen 
+viel strenger sein.
+Ein Datei-Upload auf den Server bedeutet immer ein Sicherheits-Risiko. Darum mu&szlig;
+die Datei auch in einem "harmlosen" Verzeichnis landen, keinesfalls in <TT>cgi-bin</TT>
+Auch sollte man die Maximalgr&ouml;&szlig;e der Datei begrenzen, sonst f&uuml;rt das
+Hochladen riesiger Dateien zu einer Denial-of-Service-Situation.
+Deshalb sollten von Anfang an einige Sicherheits-Vorkehrungen getroffen
+werden. Dazu z&auml;hlen unter anderem:
+<ul>
+<li>Das Definieren einer maximalen Dateigr&ouml;&szlig;e<BR>
+Das kann durch Setzen der Variablen <TT>$POST_MAX</TT> geschehen. Hier
+wird die Maximal gr&ouml;&szlig;e in Bytes angegeben, z. B. f&uuml;r
+ein Maximum von 400 KByte:
+<PRE>
+$POST_MAX = 400 * 1024;
+</PRE>
+&Uuml;brigens kann man durch Setzen der Variablen <TT>DISABLE_UPLOADS</TT>
+auf einen Wert ungleich 0 den Upload komplett unterbinden.
+<li>Berechtigung f&uuml;r Aufrufer vergeben<BR>
+Der Aufruf des Scripts darf nur aus einem durch Pa&szlig;wort gesch&uuml;tzten
+Verzeichnis erfolgen. Dieser Fall wird im Beispiel abgehandelt. Die
+Umgebungsvariable <TT>HTTP_REFERER</TT> enth&auml;lt die URL der
+aufrufenden Seite. Wenn jemand versucht, das Script von einer anderen
+Seite aus aufzurufen, wird er abgewiesen.
+<li>Die &Uuml;berpr&uuml;fung des Dateinamens auf Integrit&auml;t<BR>
+Dies k&ouml;nnte z. B. so aussehen:
+<pre>
+my @extensions = "txt dat gif jpg";
+
+if(param('dateiname') !~ /^[a-z\.\-_]+?\.([a-z]{3})$/)
+ { die("Ung&uuml;ltiger Dateiname"); }
+else
+ {
+ my $extension = $1;
+ if(!grep($extension,@extensions))
+  { die("Ung&uuml;ltige Dateiendung"); }
+ }
+</pre>
+In dem obigen Code-Schnipsel wird ein Array <TT>@extensions</TT> mit 
+g&uuml;ltigen Datei-Endungen definiert.
+Dann wird der Dateiname auf Integrit&auml;t &uuml;berpr&uuml;ft. Wenn
+Sonderzeichen, shell pipes oder &auml;hnliches darin vorkommen, so wird 
+das Script mit einer Fehlermeldung beendet.
+<P>
+Am besten generiert man den serverseitigen Dateinamen im Skript selbst,
+z. B. aus Referrer, Datum und Uhrzeit.
+</ul>
+<p>
+
+<A NAME="6.3"></A>
+<H2>6.3 CGI und gesch&uuml;tzte Verzeichnisse</H2>
+Den Zugriff auf einzelne Verzeichnisse eines Webangebots kann eingeschr&auml;nkt
+werden. Der Benutzer mu&szlig; sich dann mit Benutzerkennung und Passwort
+anmelden, bevor er an die Daten des Verzeichnisses kommt. Wenn nun in so einem
+gesch&uuml;tzten Verzeichnis ein Formular liegt, dann ist zwar das Verzeichnis
+gesch&uuml;tzt, das CGI-Script kann jedoch jederzeit aufgerufen werden, ohne 
+da&szlig; User und Passwort angegeben werden m&uuml;ssen. Um CGIs zu sch&uuml;tzen
+kann man zwei Wege einschlagen:
+<UL>
+<LI>Benutzerauthentisierung ins CGI-Skript aufnehmen. Das geht recht einfach,
+indem man die Benutzerverwaltung selbst in die Hand nimmt. Das Schema der
+Apache-Basic-Authentisierung kann dabei beibehalten werden. Die Benutzerdatei
+enth&auml;t Zeilen mit den durch Doppelpunkt getrennten Paaren von Username und
+Passwort. Das eingegebene Passwort wird verschl&uuml;sselt und mit dem gespeicherten
+verschl&uuml;sselten Passwort verglichen:
+<PRE>
+$username = substr($username,0,8);
+$cryptedpass = crypt($password,substr($username,0,2));
+
+open DAT, $PASSWORDFILE;
+while (<DAT>)
+  {
+  chomp; $_ =~ s/\r//;            # <CR><LF> am Ende weg
+  ($uid,$pass) = split(":", $_);  # user:passwort
+  if ($uid eq $username)          # userid "passt"
+    {
+    fail("Falsches Passwort!") unless ($pass eq $cryptedpass);
+    last;
+    }
+  }
+close DAT;
+</PRE>
+<LI>Die andere M&ouml;glichkeit ist es, im Skript festzustellen, von wo es
+aufgerufen wurde (das verhindert das Einbinden des Scriptes in fremde Seiten).
+Die Environment-Variable <TT>HTTP_REFERER</TT> liefert die Referer-Adresse, also die
+Adresse der Seite, von der das Skript aufgerufen wurde. Zuerst wird definiert, 
+wie die Datei mit dem HTML-Formular hei&szlig;t und sp&auml;ter im Programm
+<TT>HTTP_REFERER</TT> damit verglichen:
+<PRE>
+my $referer = "http://myhost.tld/upload/upload.html";
+
+...
+
+fail ("Programmaufruf ohne Erlaubnis!"> if ($ENV{'HTTP_REFERER'} ne $referer);
+</PRE>
+</UL>
+Das folgende Datei-Upload-Programm verwendet die zweite Methode.
+<P>
+Ein <A HREF="beispiele/anmeldung.pl">Anmeldeskript</A> f&uuml;r eine geschlossene
+Benutzergruppe, das <A HREF="beispiele/anmeldung.html">Formular dazu</A> und
+ein <A HREF="beispiele/htaccess-muster">Muster f&uuml;r <TT>.htaccess</TT></A>
+finden Sie in den Beispielen.
+<P>
+Infos zum Anlegen von gesch&uuml;tzten Verzeichnissen finden Sie unter 
+<A HREF="http://www.netzmafia.de/geheim/index.html">http://www.netzmafia.de/geheim/index.html</A>.
+Zum Login folgende Zugangsdaten eingeben:
+<UL>
+<LI>Username: user
+<LI>Passwort: geheim
+</UL>
+<P>
+
+<A NAME="6.4"></A>
+<H2>6.4 Komplexes Beispiel: Steuern per Internet</H2>
+Dieses Beispiel soll in mehreren Schritten zeigen, wie das Ein- und Ausschalten 
+von Ger&auml;ten &uuml;ber das Internet realisiert werden kann. Es beginnt mit
+dem Entwurf eines sicheren Protokolls zwischen Client und Server (der dann die
+Steuerungsaufgabe &uuml;bernimmt).
+<P>
+Im weiteren Ausbau wird der Client zu einem <b>CGI-Skript</b> erweitert, das 
+dann &uuml;ber ein Webformular mit dem Benutzer kommuniziert. Die gesamte 
+Konfiguration stellt sich folgenderma&szlig;en dar:
+<P>
+<CENTER><IMG SRC="prot_ueb.gif"></CENTER>
+<P>
+
+<H3><I>Hardware</I></H3>
+<IMG SRC="967720-ka.jpg" ALIGN=LEFT HSPACE=10>
+Technische Daten der Relaiskarte:
+<UL>
+<LI>Hersteller: Conrad Electronic
+<LI>Bestellnummer: 967720
+<LI>Betriebsspannung: 11 ... 15 V DC
+<LI>Maximale Stromaufnahme: 200mA bei 12 V (8 Relais eingeschaltet)
+<LI>Relais Schaltleistung: 230 V AC/ 4 A, ohne gesonderte Funktions- und Sicherheitspr&uuml;fung 
+der Gesamtapplikation sind maximal 24 V/ 2 A zul&auml;ssig!
+<LI>Au&szlig;enma&szlig;e: 160 x 100 mm (Europlatine)
+<LI>Serielle Schnittstelle: RS232, 19200 Baud, 8 Datenbits, 1 Stopbit, kein Parit&auml;tsbit, 
+kein Handshake, Nullmodemkabel zum Anschlu&szlig; an den PC verwenden
+</UL>
+Es k&ouml;nnen bis zu 255 Relaiskarten kaskadiert werden (255 Relaiskarten * 8 Relais = 2040 
+schaltbare Relais insgesamt). Wer sich weiter informieren will, kann sich
+<UL>
+<LI>den <A HREF="967720-sp.pdf">Schaltplan (PDF)</A> und 
+<LI>die <A HREF="967720-an.pdf">Beschreibung (PDF) der Ansteuerung</A>
+</UL>
+ansehen. 
+<BR CLEAR=ALL>
+Anschlu&szlig; des Netzteiles: Zuerst die richtige Spannung am Netzteil 
+einstellen (9 V sind trotz anders angegebener technischer Daten 
+v&ouml;llig ausreichend). Dan den am Netzteil vorhandenen Klinkenstecker 
+abschneiden und beide Adern des Kabels abisolieren. Nun das Kabel an 
+Klemme K9 anschliessen (richtige Polung beachten). 
+<P>
+Nun wird das Nullmodemkabel angeschlossen. Man kann auch selbst ein Seriellkabel
+l&ouml;ten. Dies bietet sich an, wenn die Relaiskarte in ein Geh&auml;se eingebaut 
+wird, da dort kein Platz mehr f&uuml;r die Steckverbindung ist. Die Steckerbelegung 
+zeigt das nebenstehende Bild. Die Klemmen auf der Relaiskarte befinden sich neben der
+seriellen Buchse.
+<P>
+<CENTER><IMG SRC="relais4.jpg"></CENTER>
+<P>
+M&ouml;chte man mehrere Karten anschlie&szlig;en, so mu&szlig; man den Anschlu&szlig; 
+TXb der ersten Relaiskarte mit dem Anschlu&szlig; RXa der zweiten Karte, und den 
+Anschlu&szlig; RXb der ersten Karte mit dem Anschlu&szlig; TXa der zweiten Karte
+verbinden. Dann werden noch die GND-Ansch&uuml;sse verbunden. Beachten Sie die
+Einstellung von Jumper JP3. Beim Einzelkartenbetrieb mu&szlig; sich der Jumper 
+in der Position 1-2 befinden. Beim Mehrkartenbetrieb m&uuml;ssen sich die Jumper 
+aller Karten bis auf den der letzten in Position 2-3 befinden und nur auf der 
+letzten Karte darf er sich in Position 1-2 befinden. Das folgende Bild zeigt
+das Anschlu&szlig;-Schema:
+<P>
+<CENTER><IMG SRC="relais5.jpg"></CENTER>
+<P>
+
+<P>
+<IMG SRC="998575-ge.jpg" ALIGN=RIGHT HSPACE=10>
+Die Karte wurde in den Conrad Power-Manager (Best. Nr. 998575) eingebaut. Das Ger&auml;t
+besteht aus einem Stahlblechgeh&auml;use, das auf der Vorderseite sieben Schalter und auf 
+der R&uuml;ckseite sieben korrespondierende Schuko-Steckdosen besitzt. 
+Die Relaiskontakte 1 - 7 der Relaiskarte sind in Reihe zu den Schaltern verdrahtet, so 
+da&szlig; die im Schalter eingebauten Glimmlampen als Betriebsanzeige wirken (Schalter 
+eingeschaltet). Ist ein Schalter in Stellung "aus", bleibt die entsprechende Steckdose 
+unabh&auml;ngig von der Relais-Stellung stromlos. F&uuml;r die Versorgung der Relais-Karte 
+wurde noch ein passendes 12-V-Netzteil eingebaut. Der Power Manager erf&uuml;llt so gleichzeitig
+drei Funktionen: Anzeige, Ber&uuml;hrschutz und Geh&auml;se f&uuml;r alle Komponenten. Da nur
+sieben Steckdosen vorhanden sind, wurde das achte Relais zum Schalten eines Gleichstromsummers 
+verwendet.
+<P>
+<B>Achtung:</B> Die Abschaltung im Power Manager erfolgt nur einpolig. Je nachdem, wie der 
+Netzstecker des Power Managers eingesteckt wird, schaltet er Phase oder Nulleiter. Lediglich der
+Hauptschalter ist zweipolig ausgef&uuml;hrt. Bei Arbeiten an angeschlossenen Ger&auml;ten ist 
+auf alle F&auml;lle deren Netzstecker zu ziehen.
+<BR CLEAR=ALL>
+<P>
+<H3><I>Software</I></H3>
+<H3>Das Programm <TT>relais</TT></H3>
+<H4>Syntax der Parameter von <TT>relais</TT></H4>
+Das Ansteuerprogramm f&uuml;r die serielle Relaiskarte von Conrad wird mit dem Kommando 
+<TT>relais &lt;Parameter&gt;</TT> aufgerufen. Als Parameter sind folgende Eingaben m&ouml;glich:
+<P>
+<TABLE BORDER=0 CELLPADDING=3 CELLSPACING=0>
+<TR><TH ALIGN=LEFT>Parameter</TH><TH ALIGN=LEFT>Bedeutung</TH><TR>
+<TR><TD><TT>-stat</TT></TD><TD>Status der Relais als Dezimalzahl. Bit=1: Relais an, 
+Bit=0: Relais aus. Es sind keine weiteren Parameter m&ouml;glich</TD></TR>
+<TR><TD><TT>-off</TT></TD><TD>alle Relais aus</TD></TR>
+<TR><TD><TT>-on</TT></TD><TD>alle Relais an</TD></TR>
+<TR><TD><TT>-sx</TT></TD><TD>Relais x einschalten (1 &lt;= x &lt;= 8)</TD></TR>
+<TR><TD><TT>-rx</TT></TD><TD>Relais x ausschalten (1 &lt;= x &lt;= 8)</TD></TR>
+</TABLE>
+<P>
+Beispiele:<BR>
+<TT>relais -off -s1 -s3:</TT> Relais 1 und 3 einschalten<BR>
+<TT>relais -s4 -r3:</TT> Relais 4 ein- und 3 ausschalten<BR>
+<TT>relais -on -r8:</TT> alle Relais ausser 8 einschalten<BR>
+<P>
+<H4>R&uuml;ckgabewert:</H4>
+Normalerweise wird <TT>OK: &lt;Kontaktstellung dezimal&gt;</TT>
+z. B. 'OK: 5' --&gt; Relais 1 und 3 on auf der Standardausgabe zur&uuml;ckgegeben.<BR>
+Bei Fehler wird <TT>FAIL: </TT> und der komplette Status
+zur&uuml;ckgegeben (Antwortcode Adresse Daten/Info).
+<P>
+<H4>Quellcode</H4>
+Der <A HREF="relais.c"><B>C-Quellcode</B></A> des Programms basiert auf dem 
+<A HREF="http://www.tldp.org/HOWTO/Serial-HOWTO.html">Serial-HOWTO</A>
+von Linux. Das Programm sollte auf allen Linux-Versionen lauff&auml;hig sein.<BR>
+&Uuml;ber <TT>#define PORT 0</TT> wird die erste serielle Schnittstelle (<TT>ttyS0</TT>)
+ausgew&auml;hlt; hier sind die Werte 0 bis 3 f&uuml;r <TT>ttyS0</TT> bis <TT>ttyS3</TT>
+m&ouml;glich.
+<P>
+
+<H3>Entwurf eines Protokolls</H3>
+Es wird ein Protokoll f&uuml;r die Anwendungsschicht entworfen und beschrieben,
+das zwischen einem Server mit angeschlossener Relais-Steuereinheit und 
+einem Client benutzt werden soll. Da die Relais nicht von Jedermann
+geschaltet werden sollen, m&uuml;ssen sich Client und Server gegenseitig authentisieren.
+Das Protokoll soll nat&uuml;rlich abh&ouml;rsicher sein. Eine &Uuml;bertragung eines
+Passworts im Klartext scheidet daher aus. Aber auch die &Uuml;bertragung eines 
+verschl&uuml;sselten Passworts f&uuml;hrt diesmal nicht weiter (warum?).
+<P>
+Daher wird diesmal ein Challenge-Response-Protokoll verwendet. Das bedeutet,
+da&szlig; sich Client und Server im Dialog gegenseitig authentisieren. Damit
+die &Uuml;bertragung abh&ouml;rsicher wird, verschl&uuml;sselt man die Daten mit einer
+sogenannten <b>Einweg-Funktion</b>.<BR>
+Eine Einwegfunktion ist eine mathematische Funktion, die (vorw&auml;rts) deutlich
+leichter zu berechnen ist, als die zugeh&ouml;rige Umkehrfunktion (r&uuml;ckw&auml;rts). Ein
+Rechner braucht beispielsweise nur einige Sekunden, um die Funktion f&uuml;r
+einen Wert zu berechnen, f&uuml;r die Umkehrung braucht er jedoch
+m&ouml;glicherweise Monate oder sogar Jahre.<BR>
+Je gr&ouml;&szlig;er die Eingabedaten der Einwegfunktion (und damit der Schl&uuml;ssel)
+gew&auml;hlt werden, desto gr&ouml;&szlig;er ist auch der Unterschied in der Rechenzeit f&uuml;r
+die Hin- und R&uuml;ckrichtung. Alle praktisch verwendbaren asymmetrischen Kryptosysteme 
+basieren auf angenommenen Einwegfunktionen, d.h. Funktionen, von denen man glaubt,
+da&szlig; es Einwegfunktionen sind, dieses jedoch bisher nicht bewiesen wurde.
+<p>
+
+<H4>Einwegfunktionen</H4>
+Einwegfunktionen dienen in der Kryptografie zur Generierung von nicht manipulierbaren
+Fingerabdr&uuml;cken aus Nachrichten. Sie erzeugen aus einer Nachricht mit beliebiger 
+L&auml;nge nach einem vorbestimmten Verfahren ein Komprimat (gewisserma&szlig;en
+eine kryptografische Pr&uuml;fziffer). Man nennt sie auch <b>Hashfunktionen</b>.
+Eine Hashfunktion, welche die Eigenschaft hat, da&szlig; es sehr lange dauert eine Nachricht
+zu finden f&uuml;r die <nobr>hash(m) = hash(n)</nobr> gilt, nennt man kryptografische
+Hashfunktion. Anders als bei Pr&uuml;fsummenverfahren m&uuml;ssen dabei nicht nur zuf&auml;llig
+auftretende Fehler, sondern auch vors&auml;tzliche Manipulationen sicher erkannt werden.
+Die wichtigsten Anforderungen an solche Funktionen lauten:
+<ul type="disc">
+  <li><b><i>Effizienz</i></b><br>
+Ein Hashwert muss "einfach", d.h. leicht und schnell, zu berechnen sein.
+<p>
+  <li><b><i>Kollisionsfreiheit</i></b><br>
+Eine Hashfunktion muss "kollisionsfrei" sein, das hei&szlig;t es darf nicht
+m&ouml;glich sein, zwei Nachrichten zu konstruieren, die den gleichen Hashwert haben,
+da es sonst m&ouml;glich w&auml;re, eine Originalnachricht unerkannt durch eine F&auml;lschung
+auszutauschen (Geburtstagsangriff).
+<p>
+  <li><b><i>Repr&auml;sentativit&auml;t</i></b><br>
+Jedes Bit eines Textes muss den Hashwert beeinflussen, d. h. die &Auml;nderung auch nur
+eines Buchstaben eines Textes muss zu einem anderen Hashwert f&uuml;hren. Daher m&uuml;ssen
+auch &auml;hnliche Texte vollkommen unterschiedliche Hashwerte ergeben.
+<p>
+  <li><b><i>Kryptografische Sicherheit</i></b><br>
+F&uuml;r einen gegebenen Hashwert muss es praktisch unm&ouml;glich sein den zugeh&ouml;rigen
+Text herzustellen bzw. zur&uuml;ckzugewinnen.
+ </ul>
+<p>
+Hashfunktionen die diese Eigenschaften erf&uuml;llen werden im Englischen als
+"Message Digest" (MD) bezeichnet. (Digest: Auszug, Zusammenfassung) Ein Message 
+Digest ist der (digitale) Fingerabdruck einer Nachricht, bei der mit Hilfe
+von einfach berechenbaren Funktionen ein Wert ermittelt wird, der k&uuml;rzer ist als die
+Originalnachricht. Die verwendete Funktion  muss so beschaffen sein, dass es relativ
+schwierig ist eine zweite Nachricht zu erzeugen, die den gleichen Fingerabdruck hat.
+Die Chance, aus zwei unterschiedlichen Texten einen identischen Fingerabdruck zu
+generieren, sollte eins zu unendlich sein, kann aber nie v&ouml;llig ausgeschlossen werden.
+Eine <b>kryptographische Hash-Funktion</b> hat also folgende Eigenschaften:
+<ul>
+<li>Die Eingabedaten k&ouml;nnen beliebig gross sein.
+<li>Die Ausgabe ist normalerweise von konstanter L&auml;nge.
+<li>Die Funktion muss schnell berechenbar sein.
+<li>Die Funktion muss kollisionsfrei sein, d.h. f&uuml;r verschiedene Input-Daten
+darf nie derselbe Hashwert errechnet werden.
+<li>Es muss eine Einweg-Funktion sein, d.h. aus dem Hashwert k&ouml;nnen keine Schl&uuml;sse auf die
+Inputdaten gezogen werden.
+<li>Die L&auml;nge der Nachricht beeinflusst die kryptographische Pr&uuml;summe.
+<li>Jedes Bit der Nachricht beeinflusst jedes Bit der kryptographischen Pr&uuml;summe. Bei einer &Auml;nderung eines
+Bits in der Nachricht besteht eine &Auml;nderungswahrscheinlichkeit von 50% f&uuml;r jedes Bit der Pr&uuml;fsumme.
+<li>Der Algorithmus der Hash-Funktion muss &ouml;ffentlich bekannt sein.
+Die Sicherheit darf nicht von der Kenntnis oder Unkenntnis des verwendeten Verfahrens abh&auml;ngen.
+</ul>
+<p>
+Ron Rivest entwickelte - zusammen mit anderen Mitarbeitern der RSA Data Security - eine
+Reihe von Hashfunktionen MD1(?), MD2, MD3, MD4 bis MD5, die gemeinhin auch als Synonym
+f&uuml;r den Message Digest gelten. Die Algorithmen akzeptieren als Eingabe eine Botschaft
+beliebiger L&auml;nge und erzeugen einen "digitalen Fingerabdruck" von 128 Bit
+L&auml;nge als Ausgabe. Die Chance, aus zwei unterschiedlichen Texten einen identischen
+Fingerabdruck zu generieren, ist beinahe unendlich, kann aber nicht v&ouml;llig ausgeschlossen
+werden.
+<p>
+MD5 ist wohl zur Zeit die am weitesten verbreitete Hashfunktion. Sie ist aus MD4
+entstanden und dabei in erster Linie um deren Unsicherheiten auszur&auml;umen.
+Wie bei MD4 wird zu Beginn die L&auml;nge der Nachricht auf ein Vielfaches von 512 Bit
+gebracht, indem eine 1 und entsprechend Nullen sowie die L&auml;nge der Ursprungsnachricht
+- im 64 Bit Format - angeh&auml;ngt werden. Auch der Puffer und dessen Initialisierung
+sind gleich. <br>
+Eine genaue Beschreibung finden Sie in <a href="http://www.ietf.org/rfc/rfc1321.txt">RFC 1321</a>:
+MD5 Message Digest Algorithm; R. Rivest, April 1992. In Perl steht MD5 im Modul 
+<TT>Digest::MD5</TT> bereit (<TT>use Digest::MD5 qw(md5_hex</TT>). Erzeugt wird ein Hash mit
+<TT>$digest = md5_hex($string);</TT>.
+<P>
+
+Es werden nun ein Server und ein Client in Perl vorgestellt. Die Authentisierung
+l&auml;uft folgenderma&szlig;en ab:
+<OL>
+<LI>Nach dem Connect meldet sich der Server mit der Zeichenkette "AUTH", gefolgt von Newline.
+Danach folgen T und Z1 in jeweils einer neuen Zeile. T ist die aktuelle Zeit (GMT), die in Perl
+mit der Funktion <TT>gmtime()</TT> zu bekommen ist. Z1 ist eine vierstellige Zufallszahl (z. B.
+mit <TT>substr(rand(),2,4)</TT> zu finden). Dies ist die "Challenge".
+<LI>Nachdem er die drei Zeilen vom Server erhalten hat, sendet der Client zwei Zeilen. Zuerst
+einen MD5-Hash von (T,Z1,P), wobei P das Passwort ist und authentisiert sich damit gegen&uuml;ber
+dem Server. In der zweiten Zeile sendet er seine Zufallszahl Z2.
+<LI>Der Server antwortet mit einem MD5-Hash von (T,Z2,P) und authentisiert sich so gegen&uuml;ber
+dem Client.
+<LI>Tritt im Verlauf dieser Authentisierung ein Fehler auf (nicht &uuml;bereinstimmende Hashes,
+etc.) wird die Verbindung mit einer entsprechenden Meldung beendet.
+<LI>Sind beide Partner gl&uuml;cklich, sendet der Client eine Zeile mit Relais-Steuerkommandos,
+die den Parametervereinbarungen des Programms <TT>relais</TT> entsprechen. Dieses Programm 
+wird aus dem Perl-Server als Systemaufruf (Backquotes) gestartet.
+<LI>Der Server sendet die Ausgaben von <TT>relais</TT> an den Client zur&uuml;ck, worauf
+beide die Verbindung beenden.
+</Ol>
+<P>
+
+<H4>Das Client-Programm in Perl</H4>
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+
+use IO::Socket;
+use Digest::MD5  qw(md5 md5_hex md5_base64);
+
+my $SERVER = "blackhole.ee.fhm.edu";
+my $PORT = 666;
+my $TIMEOUT = 50;
+my $PASS= "geheim";
+
+my ($eingabe, $ausgabe, $rs, $com);
+
+my $sock = new IO::Socket::INET(PeerAddr =&gt; $SERVER, 
+                                PeerPort =&gt; $PORT,
+                                Proto    =&gt; 'tcp', 
+                                Timeout  =&gt; $TIMEOUT) 
+           || die "Can't connect to server: $@\n";
+
+$eingabe = &lt;$sock&gt;; chomp($eingabe);
+if ($eingabe ne "AUTH") 
+  { print "Authentication failed\n"; close($sock); exit(1); }
+$eingabe = &lt;$sock&gt;; chomp($eingabe);
+# print "Got: $eingabe\n";
+$rs = &lt;$sock&gt;; chomp($rs);
+# print "Got: $rs\n";
+$ausgabe = md5_hex($eingabe, $rs, $PASS);
+print $sock "$ausgabe\n";
+# print "Sent: $ausgabe\n";
+$ausgabe = substr(rand(),2,4); 
+print $sock "$ausgabe\n";
+# print "Sent: $ausgabe\n";
+$ausgabe = md5_hex($eingabe, $ausgabe, $PASS); 
+$eingabe = &lt;$sock&gt;; chomp($eingabe);
+# print "Got: $eingabe\n";
+if($eingabe ne $ausgabe) 
+  { print "Authentication failed\n"; close($sock); exit(1); }
+print $sock "@ARGV\n";
+$com = &lt;$sock&gt;;
+print "Returned $com\n";
+</PRE>
+<P>
+
+<H4>Das Server-Programm</H4>
+<PRE>
+#!/usr/bin/perl -w
+# Server fuer Relaissteuerung
+
+use strict;
+use IO::Socket;
+use Digest::MD5  qw(md5 md5_hex md5_base64);
+
+my $PORT = 666;
+my $PASS= "geheim";
+
+my ($rc, $sock, $client, $tim, $rs, $hs, $p, $com, $res);
+
+$sock = new IO::Socket::INET(LocalPort =&gt; $PORT, 
+                             Reuse =&gt; 1, 
+                             Listen =&gt; 5)
+          || die "Can't create local socket : $@\n";
+
+print "Accepting connections on port ",$PORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  $tim = gmtime();
+  $rs = substr(rand(),2,4);
+  print $client "AUTH\n$tim\n$rs\n";
+
+  next if (&lt;$client&gt; ne (md5_hex($tim, $rs, $PASS))."\n");
+  $rc = &lt;$client&gt;; chomp ($rc);
+  print $client md5_hex($tim, $rc, $PASS)."\n";
+
+  next if (! defined($com = &lt;$client&gt;));
+  chomp ($com);
+  print "Commandline: $com\n";             # Fuer den Test
+  $res = `/usr/local/bin/relais $com`;
+  print $client "$res\n";
+  }
+  continue { $client-&gt;close(); }
+</PRE>
+<P>
+
+<H3>CGI-Schnittstelle</H3>
+Die &Uuml;bertragung zwischen Relais-Server und Client ist nun m&ouml;glich
+(sogar mit gesichertem Protokoll). Das CGI-Programm enth&auml;lt 
+nat&uuml;rlich den Client und wertet zus&auml;tzlich die Eingaben eines
+Formulars aus. Wenn zwischen HTTP-Client (nicht zu verwechseln mit unserem 
+Relais-Client) und Wevserver das HTTPS-Protokoll verwendet wird, ist die 
+gesamte &Uuml;bertragungsstrecke gesichert.
+<P>
+Das Formular hat folgenden Quellcode:
+<PRE>
+&lt;TABLE BGCOLOR="#FFFFFF" ALIGN=CENTER BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH="80%"&gt;
+&lt;TR&gt;&lt;TD VALIGN=TOP ALIGN=LEFT&gt;&lt;IMG SRC="relais1.jpg"&gt;&lt;/TD&gt;
+&lt;TD&gt;
+&lt;CENTER&gt;
+&lt;H2&gt;Relais-Steuerung&lt;/H2&gt;
+&lt;FORM ACTION="/cgi-bin/relais.cgi" METHOD="POST"&gt;
+&lt;TABLE BGCOLOR="#EEEEEE" BORDER=0 CELLSPACING=0 CELLPADDING=5&gt;
+&lt;TR&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;Relais 1&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="1" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="1" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;Relais 2&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="2" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="2" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;Relais 3&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="3" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="3" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;Relais 4&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="4" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="4" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;Relais 5&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="5" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="5" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;Relais 6&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="6" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="6" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;Relais 7&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEFF99" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="7" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="7" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;Summer&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEEEEE" VALIGN=TOP&gt;
+&lt;INPUT TYPE="radio" NAME="8" VALUE="1"&gt;On 
+&lt;INPUT TYPE="radio" NAME="8" VALUE="0"&gt;Off &lt;/TD&gt;
+&lt;/TR&gt;&lt;TR&gt;
+&lt;TD BGCOLOR="#EEEE99" VALIGN=TOP&gt;Passwort: 
+    &lt;INPUT TYPE="PASSWORD" NAME="PASS" LENGTH=8&gt;&lt;/TD&gt;
+&lt;TD BGCOLOR="#EEEE99" VALIGN=TOP&gt;
+    &lt;INPUT TYPE="SUBMIT" VALUE=" Absenden "&gt;&lt;/TD&gt;
+&lt;/TR&gt;
+&lt;/TABLE&gt;
+&lt;/FORM&gt;
+&lt;/CENTER&gt;
+&lt;/TD&gt;
+&lt;TD VALIGN=BOTTOM ALIGN=RIGHT&gt;&lt;IMG SRC="relais2.jpg"&gt;&lt;/TD&gt;
+&lt;/TR&gt;&lt;/TABLE&gt;
+</PRE>
+<P>
+Das Formular stellt sich dann wie folgt auf dem Bildschirm dar (und ist, bei Kenntnis des
+Passworts, auch von hier aus nutzbar):
+<P>
+<TABLE BGCOLOR="#FFFFFF" ALIGN=CENTER BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH="80%">
+<TR><TD VALIGN=TOP ALIGN=LEFT><IMG SRC="relais1.jpg"></TD>
+<TD>
+<CENTER>
+<H2>Relais-Steuerung</H2>
+<FORM ACTION="/cgi-bin/relais.cgi" METHOD="POST">
+<TABLE BGCOLOR="#EEEEEE" BORDER=0 CELLSPACING=0 CELLPADDING=5>
+<TR>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>Relais 1</TD>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="1" VALUE="1">On 
+<INPUT TYPE="radio" NAME="1" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>Relais 2</TD>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="2" VALUE="1">On 
+<INPUT TYPE="radio" NAME="2" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>Relais 3</TD>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="3" VALUE="1">On 
+<INPUT TYPE="radio" NAME="3" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>Relais 4</TD>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="4" VALUE="1">On 
+<INPUT TYPE="radio" NAME="4" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>Relais 5</TD>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="5" VALUE="1">On 
+<INPUT TYPE="radio" NAME="5" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>Relais 6</TD>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="6" VALUE="1">On 
+<INPUT TYPE="radio" NAME="6" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>Relais 7</TD>
+<TD BGCOLOR="#EEFF99" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="7" VALUE="1">On 
+<INPUT TYPE="radio" NAME="7" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>Summer</TD>
+<TD BGCOLOR="#EEEEEE" VALIGN=TOP>
+<INPUT TYPE="radio" NAME="8" VALUE="1">On 
+<INPUT TYPE="radio" NAME="8" VALUE="0">Off </TD>
+</TR><TR>
+<TD BGCOLOR="#EEEE99" VALIGN=TOP>Passwort: <INPUT TYPE="PASSWORD" NAME="PASS" LENGTH=8></TD>
+<TD BGCOLOR="#EEEE99" VALIGN=TOP><INPUT TYPE="SUBMIT" VALUE=" Absenden "></TD>
+</TR>
+</TABLE>
+</FORM>
+</CENTER>
+</TD>
+<TD VALIGN=BOTTOM ALIGN=RIGHT><IMG SRC="relais2.jpg"></TD>
+</TR></TABLE>
+<P>
+
+<H3>Der Server als Daemon</H3>
+Bisher wurde zu Testzwecken der Server immer von der Konsole oder vom Terminalfenster
+aus gestartet. Das Programm l&auml;&szlig;t sich mit den Erkenntnissen aus der Vorlesung
+aber recht einfach zum Daemon umgestalten. Der Server wird als Kindproze&szlig; in den
+Hintergrund verlagert und die Standard-Ausgabe/Standard-Fehlerausgabe in eine Log-Datei 
+umgeleitet. Auf das Anlegen einer PID-Datei wird im folgenden Beispiel verzichtet.
+
+<PRE>
+#!/usr/bin/perl -w
+# Server fuer Relaissteuerung als Daemon
+
+use strict;
+use POSIX 'setsid';
+use IO::Socket;
+use Digest::MD5  qw(md5 md5_hex md5_base64);
+
+my $PORT = 666;
+my $PASS= "geheim";
+
+my ($child, $rc, $sock, $client, $tim, $rs, $hs, $p, $com, $res);
+
+# Exit-Handler setzen
+$SIG{TERM} = $SIG{INT} = sub { exit(0); };
+
+# Daemon werden
+$child = fork();
+if ($child &lt; 0) { die "Cannot fork!\n"; }
+exit(0) if ($child &gt; 0);          # Eltenprozess beendet sich
+&amp;setsid();                        # Abtrennen
+open(STDIN, "&lt;/dev/null");        # Standarddateien umlenken
+open(STDOUT, "&gt;/var/log/relais.log");
+open(STDERR, "&gt;&amp;STDOUT");
+chdir('/tmp');                    # Arbeitsverzeichnis /tmp
+umask(0);                         # UMASK definieren
+                                  # Pfad definiert setzen:
+$ENV{PATH} = '/bin; /sbin; /usr/bin; /usr/sbin; /usr/local/bin;';
+
+# und den Server starten
+$sock = new IO::Socket::INET(LocalPort =&gt; $PORT, 
+                             Reuse =&gt; 1, 
+                             Listen =&gt; 5)
+          || die "Can't create local socket : $@\n";
+
+# ins Logfile schreiben (Startmeldung):
+print "Accepting connections on port ",$PORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # ins Logfile schreiben:
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  $tim = gmtime();
+  $rs = substr(rand(),2,4);
+  print $client "AUTH\n$tim\n$rs\n";
+
+  next if (&lt;$client&gt; ne (md5_hex($tim, $rs, $PASS))."\n");
+  $rc = &lt;$client&gt;; chomp ($rc);
+  print $client md5_hex($tim, $rc, $PASS)."\n";
+
+  next if (! defined($com = &lt;$client&gt;));
+  chomp ($com);
+  print "Commandline: $com\n";                 # ins Logfile
+  $res = `/usr/local/bin/relais $com`;
+  print $client "$res\n";
+  }
+  continue { $client-&gt;close(); }
+</PRE>
+<P>
+Die Programme und Dateien k&ouml;nnen &uuml;ber folgende Links 
+heruntergeladen werden:
+<UL>
+<LI><A HREF="relais.c">Steuerprogramm 'relais.c'</A>
+<LI><A HREF="relais-client.pl">Client-Programm</A>
+<LI><A HREF="relais-server.pl">Server-Programm</A>
+<LI><A HREF="relais-daemon.pl">Relais-Daemon</A>
+<LI><A HREF="relais.cgi">CGI-Steuerprogramm</A>
+<LI><A HREF="relais-form1.html">HTML-Formular</A>
+</UL>
+<P>
+Um die Sache schliesslich vollst&auml;ndig zu automatisieren, kann
+man in <TT>/etc/init.d</TT> noch ein Start/Stopp-Skript anlegen.
+Die folgende Version arbeitet unter der Debian-Distribution:
+<PRE>
+#!/bin/sh
+# Start/stop the relais daemon.
+
+test -f /root/bin/relais-daemon.pl || exit 0
+
+case "$1" in
+start)  echo -n "Starting Relais-Daemon"
+        start-stop-daemon --start --quiet --exec /root/bin/relais-daemon.pl
+        echo "."
+        ;;
+stop)   echo -n "Stopping Relais-Daemon"
+        kill -HUP `ps ax | grep relais-daemon.pl | grep -v grep | awk '{print $1}'`
+        echo "."
+        ;;
+restart) echo -n "Restarting Relais-Daemon"
+        $0 stop
+        sleep 2
+        $0 start
+        echo "."
+        ;;
+*)      echo "Usage: /etc/init.d/relais start|stop|restart"
+        exit 1
+        ;;
+esac
+exit 0
+</PRE>
+In den entsprechenden Runlevel-Verzeichnissen m&uuml;ssen dann noch die symbolischen
+Links (<TT>S99relais</TT> bzw. <TT>K01relais</TT>) angelegt werden.
+<P>
+
+<A NAME="6.5"></A>
+<H2>6.5 Wanzen in der Webseite</H2>
+Sicherlich kennen viele von Ihnen das folgende Szenario: Auf irgendeiner
+beliebigen Webseite abonnieren Sie einen Newsletter. schon bald landet 
+die erste Ausgabe im eigenen E-Mail-Postfach - nat&uuml;rlich schick formatiert
+in HTML. Wenn Sie sp&auml;ter mal wieder auf die Mail schauen, geschieht etwas: 
+Das E-Mail-Programm m&ouml;chte online gehen. Warum sollte es das tun, die 
+Mail ist doch schon da? Dasselbe kann beim Ansehen einer lokal gespeicherten
+Webseite geschehen.
+<P>
+Des R&auml;tsels L&ouml;sung sind die "Web-Bugs". Dabei handelt es sich in der Regel 
+um eine kleine <A HREF="1pix.gif">Grafik</A>, die nur 1 mal 1 Bildpunkt 
+gro&szlig; und zudem auch noch transparent ist. Sichtbar ist diese Grafiken nicht, 
+dennoch wird Ihr E-Mail-Programm dieses Bild darstellen wollen. Nun ist es
+so, dass es aber nicht mitgeschickt wurde, es liegt noch auf dem Server, 
+das Programm greift auf das Internet zu.
+<P>
+Wird die Grafik vom Server geladen, so wird dies dort mitprotokolliert. 
+So kann der Betreiber des Newsletters sehen, wann und wie viele Leser den 
+Newsletter ge&ouml;ffnet haben. Seri&ouml;se Argumente f&uuml;r solche "Web-Bugs" sind 
+daher die Anfertigung von Statistiken. Letztlich m&ouml;chten die meisten 
+Webmaster Geld mit ihrer Site verdienen und ein potentieller Werbekunde 
+m&ouml;chte wissen, wie oft die E-Mail denn nun wirklich ge&ouml;ffnet wird. Da der 
+Besuch von Webseiten derzeit i.A. kostenlos ist, ist dies ein durchaus 
+legitimes Argument. Printmedien wissen schlie&szlig;lich auch, wie viele 
+Zeitschriften verkauft wurden.Als Leser k&ouml;nnen Sie aber nicht feststellen, 
+ob einfach nur gez&auml;hlt wird, oder ob Ihre Schritte mitprotokolliert werden.
+<P> 
+Mit "Web Bugs" in E-Mails l&auml;&szlig;t sich also feststellen, ob und wann eine 
+Mail ge&ouml;ffnet wurde, was auch feststellbar macht, wann und ob Werbemails (SPAM)
+gelesen wurden. Sie lassen sich auch verwenden, um den Cookie des Browsers mit einer 
+bestimmten Mailadresse zu verkn&uuml;pfen, so da&szlig; ein Besucher bekannt ist, 
+wenn er sp&auml;ter eine Website aufruft. Wenn jemand mit dem Outlook Express 
+oder dem Netscape Messenger Mitteilungen in einer Newsgroup liest, so lassen sich 
+mit einem "Web Bug" auch diese Leser identifizieren. 
+<P>
+Man kann aber noch eins draufsetzen. Statt der Grafik wir ein Skript
+aufgerufen, welches seinerseits die Grafikdaten zur&uuml;ckgibt und so das 
+E-Mail-Programm oder den Browser zufriedenstellt. Das Skript kann nun alle 
+m&ouml;glichen Daten &uuml;ber den User ermitteln oder aus einer Menge von Grafiken
+eine bestimmte ausw&auml;hlen (per Zufallsgenerator oder nach anderen Kriterien).
+Selbst wer Cookies und Skriptsprachen abgeschaltet hat, entkommt dem
+"Web-Bug" nicht. Der Code in einer HTML-Seite k&ouml;nnte beispielsweise so
+aussehen:
+<PRE>
+&lt;B&gt;Diese Seite zeigt am unteren Ende eine  Grafik,
+die von einen CGI-Skript generiert wird.&lt;/B&gt;
+&lt;p&gt;
+&lt;hr&gt;&lt;center&gt;
+&lt;img src="/cgi-bin/bug.cgi"&gt;&lt;/center&gt;
+</PRE>
+Man kann Verzeichnis und Dateiname nat&uuml;rlich noch "unverf&auml;nglicher" 
+gestalten. Ein Demoscript ist ebenfalls schnell gemacht:
+<PRE>
+#!/usr/bin/perl
+use strict;
+
+# HTTP-Vorspann
+print "Content-Type: image/gif\n";
+print "\n";
+
+# GIF schicken
+open(DAT,"1pix.gif");
+print while (&lt;DAT&gt;);
+close(DAT);
+
+# Irgendwas protokollieren
+open(DAT,">>bug.log");
+print DAT "Killroy was here\n";
+close(DAT);
+</PRE>
+Wenn man jetzt die Namen der Grafik dynamisch (z. B. benutzerbezogen)
+generiert, kann man alleine &uuml;ber den Namen der Grafik schon ein
+Benutzerprofil erstellen und - falls jede Webseite einen "Bug" enth&auml;lt -
+sogar den Weg durch das eigene Angebot verfolgen.
+<P>
+Mehr dazu findet man in der 
+<A HREF="http://www.eff.org/Privacy/Profiling_cookies_webbugs/web_bug.html">Web Bug FAQ</A>
+von Richard M. Smith.
+<P>
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server5.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server7.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+<H6><I>Letzte Aktualisierung: 23. Jul 2005</I></H6>
+</BODY>
+</HTML>

@@ -1,0 +1,528 @@
+<HTML>
+<HEAD>
+<TITLE>Programming UNIX Sockets in C - Frequently Asked Questions: Writing Server Applications (TCP/SOCK_STREAM)</TITLE>
+</HEAD>
+<BODY>
+<A HREF="unix-socket-faq-3.html">Previous</A>
+<A HREF="unix-socket-faq-5.html">Next</A>
+<A HREF="unix-socket-faq.html#toc4">Table of Contents</A>
+<HR>
+<H2><A NAME="s4">4. Writing Server Applications (TCP/SOCK_STREAM)</A></H2>
+
+<H2><A NAME="ss4.1">4.1 How come I get "address already in use" from bind()? </A></H2>
+
+<P>You get this when the address is already in use.  (Oh, you figured that 
+much out?)  The most common reason for this is that you have stopped your 
+server, and then re-started it right away.  The sockets that were used by 
+the first incarnation of the server are still active.  This is further 
+explained in 
+<A HREF="unix-socket-faq-2.html#time_wait">2.7 Please explain the TIME_WAIT state.</A>, and
+<A HREF="unix-socket-faq-2.html#close">2.5 How do I properly close a socket?</A>.</P>
+
+
+<H2><A NAME="ss4.2">4.2 Why don't my sockets close?</A></H2>
+
+<P>When you issue the <CODE>close()</CODE> system call, you are closing your 
+interface to 
+the socket, not the socket itself.  It is up to the kernel to close the 
+socket.  Sometimes, for really technical reasons, the socket is kept 
+alive for a few minutes after you close it.  It is normal, for example 
+for the socket to go into a TIME_WAIT state, on the server side, for a 
+few minutes.  People have reported ranges from 20 seconds to 4 minutes 
+to me.  The official standard says that it should be 4 minutes.  On my 
+Linux system it is about 2 minutes.  This is explained in great detail in 
+<A HREF="unix-socket-faq-2.html#time_wait">2.7 Please explain the TIME_WAIT state.</A>.</P>
+
+
+<H2><A NAME="ss4.3">4.3 How can I make my server a daemon?</A></H2>
+
+<P>There are two approaches you can take here.  The first is to use inetd to 
+do all the hard work for you.  The second is to do all the hard work 
+yourself.</P>
+<P>If you use inetd, you simply use <CODE>stdin</CODE>, <CODE>stdout</CODE>, or <CODE>stderr</CODE> for 
+your 
+socket.  (These three are all created with <CODE>dup()</CODE> from the real socket)  
+You can use these as you would a socket in your code.  The inetd process 
+will even close the socket for you when you are done.</P>
+<P>If you wish to write your own server, there is a detailed explanation in 
+"Unix Network Programming" by Richard Stevens (see
+<A HREF="unix-socket-faq-1.html#books">1.6 Where can I get source code for the book [book  title]?</A>). I also 
+picked up this 
+posting from comp.unix.programmer, by Nikhil Nair 
+(
+<A HREF="mailto:nn201@cus.cam.ac.uk">nn201@cus.cam.ac.uk</A>).
+You may want to add code to ignore SIGPIPE, because if this signal is
+not dealt with, it will cause your application to exit.  (Thanks to
+<A HREF="mailto:ingo@milan2.snafu.de">ingo@milan2.snafu.de</A>
+for pointing this out).</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+I worked all this lot out from the GNU C Library Manual (on-line
+documentation).  Here's some code I wrote - you can adapt it as necessary:
+
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;sys/wait.h&gt;
+
+/* Global variables */
+...
+volatile sig_atomic_t keep_going = 1; /* controls program termination */
+
+
+/* Function prototypes: */
+...
+void termination_handler (int signum); /* clean up before termination */
+
+
+int
+main (void)
+{
+  ...
+
+  if (chdir (HOME_DIR))         /* change to directory containing data 
+                                    files */
+   {
+     fprintf (stderr, &quot;`%s': &quot;, HOME_DIR);
+     perror (NULL);
+     exit (1);
+   }
+
+   /* Become a daemon: */
+   switch (fork ())
+     {
+     case -1:                    /* can't fork */
+       perror (&quot;fork()&quot;);
+       exit (3);
+     case 0:                     /* child, process becomes a daemon: */
+       close (STDIN_FILENO);
+       close (STDOUT_FILENO);
+       close (STDERR_FILENO);
+       if (setsid () == -1)      /* request a new session (job control) */
+         {
+           exit (4);
+         }
+       break;
+     default:                    /* parent returns to calling process: */
+       return 0;
+     }
+
+   /* Establish signal handler to clean up before termination: */
+   if (signal (SIGTERM, termination_handler) == SIG_IGN)
+     signal (SIGTERM, SIG_IGN);
+   signal (SIGINT, SIG_IGN);
+   signal (SIGHUP, SIG_IGN);
+
+   /* Main program loop */
+   while (keep_going)
+     {
+       ...
+     }
+   return 0;
+}
+
+void
+termination_handler (int signum)
+{
+  keep_going = 0;
+  signal (signum, termination_handler);
+}
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss4.4">4.4 How can I listen on more than one port at a time?</A></H2>
+
+<P>The best way to do this is with the <CODE>select()</CODE> call.  This tells the 
+kernel 
+to let you know when a socket is available for use.  You can have one 
+process do i/o with multiple sockets with this call.  If you want to wait 
+for a connect on sockets 4, 6 and 10 you might execute the following code 
+snippet:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+fd_set socklist;
+
+FD_ZERO(&amp;socklist); /* Always clear the structure first. */
+FD_SET(4, &amp;socklist);
+FD_SET(6, &amp;socklist);
+FD_SET(10, &amp;socklist);
+if (select(11, NULL, &amp;socklist, NULL, NULL) &lt; 0)
+  perror(&quot;select&quot;);
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>The kernel will notify us as soon as a file descriptor which is less than 
+11 (the first parameter to <CODE>select()</CODE>), and is a member of our 
+<CODE>socklist</CODE> becomes 
+available for writing.  See the man page on <CODE>select()</CODE> for more details.</P>
+
+
+<H2><A NAME="ss4.5">4.5 What exactly does SO_REUSEADDR do?</A></H2>
+
+<P>This socket option tells the kernel that even if this port is busy (in
+the TIME_WAIT state), go ahead and reuse it anyway.  If it is busy, but 
+with another state, you will still get an address already in use error.
+It is useful if your server has been shut down, and then restarted right 
+away while sockets are still active on its port.  You should be aware 
+that if any unexpected data comes in, it may confuse your server, but 
+while this is possible, it is not likely. </P>
+<P>It has been pointed out that "A socket is a 5 tuple (proto, local addr,
+local port, remote addr, remote port).  SO_REUSEADDR just says that you
+can reuse local addresses.  The 5 tuple still must be unique!" by Michael 
+Hunter (mphunter@qnx.com).  This is true, and this is why it is very 
+unlikely that unexpected data will ever be seen by your server.  The 
+danger is that such a 5 tuple is still floating around on the net, and 
+while it is bouncing around, a new connection from the same client, on 
+the same system, happens to get the same remote port.  This is explained 
+by Richard Stevens in 
+<A HREF="unix-socket-faq-2.html#time_wait">2.7 Please explain the TIME_WAIT state.</A>.</P>
+
+
+<H2><A NAME="ss4.6">4.6 What exactly does SO_LINGER do?</A></H2>
+
+<P>On some unixes this does nothing.  On others, it instructs the kernel to 
+abort tcp connections instead of closing them properly.  This can be 
+dangerous.  If you are not clear on this, see 
+<A HREF="unix-socket-faq-2.html#time_wait">2.7 Please explain the TIME_WAIT state.</A>.</P>
+
+
+<H2><A NAME="ss4.7">4.7 What exactly does SO_KEEPALIVE do?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>The <CODE>SO_KEEPALIVE</CODE> option causes a packet (called a 'keepalive probe') 
+to be
+sent to the remote system if a long time (by default, more than 2 hours)
+passes with no other data being sent or received. This packet is designed to
+provoke an ACK response from the peer. This enables detection of a peer
+which has become unreachable (e.g. powered off or disconnected from the net).
+See 
+<A HREF="unix-socket-faq-2.html#peer_death">2.8 Why does it take so long to detect that the peer died?</A>
+for further discussion.</P>
+<P>Note that the figure of 2 hours comes from RFC1122, "Requirements for
+Internet Hosts". The precise value should be configurable, but I've often
+found this to be difficult.  The only implementation I know of that 
+allows the keepalive interval to be set per-connection is SVR4.2.</P>
+
+
+<H2><A NAME="ss4.8">4.8 How can I bind() to a port number < 1024?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>The restriction on access to ports < 1024 is part of a (fairly weak)
+security scheme particular to UNIX. The intention is that servers (for
+example rlogind, rshd) can check the port number of the client, and if it
+is < 1024, assume the request has been properly authorised at the client
+end.</P>
+<P>The practical upshot of this, is that binding a port number < 1024 is
+reserved to processes having an effective UID == root.</P>
+<P>This can, occasionally, itself present a security problem, e.g. when a
+server process needs to bind a well-known port, but does <EM>not</EM> itself need
+root access (news servers, for example). This is often solved by creating
+a small program which simply binds the socket, then restores the real userid
+and <CODE>exec()</CODE>s the real server. This program can then be made setuid root.</P>
+
+
+<H2><A NAME="ss4.9">4.9 How do I get my server to find out the client's address / hostname?</A></H2>
+
+<P>From Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>After <CODE>accept()</CODE>ing a connection, use <CODE>getpeername()</CODE> to get the
+address of the client.
+The client's address is of
+course, also returned on the <CODE>accept()</CODE>, but it is essential to
+initialise the address-length parameter before the accept call for this
+will work. </P>
+<P>Jari Kokko (
+<A HREF="mailto:jkokko@cc.hut.fi">jkokko@cc.hut.fi</A>)
+has offered the following code to determine the client address:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+int t;
+int len;
+struct sockaddr_in sin;
+struct hostent *host;
+
+len = sizeof sin;
+if (getpeername(t, (struct sockaddr *) &amp;sin, &amp;len) &lt; 0)
+        perror(&quot;getpeername&quot;);
+else {
+        if ((host = gethostbyaddr((char *) &amp;sin.sin_addr,
+                                  sizeof sin.sin_addr,
+                                  AF_INET)) == NULL)
+            perror(&quot;gethostbyaddr&quot;);
+        else printf(&quot;remote host is '%s'\n&quot;, host-&gt;h_name);
+}
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+
+
+<H2><A NAME="ss4.10">4.10 How should I choose a port number for my server?</A></H2>
+
+<P>The list of registered port assignments can be found in STD 2 or RFC 1700. 
+Choose one that isn't already registered, and isn't in /etc/services on
+your system.  It is also a good idea to let users customize the port
+number in case of conflicts with other un-registered port numbers in other
+servers.  The best way of doing this is hardcoding a service name, and 
+using <CODE>getservbyname()</CODE> to lookup the actual port number.  This method 
+allows users to change the port your server binds to by simply editing 
+the /etc/services file.</P>
+
+
+<H2><A NAME="ss4.11">4.11 What is the difference between SO_REUSEADDR and SO_REUSEPORT?</A></H2>
+
+<P><CODE>SO_REUSEADDR</CODE> allows your server to bind to an address which is in a
+TIME_WAIT state.  It does not allow more than one server to bind to the
+same address.  It was mentioned that use of this flag can create a
+security risk because another server can bind to a the same port, by
+binding to a specific address as opposed to <CODE>INADDR_ANY</CODE>.  The 
+<CODE>SO_REUSEPORT</CODE>
+flag allows multiple processes to bind to the same address provided all of
+them use the <CODE>SO_REUSEPORT</CODE> option.  </P>
+<P>From Richard Stevens 
+(
+<A HREF="mailto:rstevens@noao.edu">rstevens@noao.edu</A>):</P>
+<P>This is a newer flag that appeared in the 4.4BSD multicasting code
+(although that code was from elsewhere, so I am not sure just who
+invented the new <CODE>SO_REUSEPORT</CODE> flag).</P>
+<P>What this flag lets you do is rebind a port that is already in use,
+but only if all users of the port specify the flag.  I believe the
+intent is for multicasting apps, since if you're running the same
+app on a host, all need to bind the same port.  But the flag may have
+other uses.  For example the following is from a post in February:</P>
+<P>From Stu Friedberg 
+(
+<A HREF="mailto:stuartf@sequent.com">stuartf@sequent.com</A>):</P>
+<P>
+<BLOCKQUOTE>
+<CODE>SO_REUSEPORT</CODE> is also useful for eliminating the try-10-times-to-bind
+hack in ftpd's data connection setup routine.  Without <CODE>SO_REUSEPORT</CODE>,
+only one ftpd thread can bind to TCP (lhost, lport, <CODE>INADDR_ANY</CODE>, 0) in
+preparation for connecting back to the client.  Under conditions of
+heavy load, there are more threads colliding here than the try-10-times
+hack can accomodate.  With <CODE>SO_REUSEPORT</CODE>, things work nicely and the
+hack becomes unnecessary.
+</BLOCKQUOTE>
+</P>
+<P>I have also heard that DEC OSF supports the flag.  Also note that under
+4.4BSD, if you are binding a multicast address, then <CODE>SO_REUSEADDR</CODE> is
+condisered the same as <CODE>SO_REUSEPORT</CODE> (p. 731 of "TCP/IP Illustrated,
+Volume 2").  I think under Solaris you just replace <CODE>SO_REUSEPORT</CODE> with
+<CODE>SO_REUSEADDR</CODE>.</P>
+<P>From a later Stevens posting, with minor editing:</P>
+<P>Basically <CODE>SO_REUSEPORT</CODE> is a BSD'ism that arose when multicasting was added,
+even thought it was not used in the original Steve Deering code.  I
+believe some BSD-derived systems may also include it (OSF, now Digital
+Unix, perhaps?).  <CODE>SO_REUSEPORT</CODE> lets you bind the same address *and* port,
+but only if all the binders have specified it.  But when binding a
+multicast address (its main use), <CODE>SO_REUSEADDR</CODE> is considered identical
+to <CODE>SO_REUSEPORT</CODE> (p. 731, "TCP/IP Illustrated, Volume 2").  
+So for portability of multicasting applications
+I always use <CODE>SO_REUSEADDR</CODE>.</P>
+
+
+<H2><A NAME="multi-homed"></A> <A NAME="ss4.12">4.12 How can I write a multi-homed server?</A></H2>
+
+<P>The original question was actually from Shankar Ramamoorthy
+(
+<A HREF="mailto:shankar@viman.com">shankar@viman.com</A>):</P>
+<P>
+<BLOCKQUOTE>
+<EM>I want to run a server on a multi-homed host. The host is part of
+two networks and has two ethernet cards. I want to run a server on
+this machine, binding to a pre-determined port number. I want 
+clients on either subnet to be able to send broadcast packates to
+the port and have the server receive them.</EM>
+</BLOCKQUOTE>
+</P>
+<P>And answered by Andrew Gierth 
+(
+<A HREF="mailto:andrew@erlenstar.demon.co.uk">andrew@erlenstar.demon.co.uk</A>):</P>
+<P>Your first question in this scenario is, do you need to know which
+subnet the packet came from? I'm not at all sure that this can be
+reliably determined in all cases.</P>
+<P>If you don't really care, then all you need is one socket bound to
+<CODE>INADDR_ANY</CODE>. That simplifies things greatly.</P>
+<P>If you <EM>do</EM> care, then you have to bind multiple sockets. You are
+obviously attempting to do this in your code as posted, so I'll
+assume you do.</P>
+<P>
+<BLOCKQUOTE>
+<EM>I was hoping that something like the following would work. Will it?
+This is on Sparcs running Solaris 2.4/2.5.</EM>
+</BLOCKQUOTE>
+</P>
+<P>I don't have access to Solaris, but I'll comment based on my experience
+with other Unixes.</P>
+<P>[Shankar's original code omitted]</P>
+<P>What you are doing is attempting to bind all the current hosts unicast
+addresses as listed in hosts/NIS/DNS. This may or may not reflect
+reality, but much more importantly, neglects the broadcast addresses.
+It seems to be the case in the majority of implementations that a socket
+bound to a unicast address will <EM>not</EM> see incoming packets with broadcast
+addresses as their destinations.</P>
+<P>The approach I've taken is to use <CODE>SIOCGIFCONF</CODE> to retrieve the list of
+active network interfaces, and <CODE>SIOCGIFFLAGS</CODE> and <CODE>SIOCGIFBRDADDR</CODE>
+to identify broadcastable interfaces and get the broadcast addresses.
+Then I bind to each unicast address, each broadcast address, <EM>and to</EM>
+<CODE>INADDR_ANY</CODE> <EM>as well</EM>. That last is necessary to catch packets 
+that are
+on the wire with <CODE>INADDR_BROADCAST</CODE> in the destination. 
+(<CODE>SO_REUSEADDR</CODE> is
+necessary to bind <CODE>INADDR_ANY</CODE> as well as the specific addresses.)</P>
+<P>This gives me very nearly what I want. The wrinkles are:</P>
+<P>
+<UL>
+<LI>I don't assume that getting a packet through a particular socket
+necessarily means that it actually arrived on that interface.</LI>
+<LI>I can't tell anything about which subnet a packet originated on 
+if its destination was INADDR_BROADCAST.</LI>
+<LI>On some stacks, apparently only those with multicast support, I
+get duplicate incoming messages on the INADDR_ANY socket.</LI>
+</UL>
+</P>
+
+
+<H2><A NAME="ss4.13">4.13 How can I read only one character at a time?</A></H2>
+
+<P>This question is usually asked by people who are testing their
+server with telnet, and want it to process their keystrokes one
+character at a time.  The correct technique is to use a psuedo
+terminal (pty).  More on that in a minute.</P>
+<P>According to Roger Espel Llima
+(
+<A HREF="mailto:espel@drakkar.ens.fr">espel@drakkar.ens.fr</A>), you can have
+your server send a sequence of control characters: <CODE>0xff 0xfb 0x01 0xff 0xfb 0x03 0xff 0xfd 0x0f3</CODE>, which
+translates to <CODE>IAC WILL ECHO IAC WILL SUPPRESS-GO-AHEAD IAC DO
+SUPPRESS-GO-AHEAD</CODE>.  For more information on what this
+means, check out std8, std28 and std29.  Roger also gave the
+following tips:
+<UL>
+<LI>This code will suppress echo, so you'll have to send the
+characters the user types back to the client if you want the
+user to see them.</LI>
+<LI>Carriage returns will be followed by a null character, so
+you'll have to expect them.</LI>
+<LI>If you get a <CODE>0xff</CODE>, it will be followed by two more characters.
+These are telnet escapes.</LI>
+</UL>
+</P>
+<P>Use of a pty would also be the correct way to execute a child
+process and pass the i/o to a socket.</P>
+<P>I'll add pty stuff to the list of example source I'd like to add
+to the faq.  If someone has some source they'd like to contribute
+(without copyright) to the faq which demonstrates use of pty's,
+please email me!</P>
+
+
+<H2><A NAME="ss4.14">4.14 I'm trying to exec() a program from my server, and attach my socket's IO to it, but I'm not getting all the data across.  Why?</A></H2>
+
+<P>If the program you are running uses <CODE>printf()</CODE>, etc (streams from 
+<CODE>stdio.h</CODE>) you have to deal with two buffers.  The kernel buffers all 
+socket IO, and this is explained in 
+<A HREF="unix-socket-faq-2.html#flush">section 2.11</A>.
+The second buffer is the one that is causing you grief.  This is the 
+stdio buffer, and the problem was well explained by Andrew:</P>
+<P>(The short answer to this question is that you want to use a pty
+rather than a socket; the remainder of this article is an attempt
+to explain why.)</P>
+<P>Firstly, the socket buffer controlled by <CODE>setsockopt()</CODE> has <EM>absolutly
+nothing</EM> to do with stdio buffering. Setting it to 1 is guaranteed to
+be the Wrong Thing(tm).</P>
+<P>Perhaps the following diagram might make things a little clearer:</P>
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+        Process A                   Process B
+    +---------------------+     +---------------------+
+    |                     |     |                     |
+    |    mainline code    |     |    mainline code    |
+    |         |           |     |         ^           |
+    |         v           |     |         |           |
+    |      fputc()        |     |      fgetc()        |
+    |         |           |     |         ^           |
+    |         v           |     |         |           |
+    |    +-----------+    |     |    +-----------+    |
+    |    | stdio     |    |     |    | stdio     |    |
+    |    | buffer    |    |     |    | buffer    |    |
+    |    +-----------+    |     |    +-----------+    |
+    |         |           |     |         ^           |
+    |         |           |     |         |           |
+    |      write()        |     |       read()        |
+    |         |           |     |         |           |
+    +-------- | ----------+     +-------- | ----------+
+              |                           |                  User space
+  ------------|-------------------------- | ---------------------------
+              |                           |                Kernel space
+              v                           |
+         +-----------+               +-----------+
+         | socket    |               | socket    |
+         | buffer    |               | buffer    |
+         +-----------+               +-----------+
+              |                           ^
+              v                           |
+      (AF- and protocol-          (AF- and protocol-
+       dependent code)             dependent code)
+</PRE>
+</CODE></BLOCKQUOTE>
+</P>
+<P>Assuming these two processes are communicating with each other (I've
+deliberately omitted the actual comms mechanisms, which aren't really
+relevent), you can see that data written by process A to its stdio
+buffer is completely inaccessible to process B. Only once the decision
+is made to flush that buffer to the kernel (via <CODE>write()</CODE>) can the data
+actually be delivered to the other process.</P>
+<P>The only guaranteed way to affect the buffering within process A is to
+change the code. However, the default buffering for stdout is controlled
+by whether the underlying FD refers to a terminal or not; generally,
+output to terminals is line-buffered, and output to non-terminals
+(including but not limited to files, pipes, sockets, non-tty devices,
+etc.) is fully buffered. So the desired effect can usually be achieved
+by using a pty device; this, for example, is what the 'expect' program
+does.</P>
+<P>Since the stdio buffer (and the <CODE>FILE</CODE> structure, and everything else
+related to stdio) is user-level data, it is not preserved across an
+<CODE>exec()</CODE> call, hence trying to use <CODE>setvbuf()</CODE> before the exec is
+ineffective.</P>
+<P>A couple of alternate solutions were proposed by Roger Espel Llima
+(
+<A HREF="mailto:espel@drakkar.ens.fr">espel@drakkar.ens.fr</A>):</P>
+<P>If it's an option,
+you can use some standalone program that will just run something inside
+a pty and buffer its input/output.  I've seen a package by the name
+pty.tar.gz that did that; you could search around for it with archie or
+AltaVista.</P>
+<P>Another option (<EM>**warning, evil hack**</EM>) , if you're on a system that
+supports this (SunOS, Solaris, Linux ELF do; I don't know about others)
+is to, on your main program, <CODE>putenv()</CODE> the name of a shared executable
+(*.so)  in LD_PRELOAD, and then in that .so redefine some commonly used
+libc function that the program you're exec'ing is known to use early.
+There you can 'get control' on the running program, and the first time
+you get it, do a <CODE>setbuf(stdout, NULL)</CODE> on the program's behalf, and then
+call the original libc function with a <CODE>dlopen()</CODE> + <CODE>dlsym()</CODE>.  And 
+you keep the <CODE>dlsym()</CODE> value on a static var, so you can just call 
+that the following times.</P>
+<P><EM>(Editors note:  I still haven't done an expample for how to do pty's, 
+but I hope I will be able to do one after I finish the non-blocking 
+example code.)</EM></P>
+
+
+<HR>
+<A HREF="unix-socket-faq-3.html">Previous</A>
+<A HREF="unix-socket-faq-5.html">Next</A>
+<A HREF="unix-socket-faq.html#toc4">Table of Contents</A>
+</BODY>
+</HTML>

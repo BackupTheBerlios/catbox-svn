@@ -1,0 +1,2485 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>4 Client und Server programmieren</H1>
+
+<A NAME="4.1"></A>
+<H2>4.1 Netzwerk-Funktionen in Perl</H2>
+An dieser Stelle werden kurz die wichtigsten Netzwerk-Module, -Funktionen
+und -Methoden vorgestellt. Die folgende Auflistung erhebt aber keinen Anspruch 
+auf Vollst&auml;ndigkeit, sondern es werden nur die notwendigsten aufgef&uuml;hrt.
+<P>
+Einige Perl-Funktionen verhalten sich anders als ihr &auml;quivalen in C, obwohl sie
+dieselben Namen tragen. <TT>inet_aton</TT> ist nur ein Beispiel daf&uuml;r. 
+Ein anderes Beispiel  ist <TT>accept(2)</TT>, die in C einen Filedeskriptor
+oder -1 liefert, w&auml;hrend in Perl eine spezielle Syntax f&uuml;r das neue 
+Filehandle benutzt wird, und der R&uuml;ckgabewert Information &uuml;ber den
+Kommunikationspartner enth&auml;lt oder <TT>undef</TT> ist. (Diese
+Information wiederum kann man in C mit <TT>getpeername(2)</TT>
+erhalten.) <TT>sockaddr_in</TT> ist in C eine Struktur, in Perl eine
+Hilfsfunktion, die sowohl benutzt werden kann, um Daten aus dieser
+Struktur zu extrahieren, als auch um Daten in eine solche Struktur zu
+verfrachten. 
+<P>
+<H3>IP-Adressen</H3>
+Viele Netzwerkfunktionen brauchen eine IP-Adresse als "gepackten Bin&auml;rstring".
+Mit den Funktionen <TT>pack()</TT> und <TT>unpack()</TT> l&auml;&szlig;t sich
+die Konvertierung durchf&uml;hren. Das Packen geschieht durch:
+<PRE>
+($a,$b,$c,$d) = split(/\./, '192.168.34.3');
+$packed_ip = pack('C4',$a,$b,$c,$d);
+</PRE>
+Das entpacken analog durch:
+<PRE>
+($a,$b,$c,$d) = unpack('C4',$packed_ip); 
+$dotted_quad = join ('.', $a,$b,$c,$d); 
+</PRE>
+Das Packen und Entpacken mu&szlig; aber nicht von Hand erfolgen, denn es gibt
+passende Standardfunktionen daf&uuml;r:
+<UL>
+<LI><B><TT>$packed_ip = inet_aton($dotted_quad)</TT></B><BR>
+Packen einer Adresse der Form 'a.b.c.d' in ein Bin&auml;rformat wie es von
+<TT>sockaddr_in()</TT> gebraucht wird.
+<P>
+<LI><B><TT>$dotted_quad = inet_ntoa($packed_ip)</TT></B><BR>
+Enpacken einer bin&auml;r gespeicherten Adresse in das "lesbare" Format.
+<P>
+<LI><B><TT>$socket_addr = sockaddr_in($port,$address)</TT><BR>
+    <TT>($port,$address) = sockaddr_in($socket_addr)</TT></B><BR>
+Im skalaren Kontext (obere Zeile) wird eine Portnummer und eine bin&auml;re Adresse
+in einem Format geliefert, wie es die Methode <TT>socket</TT> ben&ouml;tigt.
+Im Listenkontext (untere Zeile) erfolgt die Konvertierung in umgekehrter Richtung.<BR>
+Wem das nicht gef&auml;llt, kann stattdessen 
+<B><TT>$socket_addr = pack_sockaddr_in($port,$address)</TT></B>
+oder <B><TT>($port,$address) = unpack_sockaddr_in($socket_addr)</TT></B> verwenden.
+</UL>
+<P>
+
+<H3>gethostbyaddr - Eintrag mit bestimmter IP ermitteln</H3>
+Ermittelt den Hostnamen zu einer bestimmten IP-Adresse und erwartet als Parameter:
+<ol>
+<li>die gew&uuml;nschte IP-Adresse numerisch in bin&auml;rer Schreibweise.
+<li>den Adresstyp der IP-Adresse (numerisch). 
+</ol>
+Gibt den zugeh&ouml;rigen Hostnamen zur&uuml;ck. Wenn die angegebene IP-Adresse 
+nicht gefunden wurde, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+Im Listenkontext erh&auml;lt man Name, Aliase, Addresstype, L&auml;nge und die
+Adresse. Beispiel:
+<PRE>
+my $addr = inet_aton("127.0.0.1");
+my $Wert  = gethostbyaddr($addr, AF_INET);
+print "$Wert\n";
+</PRE>
+oder auch:
+<PRE>
+my $addr = inet_aton("127.0.0.1");
+($name,$aliases,$atype,$len,$addrs) = gethostbyaddr($addr, AF_INET);
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "Adresse: ".join (".",unpack("C4", $addrs)), "\n";
+</PRE>
+<P>
+
+<H3>gethostbyname - Eintrag mit bestimmtem Hostnamen ermitteln</H3>
+
+Ermittelt die IP-Adresse zu einem bestimmten Hostnamen und erwartet als Parameter
+den gew&uuml;nschten Hostnamen. 
+<P>
+Gibt die zugeh&ouml;rige IP-Adresse bin&auml;r numerisch zur&uuml;ck. 
+Im Listenkontext erh&auml;lt man Name, Aliase, Addresstype, L&auml;nge und die
+Adresse. 
+</PRE>
+<pre>
+my $addr  = gethostbyname("localhost");
+my $Wert = inet_ntoa($addr);
+</pre>
+oder auch:
+<PRE>
+my ($name,$aliases,$atype,$len,$addrs) = gethostbyname("menetekel");
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "Adresse: ".join (".",unpack("C4", $addrs)), "\n";
+</PRE>
+<P>
+
+<H3>getnetbyaddr - Eintrag mit bestimmter IP ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/networks</TT> den Netzwerknamen zu einer 
+bestimmten IP-Adresse und erwartet als Parameter:
+<ol>
+<li>die gew&uuml;nschte IP-Adresse numerisch in bin&auml;rer Schreibweise.
+<LI>den Adresstyp der IP-Adresse (numerisch). 
+</ol>
+Gibt den zugeh&ouml;rigen Netzwerknamen zur&uuml;ck. Wenn die angegebene 
+IP-Adresse nicht gefunden wurde, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+<pre>
+my $addr = inet_aton("127.0.0.0");
+my $Wert  = getnetbyaddr($addr, AF_INET);
+</pre>
+<P>
+
+<H3>getnetbyname - Eintrag mit bestimmtem Netzwerknamen ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/networks</TT> die IP-Adresse zu einem 
+bestimmten Netzwerknamen und erwartet als Parameter den gew&uuml;nschten 
+Netzwerknamen. 
+<p>
+Gibt die zugeh&ouml;rige IP-Adresse bin&auml;r numerisch zur&uuml;ck. 
+<pre>
+my $addr  = getnetbyname("loopback");
+my $Wert = inet_ntoa($addr);
+</pre>
+
+<H3>getprotobyname - Eintrag mit bestimmtem Protokollnamen ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/protocols</TT> die Protokollnummer zu einem 
+bestimmten Protokollnamen. Erwartet als Parameter den gew&uuml;nschten Protokollnamen. 
+<p>
+Gibt die zugeh&ouml;rige Protokollnummer zur&uuml;ck. Wenn der &uuml;bergebene 
+Protokollname nicht gefunden wurde, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+Im Listenkontext erh&auml;lt man Name, Aliase und Protokollnummer:
+<pre>
+my $number = getprotobyname("tcp");
+print "$number\n";
+
+my ($name,$aliases,$number) = getprotobyname("tcp");
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "$number\n";
+</pre>
+
+<H3>getprotobynumber - Eintrag mit bestimmter Protokollnummer ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/protocols</TT> den Protokollnamen zu einer 
+bestimmten Protokollnummer. Erwartet als Parameter die gew&uuml;nschte Protokollnummer. 
+<p>
+Gibt den zugeh&ouml;rigen Protokollnamen zur&uuml;ck. Wenn die &uuml;bergebene 
+Protokollnummer nicht gefunden wurde, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+Im Listenkontext erh&auml;lt man Name, Aliase und Protokollnummer:
+<pre>
+my $number = getprotobynumber(17);
+print "$number\n";
+
+my ($name,$aliases,$number) = getprotobynumber(17);
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "$number\n";
+</pre>
+
+<H3>getpwnam - Eintrag mit bestimmtem Benutzernamen ermitteln</H3>
+Ermittelt zu einem bestimmten Benutzernamen den Eintrag aus der Datei <TT>/etc/passwd</TT>
+den zugeh&ouml;rigen Eintrag. Im skalaren Kontext wird die Benutzernummer (UID) ermittelt, 
+im Listenkontext eine Liste mit bis zu neun Elementen. 
+Erwartet als Parameter den gew&uuml;nschten Benutzernamen. 
+<p>
+Gibt im skalaren Kontext die zugeh&ouml;rige Benutzernummer (UID) und im Listenkontext 
+eine Liste mit allen Daten des Eintrags zur&uuml;ck. Wenn der Benutzername nicht 
+gefunden wurden, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+<PRE>
+print "\nUser-ID: ";
+chop ($login = &lt;STDIN&gt;);
+
+(@pw_info) = (getpwnam("$login"));
+print "\nUserinformationen fuer login: $login\n\n";
+print "Login: $pw_info[0]\n";
+print "Pw (encoded): $pw_info[1]\n";
+print "UserID: $pw_info[2]\n";
+print "GroupID: $pw_info[3]\n";
+print "Kommentar: $pw_info[6]\n";
+print "HomeDir: $pw_info[7]\n";
+print "Shell: $pw_info[8]\n";
+print "\n\n";
+</PRE>
+
+<H3>getpwuid - Eintrag mit bestimmter Benutzernummer ermitteln</H3>
+Ermittelt zu einer bestimmten Benutzernummer (UID) den Eintrag aus der Datei
+<TT>/etc/passwd</TT> den zugeh&ouml;rigen Eintrag. Im skalaren Kontext wird 
+der Benutzername ermittelt, im Listenkontext eine Liste mit bis zu neun Elementen. 
+Erwartet als Parameter die gew&uuml;nschte Benutzernummer (UID). 
+<p>
+Gibt im skalaren Kontext den zugeh&ouml;rigen Benutzernamen und im Listenkontext 
+eine Liste mit allen Daten des Eintrags zur&uuml;ck. Wenn die Benutzernummer 
+nicht gefunden wurden, wird <TT>undef</TT> zur&uuml;ckgegeben. 
+<PRE>
+print "\nUser-ID: ";
+chop ($login = &lt;STDIN&gt;);
+
+(@pw_info) = (getpwuid("$login"));
+print "\nUserinformationen fuer login: $login\n\n";
+print "Login: $pw_info[0]\n";
+print "Pw (encoded): $pw_info[1]\n";
+print "UserID: $pw_info[2]\n";
+print "GroupID: $pw_info[3]\n";
+print "Kommentar: $pw_info[6]\n";
+print "HomeDir: $pw_info[7]\n";
+print "Shell: $pw_info[8]\n";
+print "\n\n";
+</PRE>
+
+<H3>getservbyname - Eintrag mit bestimmtem Portnamen ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/services</TT> die Portnummer zu einem bestimmten 
+Netzwerkdienst und erwartet als Parameter:
+<ol>
+<li>den Namen des gew&uuml;nschten Netzwerkdienstes,
+<li>den Namen des gew&uuml;nschten Protokolls. 
+</ol>
+<p>Gibt die zugeh&ouml;rige Portnummer zur&uuml;ck. Wenn der &uuml;bergebene 
+Netzwerkname oder das Protokoll nicht gefunden wurden, wird <TT>undef</TT> 
+zur&uuml;ckgegeben. 
+Im Listenkontext erh&auml;lt man Name, Aliase, Port und Protokollnummer:
+<pre>
+my $port = getservbyname("www","tcp");
+print "$port\n";
+
+my ($name,$aliases,$port,$number) = getservbyname("www","tcp");
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "Port: $port\n";
+print "Proto: $number\n";
+</pre>
+
+<H3>getservbyport - Eintrag mit bestimmter Portnummer ermitteln</H3>
+Ermittelt aus der Datei <TT>/etc/services</TT> den Namen eines Netzwerkdienstes 
+zu einer bestimmten Portnummer und erwartet als Parameter:
+<ol>
+<li>die gew&uuml;nschten Portnummer,
+<li>den Namen des gew&uuml;nschten Protokolls. 
+</ol>
+Gibt den Namen des zugeh&ouml;rigen Netzwerkdienstes zur&uuml;ck. Wenn die 
+&uuml;bergebene Portnummer oder das Protokoll nicht gefunden wurden, wird 
+<TT>undef</TT> zur&uuml;ckgegeben. 
+Im Listenkontext erh&auml;lt man Name, Aliase, Port und Protokollnummer:
+<pre>
+my $port = getservbyport(80,"tcp");
+print "$port\n";
+
+my ($name,$aliases,$port,$number) = getservbyport(80,"tcp");
+print "Name: $name\n";
+print "Aliases: $aliases\n";
+print "Port: $port\n";
+print "Proto: $number\n";
+</pre>
+
+<H3><TT>IO::Socket::INET</TT> - die Socket-Schnittstelle</H3>
+<TT>IO::Socket::INET</TT> stellt eine Objektschnittstelle bereit, mit der Sockets 
+in der <TT>AF_INET</TT>-Domain erzeugt und verwendet werden k&ouml;nnen. Es baut 
+auf der IO-Schnittstelle auf und erbt alle von <TT>IO</TT> definierten Methoden.
+<P>
+
+<H4>Konstruktor <TT>new( [ARGS] )</TT></H4>
+Erzeugt ein <TT>IO::Socket::INET</TT>-Objekt, das eine Referenz auf ein neu 
+erzeugtes Symbol (beachten Sie hierzu auch das <TT>Symbol</TT>-Paket) darstellt. 
+<TT>new</TT> kann optionale Argumente verarbeiten. Diese Argumente liegen als 
+Schl&uuml;ssel/Wert-Paare vor.<BR>
+Neben den von <TT>IO</TT> akzeptierten Schl&uuml;ssel/Wert-Paaren stellt 
+<TT>IO::Socket::INET</TT> die folgenden zur Verf&uuml;gung:
+<PRE>
+PeerAddr    Adresse des entfernten Hosts   &lt;hostname&gt;[:&lt;port&gt;]
+PeerHost    Synonym f&uuml;r PeerAddr
+PeerPort    Entfernter Port oder Dienst    &lt;service&gt;[(&lt;no&gt;)] | &lt;no&gt;
+LocalAddr   Lokal gebundene Hostadresse    hostname[:port]
+LocalHost   Synonym f&uuml;r LocalAddr
+LocalPort   Lokal gebundener Host-Port     &lt;service&gt;[(&lt;no&gt;)] | &lt;no&gt;
+Proto       Name/Nummer des Protokolls     "tcp" | "udp" | ...
+Type        Socket-Typ                    SOCK_STREAM | SOCK_DGRAM | ...
+Listen      Queue-Gr&ouml;&szlig;e f&uuml;r Listen
+Reuse       Setze SO_REUSEADDR vor Bindung.
+Timeout     Timeout-Wert f&uuml;r verschiedene Operationen
+</PRE>
+Ist <TT>Listen</TT> angegeben, wird ein Listen-Socket erzeugt. Handelt es sich 
+beim Socket-Typ, der aus dem Protokoll abgeleitet wird, hingegen um SOCK_STREAM, 
+dann wird <TT>connect()</TT> aufgerufen.<BR>
+<TT>PeerAddr</TT> kann einen Hostnamen oder eine IP-Adresse der Form "xx.xx.xx.xx" 
+enthalten. <TT>PeerPort</TT> kann eine Zahl oder ein symbolischer Dienstname sein. 
+Dem Servicenamen kann in Klammern eine Zahl folgen, die verwendet wird, wenn das 
+System den Dienst nicht kennt. Auch <TT>PeerPort</TT> kann in <TT>PeerAddr</TT> 
+eingebettet werden, indem man ihm einen ":" voranstellt.<BR>
+Geben Sie <TT>Proto</TT> nicht an, w&auml;hrend Sie einen symbolischen 
+<TT>PeerPort</TT> festlegen, versucht der Konstruktor, <TT>Proto</TT> aus dem 
+Dienstnamen abzuleiten. Als letzter Ausweg wird <TT>Proto</TT> mit "tcp" angenommen. 
+Der <TT>Type</TT>-Parameter wird aus <TT>Proto</TT> abgeleitet, wenn er nicht 
+angegeben wird.<BR>
+Wird dem Konstruktor nur ein einzelnes Argument &uuml;bergeben, wird davon ausgegangen, 
+da&szlig; es sich um <TT>PeerAddr</TT> handelt. Beispiele:
+<PRE>
+$sock = IO::Socket::INET-&gt;new(PeerAddr =&gt; 'www.netzmafia.de',
+                              PeerPort =&gt; 'http(80)',
+                              Proto    =&gt; 'tcp');
+
+$sock = IO::Socket::INET-&gt;new(PeerAddr =&gt; 'localhost:smtp(25)');
+
+$sock = IO::Socket::INET-&gt;new(Listen    =&gt; 5,
+                              LocalAddr =&gt; 'localhost',
+                              LocalPort =&gt; 9000,
+                              Proto     =&gt; 'tcp');
+
+$sock = IO::Socket::INET-&gt;new('127.0.0.1:25');
+</PRE>
+Seit der Version 1.18 ist bei allen <TT>IO::Socket</TT>-Objekten das Autoflushing 
+standardm&auml;&szlig;ig aktiviert. Bei fr&uuml;heren Releases ist das nicht der Fall.
+<P>
+
+<H4>Aktive Methoden</H4>
+Diese Methoden dienen zum Aufbau bzw zur Annahme einer Verbindung. Alle Methoden
+liefern einen Wert zur&uuml;ck.
+<UL>
+<LI><TT>$conn_sock = $listen_socket-&gt;accept()</TT><BR>
+<LI><TT>($conn_sock,$remote_addr) = $listen_socket-&gt;accept()</TT><BR>
+Diese Methode kann nur auf einen Socket im Zustand "listen", also bei einem Server, 
+angewendet werden. Sie liefert f&uuml;r die n&auml;chste Anfrage aus der Warteschlange
+einen konnektierten Socket, der f&uuml;r die Kommunikation mit dem entfernten Host
+verwendet werden kann. Er erbt alle Eigenschaften des Server-Sockets. Im skalaren Kontext
+wird nur der konnektierte Socket geliefert, im Listenkontext zus&auml;tzlich die
+Adresse des entfernten Host im Bin&auml;rformat.
+<P>
+
+<LI><TT>$sock-&gt;connect($port,$host)</TT><BR>
+    <TT>$sock-&gt;bind($port,$host)</TT><BR>
+Im Gegensatz zu den gleichnamigen Methoden unten wird hier eine bequeme M&ouml;glichkeit
+geboten <TT>connect</TT> und <TT>bind</TT>mit Portnummer und der ungepackten Hostadresse
+(dotted quad oder symbolischer Hostname) aufzurufen.
+<P>
+
+<LI><TT>$sock-&gt;shutdown($how)</TT><BR>
+Mit dieser Methode wird ein Socket geschlossen. <TT>shutdown()</TT> besitzt wesentlich
+h&ouml;here "Durchsetzungskraft" als <TT>close()</TT>. Es werden beispielsweise auch
+Sockets geschlossen, von denen offene Kopien in irgendwelchen Kindprozessen existieren.
+Der Parameter <TT>$how</TT> legt fest, was bei bidirektionalen Sockets geschlossen wird:<BR>
+0 : lesenden Socket schlie&szlig;en<BR>
+1 : schreibenden Socket schlie&szlig;en<BR>
+2 : Socket komplett schlie&szlig;en<BR>
+<P>
+
+<LI><TT>$wert = $sock-&gt;sockopt($option_name [,$option_wert])</TT><BR>
+Socketoption erfragen oder setzen. Es handet sich um ein Frontend f&uuml;r <TT>getsockopt()</TT>
+oder <TT>setsockopt()</TT> aus dem Modul <TT>Socket</TT>. Mit einem einzigen (numerischen) 
+Parameter aufgerufen, liefert die Methode den Wert der entsprechenden Option. Wird sie mit
+zwei Parametern aufgerufen, wird der Wert der entsprechenden Option neu gesetzt. In diesem
+Fall liefert die Methode einen Integer-Resultatwert, der &uuml;ber Erfolg oder Mi&szlig;erfolg
+Auskunft gibt.
+<P>
+
+<LI><TT>$sock-&gt;send($data [,$flags,$destination])</TT><BR>
+   <TT>$sock-&gt;recv($data [,$flags,$destination])</TT><BR>
+Frontend f&uuml;r die Funktionen <TT>send()</TT> und <TT>recv</TT>, die haupts&auml;chlich
+f&uuml;r UDP-Verbindungen eingesetzt werden.
+<P>
+
+<LI><TT>$sock-&gt;connect($dest_addr)</TT><BR>
+    <TT>$sock-&gt;bind($my_addr)</TT><BR>
+    <TT>$sock-&gt;listen($max_queue)</TT><BR>
+Diese Aufrufe werden selten verwendet, da sie bereits bei <TT>new</TT> intern aufgerufen
+werden oder komfortablere Varianten besitzen. Sie sind nur vorhanden, falls man die 
+Einstellungen "von Hand" vornehmen will. Man kann z. B. auch so einen Socket erzeugen:
+<PRE>
+$sock = IO::Socket::INET-&gt;new(Proto=&gt;'tcp');
+$dest_addr = sockaddr_in(...); # usw.
+$sock-&gt;connect($dest_addr);
+</PRE>
+</UL>
+<P>
+
+<H4>Informations-Methoden</H4>
+Die folgenden Methoden liefern Informationen &uuml;ber den lokalen und
+den entfernten Host.
+<UL>
+<LI><TT>$sock-&gt;connected()</TT><BR>
+liefert "wahr", falls der Socket eine Verbindung zum entfernten Rechner
+hat - verwendet <TT>peername()</TT>.
+<P>
+
+<LI><TT>$sock-&gt;sockaddr()</TT><BR>
+Gibt den Adre&szlig;-Teil der sockaddr-Struktur des Sockets zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;sockport()</TT><BR>
+Gibt die Portnummer zur&uuml;ck, die das Socket auf dem lokalen Host verwendet.
+<P>
+
+<LI><TT>$sock-&gt;sockhost()</TT><BR>
+Gibt den Adre&szlig;-Teil der sockaddr-Struktur des Sockets in der Form "xx.xx.xx.xx" 
+zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;sockname()</TT><BR>
+gibt nicht den Namen, sondern die gepackte Bin&auml;radresse des lokalen Hosts
+zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;peeraddr()</TT><BR>
+Gibt den Adre&szlig;-Teil der sockaddr-Struktur des Sockets auf dem entfernten Host 
+zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;peerport()</TT><BR>
+Gibt die Portnummer des Sockets auf dem entfernten Host zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;peerhost()</TT><BR>
+Gibt den Adre&szlig;-Teil der sockaddr-Struktur des Sockets auf dem entfernten 
+Host in der Form "xx.xx.xx.xx" zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;peername()</TT><BR>
+gibt nicht den Namen, sondern die gepackte Bin&auml;radresse des entfernten Hosts
+zur&uuml;ck.
+<P>
+
+<LI><TT>$sock-&gt;protocol()</TT><BR>
+    <TT>$sock-&gt;socktype()</TT><BR>
+    <TT>$sock-&gt;sockdomain</TT><BR>
+liefern Basisinformationen &uuml;ber den entsprechenden Socket. Sie k&ouml;nnen
+nicht verwendet werden, um Eigenschaften des Socket zu &auml;ndern.
+</UL>
+<P>
+
+<A NAME="4.2"></A>
+<H2>4.2 Single-Thread-Server und -Client in Perl</H2>
+Ein einfacher Server wurde schon im letzten Kapitel kurz vorgestellt. Diesmal
+soll er genauer betrachtet werden. Der Server "bewacht" den Port 2000, kann also
+auch von jedem Benutzer gestartet werden. Zuerst wird ein neuer Socket f&uuml;r diesen
+Port eingerichtet. Der Parameter "<TT>Reuse</TT>" (sprich "Re-Use") erlaubt die
+sofortige Wiederverwendung des Ports, wenn der Client "aufgelegt" hat. Mit 
+"<TT>Listen</TT>" wird der Standardwert von f&uuml;nf Anfragen in der Warteschlange
+festgelegt. Danach wartet das Programm auf eine Kontaktaufnahme des Clients
+(<TT>$client = $sock-&gt;accept()</TT>). Sobald eine Verbindung steht, meldet der
+Server mit welchem Rechner die Verbindung aufgenommen wurde. Damit es etwas
+kurzweiliger als beim einfachen Echo-Server wird, handelt es sich diesmal um einen
+Ohce-Server, der jede Eingabezeile gespiegelt zur&uuml;ckschickt. Womit auch
+gleich festgelegt w&auml;re, da&szlig; der Server textzeilenorientiert arbeitet.
+Sobald der Client keine Daten mehr liefert (Eingabe Ctrl-D), wird die Verbindung beendet.
+
+<PRE>
+#!/usr/bin/perl
+# tcp-server-st.pl -- Ein Single-threaded-TCP-Server
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 2000;
+my $sock = '';
+my $client = 0;
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+print "Accepting connections on Port ", MYPORT, "...\n";
+
+while ($client = $sock-&gt;accept()) 
+  {
+  # Eine Verbindung ist eingetroffen.
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Echo, das alles umdreht:
+  while (&lt;$client&gt;) 
+    {
+    chomp;
+    print $client scalar(reverse($_)), "\n";
+    }
+  $client-&gt;close() if defined $client;
+  }
+</PRE>
+Solange der Server mit einem Client in Verbindung ist, kann er keine weiteren
+Anfragen entgegennehmen. Sobald dann f&uuml;nf Client-Anfragen in der Warteschlange
+stehen werden weitere Anfragen abgewiesen.
+<P>
+Der Client dazu kann auch zum Testen weiterer Demonstrations-Server verwendet werden.
+Hier ist die Parameterversorgung beim Erzeugen eines neuen Socket etwas anders. Die
+Adresse des zu kontaktierenden Servers und die Portnummer werden &uuml;ber die
+Kommandozeile eingegeben. Statt "<TT>Reuse</TT>" und "<TT>Listen</TT>" werden 
+beim Client das Protokoll (TCP) und ein Timeoutwert &uuml;bergeben. Der Client bricht
+somit nach 5 Sekunden ab, wenn keine Verbindung zustandekommt.<BR>
+Der Client schickt alle Eingabezeilen zum Server. Falls zwischendurch Zeilen vom
+Server angekommen sind, werden Sie entgegengenommen und auf der Standardausgabe
+ausgegeben.
+<PRE>
+#!/usr/bin/perl
+# tcp-client.pl -- Ein einfacher TCP-Client.
+# Verwendung: $0 remote_host remote_port
+
+use strict;
+use IO::Socket;
+
+use constant TIMEOUT =&gt; 5;
+my $sock = '';
+my $reply = '';
+
+$sock = new IO::Socket::INET(PeerAddr =&gt; $ARGV[0],
+			     PeerPort =&gt; $ARGV[1],
+			     Proto    =&gt; 'tcp', Timeout =&gt; TIMEOUT)
+    or die "can't connect to $ARGV[0]:$ARGV[1]: $@\n";
+
+while (&lt;STDIN&gt;) 
+  {
+  print $sock $_;
+  last unless defined($reply = &lt;$sock&gt;);
+  print "&gt;&gt; $reply";
+  }
+
+$sock-&gt;close() if defined $sock;
+</PRE>
+
+Der Nachteil des Single-Thread-Servers besteht haupts&auml;chlich darin,
+da&szlig; keine neuen Clientanfragen entgegengenommen werden, solange der
+Server noch mit einem anderen Partner kommuniziert. Das Problem l&ouml;st 
+die folgende Erweiterung.
+<P>
+
+
+<A NAME="4.3"></A>
+<H2>4.3 Multi-Thread-Server und -Client in Perl</H2>
+Der folgende Server bedient die Anfragen nicht selbst, sondern erzeugt f&uuml;r
+jede Anfrage einen Kindproze&szlig;, der sich dann dem Client widmet. Der Vorteil 
+liegt darin, da&szlig; der Server selbst sofort wieder auf dem Port lauschen kann,
+f&uuml;r den er zust&auml;ndig ist. Wie schon besprochen, mu&szlig; daf&uuml;r
+gesorgt werden, da&szlig; keine Zombies zur&uuml;ckbleiben. Dazu wird das schon
+bekannte Schema mittels Signal-Handler verwendet. Gegen&uuml;ber dem vorhergehenden
+Server neu ist nur der <TT>fork()</TT>-Aufruf. Da ein Kindproze&szlig; alles
+vom Elternproze&szlig; erbt, kann der Kindproze&szlig; auch weiter &uuml;ber
+die von <TT>accept()</TT> ge&ouml;ffnete Socketverbindung mit dem Client 
+kommunizieren. Wenn sich der Kindproze&szlig; beendet,
+wird der Signalhandler aufgerufen. Er schlie&szlig;t den Socket und nimmt
+den Return-Wert des Kindes entgegen.
+<PRE>
+#!/usr/bin/perl
+# tcp-server-mt.pl -- Ein Multithreaded-TCP-Server
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 2000;
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+# Zombies verhindern
+$SIG{'CHLD'} = sub { wait();  $client ->close; };
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    # Echo, das alles umdreht:
+    while (&lt;$client&gt;) 
+      {
+      chomp;
+      print $client scalar(reverse($_)), "\n";
+      }
+    }
+  }
+</PRE>
+<P>
+Kommuniziert der erste Eigenbau-Client mit einem Server, der mehrere Zeilen
+zur&uuml;ckliefert, geht anscheinend irgendetwas schief. Der folgende Versuch,
+mit einem FTP-Server zu kommunizieren geht beim Login noch gut, aber danach
+wird die Kommunikation asynchron. Die Ausgaben des help-Befehls kommen nur Zeile
+f&uuml;r Zeile und man mu&szlig; nach jeder Zeile die Enter-Taste dr&uuml;cken.
+Danach werden vom FTP-Server die leeren Eingaben mit einer Fehlermeldung quittiert:
+<PRE>
+plate@atlas:~/server &gt; perl tcp-st-client.pl localhost 21
+user plate
+&gt;&gt; 331 Password required for plate.
+pass Tralala
+&gt;&gt; 230 User plate logged in.
+help
+&gt;&gt; 214-The following commands are recognized (* =&gt;'s unimplemented).
+
+&gt;&gt;    USER    PORT    STOR    MSAM*   RNTO    NLST    MKD     CDUP 
+
+&gt;&gt;    PASS    PASV    APPE    MRSQ*   ABOR    SITE    XMKD    XCUP 
+
+&gt;&gt;    ACCT*   TYPE    MLFL*   MRCP*   DELE    SYST    RMD     STOU 
+
+&gt;&gt;    SMNT*   STRU    MAIL*   ALLO    CWD     STAT    XRMD    SIZE 
+
+&gt;&gt;    REIN*   MODE    MSND*   REST    XCWD    HELP    PWD     MDTM 
+
+&gt;&gt;    QUIT    RETR    MSOM*   RNFR    LIST    NOOP    XPWD 
+
+&gt;&gt; 214 Direct comments to root@localhost.
+quit
+&gt;&gt; 500 '': command not understood.
+
+&gt;&gt; 500 '': command not understood.
+
+&gt;&gt; 500 '': command not understood.
+
+&gt;&gt; 500 '': command not understood.
+</PRE>
+Der Client mu&szlig; die Ausgaben vom Server getrennt von den eigenen Eingaben
+behandeln. Wenn mehrere Zeilen vom Server zur&uuml;ckkommen, m&uuml;ssen auch
+mehrere Zeilen lokal angezeigt werden. Es gibt nur ein Problem: Das Ende der
+gesamten Kommunikation kann erkannt werden, aber nicht das Ende einer momentanen
+Ausgabe. Daher trennen wir auch beim Client die Kommunikation in zwei Prozesse
+auf. Der Elternproze&szlig; &uuml;bernimmt ausschlie&szlig;lich das Senden
+der Eingaben zum Server. Der Kindproze&szlig; sorgt f&uuml;r die Ausgabe
+der Zeilen, die vom Server kommen. Nun treten keine Asynchronit&auml;ten mehr auf.
+<PRE>
+#!/usr/bin/perl
+# tcp-mtclient.pl -- Ein multithreaded interaktiver TCP-Client.
+# Verwendung: $0 remote_host remote_port
+
+use strict;
+use IO::Socket;
+
+my $sock = '';
+
+use constant TIMEOUT =&gt; 5;
+$sock = new IO::Socket::INET(PeerAddr =&gt; $ARGV[0],
+			     PeerPort =&gt; $ARGV[1],
+			     Proto    =&gt; 'tcp', Timeout =&gt; TIMEOUT)
+    or die "can't connect to $ARGV[0]:$ARGV[1]: $@\n";
+
+# An dieser Stelle teilen wir mit fork() in zwei Prozesse auf:
+if (fork()) # == 0 --&gt; Kind
+  {
+  # Der Kindprozess: Server -&gt; Mensch
+  while (&lt;$sock&gt;) { print $_; }
+  $sock-&gt;close() if defined $sock;
+  die "server closed connection.\n";
+  } 
+else 
+  {
+  # Der Elternprozess: Mensch -&gt; Server
+  while (&lt;STDIN&gt;) { print $sock $_; }
+  $sock-&gt;close();    # fertig, aufhaengen!
+  wait();
+  }
+</PRE>
+Man kann den gleichen Effekt auch Resourcen-schonender erreichen, indem man
+<TT>IO::Select</TT> verwendet. Der Client pr&uuml;ft nun bei allen in
+<TT>$select</TT> eingetragenen Handles, ob Daten vorliegen und so kann
+das Programm die Daten unabh&auml;ngig voneinander bearbeiten.
+<PRE>
+#!/usr/bin/perl
+
+# Ein single-threaded interaktiver TCP-Client.
+# Benutzt nur einen Prozess, aber IO::Select.
+# Verwendung: $0 remote_host remote_port
+
+use IO::Socket;
+use IO::Select;
+use strict;
+
+my ($socket, $select, $handle);
+my @ready = ();
+
+$sock = new IO::Socket::INET(PeerAddr =&gt; $ARGV[0] 
+                             PeerPort =&gt; $ARGV[1],
+                             Proto    =&gt; 'tcp', 
+                             Timeout  =&gt; 5)
+    or die "can't connect to $ARGV[0]:$ARGV[1]: $@\n";
+
+$select = IO::Select-&gt;new();
+
+$select-&gt;add($sock);
+$select-&gt;add(\*STDIN);
+
+while (@ready = $select-&gt;can_read()) 
+  {
+  foreach $handle (@ready) 
+    {
+	last unless defined($reply = &lt;$handle&gt;);
+	if ($handle == $sock) { print $reply; } 
+	else                  { print $sock $reply; }
+    }
+  }
+$sock-&gt;close();    # fertig, aufhaengen!
+</PRE>
+<P>
+
+<H3>Der erste HTTP-Server</H3>
+Nun soll der Server f&uuml;r Anfragen auf dem HTTP-Port verwendet werden.
+Der erste Server ist recht einfach gehalten, denn er sendet nur eine
+Fehlermeldung ("Not found"). Trozdem sind schon Kenntnisse des HTTP-Protokolls
+und gegebenenfalls HTML-Kenntnisse erforderlich. Wie so viele h&ouml;here
+Protokolle ist auch HTTP recht einfach gehalten. Jede Nachricht (vom Client an
+den Server wie auch vom Server an den Client) besteht aus einem Header und
+einem Body, die durch eine Leerzeile voneinander getrennt sind (deshalb mu&szlig; 
+man beim Testen per Telnet-Programm auch eine Leerzeile eingeben, ehe der
+Server reagiert). Unser Serverprogramm von oben wurde nur leicht ver&auml;ndert:
+Der Port ist nun 8080. Der Server nimmt nach Verbindungaufbau die Anfrage des
+Client entgegen und gibt sie zur Kontrolle auf dem Bildschirm aus. Da der
+Socket vom Client nicht geschlossen wird, k&ouml;nnen wir nur an der Leerzeile
+erkennen, wann die Anfrage zuende ist. Da man auch nicht wissen kann, ob nur ein 
+Newline-Zeichen oder Carriage-Return und Newline geschickt werden, geht man
+davon aus, da&szlig; Zeilen mit weniger als zwei Zeichen L&auml;nge, Leerzeilen sind.
+Danach schickt der Server erst den Header:
+<PRE>
+HTTP/1.0 404 Not Found
+Server: Tralala 1.0
+Content-Type: text/html
+Connection: close
+</PRE>
+gefolgt von einer Leerzeile. Anschlie&szlig;end wird auch noch die Fehlermeldung
+als Mini-Webdokument geschickt und danach die Verbindung beendet.
+<PRE>
+#!/usr/bin/perl
+# Ein Mini-Webserver: Nur Fehlermeldung
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 8080;
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    $client-&gt;autoflush;
+    my ($dummy);
+    # Gaaaaaanz einfacher Webserver
+    # Eingabe wird ignoriert, aber ausgegeben
+    do
+      {
+      chomp($dummy = &lt;$client&gt;);
+      print "$dummy\n";
+      }
+      while(length($dummy) &gt; 1);
+    print $client "HTTP/1.0 404 Not Found\n";
+    print $client "Server: Tralala 1.0\n";
+    print $client "Content-Type: text/html\n";
+    print $client "Connection: close\n";
+    print $client "\n";
+    print $client "&lt;html&gt;&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;\n";
+    print $client "&lt;body&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;\n";
+    print $client "&amp;Auml;tschib&amp;auml;tsch!\n";
+    print $client "&lt;/body&gt;&lt;/html&gt;\n";
+    print "*** FERTIG ***\n";
+    $client -&gt;close;
+    }
+  }
+</PRE>
+Leider hat dieser Webserver noch einen Nachteil. Nach jedem Connect von einem Client bleibt ein Zombie
+zur&uuml;ck - denn der Elternproze&szlig; hat vergessen, das Signal CHLD vom Kindproze&szlig; anzunehmen.
+Deshalb wird auch hier der schon aus dem letzten Kapitel bekannte Signalhandler eingebaut:
+<PRE>
+#!/usr/bin/perl
+# Ein Mini-Webserver: Nur Fehlermeldung
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 8080;
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+$SIG{'CHLD'} = sub { wait(); };    # Zombies verhindern
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    $sock->close; # not needed in child
+    $client-&gt;autoflush;
+    my ($dummy);
+    # Gaaaaaanz einfacher Webserver
+    # Eingabe wird ignoriert, aber ausgegeben
+    do
+      {
+      chomp($dummy = &lt;$client&gt;);
+      print "$dummy\n";
+      }
+      while(length($dummy) &gt; 1);
+    print $client "HTTP/1.0 404 Not Found\n";
+    print $client "Server: Tralala 1.0\n";
+    print $client "Content-Type: text/html\n";
+    print $client "Connection: close\n";
+    print $client "\n";
+    print $client "&lt;html&gt;&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;\n";
+    print $client "&lt;body&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;\n";
+    print $client "&amp;Auml;tschib&amp;auml;tsch!\n";
+    print $client "&lt;/body&gt;&lt;/html&gt;\n";
+    print "*** FERTIG ***\n";
+    $client -&gt;close;
+    }
+  $client -&gt;close; # not needed in parent   
+  }
+</PRE>
+Dieser Server l&auml;&szlig;t sich recht einfach so erweitern, da&szlig; die
+vom Client gew&uuml;nschte HTML-Datei geschickt wird. Dazu wird im Server
+ein Startverzeichnis festgelegt, das f&uuml;r die Anfragen der Clients das
+Wurzelverzeichnis bildet. Deshalb werden beim Auswerten der Anfrage auch URLs
+der Form "<TT>../../..</TT> usw. verhindert. Die Anfragezeile selbst hat
+den Aufbau
+<PRE>
+GET dateiname HTTP/1.x
+</PRE>
+Der Dateiname l&auml;&szlig;t sich recht einfach aus dieser Zeile herausziehen.
+Ist die angegebene Datei vorhanden, wird sie gesenden, andernfalls erfolgt die 
+Fehlermeldung 404.
+<PRE>
+#!/usr/bin/perl
+# Ein Mini-Webserver - Dateiausgabe, aber nur Text
+
+use strict;
+use IO::Socket;
+
+# Port waehlen
+use constant MYPORT =&gt; 8080;
+
+# Startdirectory (Server-Root) festlegen
+my $startdir = '/home/plate/server/';
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+$SIG{'CHLD'} = sub { wait(); };    # Zombies verhindern
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    my ($input, $get, $file);
+    $sock->close; # not needed in child
+    $client-&gt;autoflush;
+    # Gaaaaaanz einfacher Webserver
+    # Eingabe wird untersucht und ausgegeben
+    do
+      {
+      chomp($input = &lt;$client&gt;);
+      print "$input\n";
+      $get = $input if ($input =~ /GET/);
+      }
+      while(length($input) &gt; 1);
+    # Aus der GET-Zeile Dateinamen extrahieren
+    $get =~ /GET ([^ ]*) HTTP/;
+    $file= "$1";
+    $file = $file . 'index.html' if ($file =~ /\/$/);
+    $file =~ s/^\///g;          # '/' am Anfang weg
+    $file =~ s/\.\.\///g;       # URLS der Form '../../' unterbinden
+    $file = $startdir . $file;  # Server-Root davor setzen
+    print "Senden $file\n";
+
+    # Datei oeffnen und zum Client schicken.
+    if (!open(DATEI,"$file"))
+      {
+      print $client "HTTP/1.0 404 Not Found\n";
+      print $client "Server: Tralala 1.0\n";
+      print $client "Content-Type: text/html\n";
+      print $client "Connection: close\n";
+      print $client "\n";
+      print $client "&lt;html&gt;&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;\n";
+      print $client "&lt;body&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;\n";
+      print $client "&lt;/body&gt;&lt;/html&gt;\n";
+      print "*** FERTIG **\n";
+      $client -&gt;close;
+      }
+    else
+      {
+      print $client "HTTP/1.0 200 OK\n";
+      print $client "Server: Tralala 1.0\n";
+      print $client "Content-Type: text/html\n";
+      print $client "Connection: close\n";
+      print $client "\n";
+      print $client $_ while(&lt;DATEI&gt;);
+      close(DATEI);
+      print "*** FERTIG **\n";
+      $client -&gt;close;
+      }
+    }
+  $client -&gt;close; # not needed in parent   
+  }
+</PRE>
+Da dieser Server zeilenorientiert arbeitet, k&ouml;nnen keine Bilder oder
+andere Multimedia-Inhalte gesendet werden. Dieser Mangel ist aber relativ
+leicht zu beheben. Aber auch dann sind die beiden Webserver noch nicht f&uuml;r
+eine Produktionsumgebung, sondern nur f&uuml;r Tests und Demonstrationen geeignet.
+<P>
+Au&szlig;erdem wird davon ausgegangen, da&szlig; die Kindprozesse in der Reichenfolge
+beendet werden, in der sie kreiert wurden, da sonst der einfache Signalhandler nicht
+funktioniert und wieder Zombies entstehen. Man mu&szlig; also eine Proze&szlig;verwaltung
+einrichten, wie es schon im vorhergehenden Kapitel gezeigt wurde. Einen Server, der dies
+macht, finden Sie bei den Beispielen als <A HREF="beispiele/webserver3.pl">webserver3.pl</A>.
+<P>
+
+<H3>Weitere Server</H3>
+Der folgende Server ist ein Spa&szlig;-Server mit leicht ernstem Hintergrund. Erinnern 
+Sie sich noch an das Keks-Monster-Programm unter MS-DOS. Es verlangte dauern Kekse 
+("Ich will KEKSE!") und h&ouml;rte erst auf, wenn man ihm welche gab, indem man das 
+Wort "KEKSE" eintippte. Diesmal ist es kein Programm, sondern ein Server, der KEKSE 
+verlangt. Man k&ouml;nnte ihn beispielsweise auf Port 23 legen statt auf Port 2300.
+Der Server produziert f&uuml;r jede Anfrage einen Kindproze&szlig;, weil davon auszugehen
+ist, da&szlig; der Dialog mit dem Benutzer l&auml;nger dauert. Das Quittieren des
+Todes eines Kindes ist ebenfalls integriert. Au&szlig; ist das der erste Server, der
+einen Hauch von Protokoll implementiert: 
+<OL>
+<LI>Sende "Ich will KEKSE".
+<LI>Lies eine Zeile vom Client und pr&uuml;fe sie auf das Wort "KEKSE".
+<LI>Fall ja, sende "Mampf, Mampf...." und beende, andernfalls gehe zu 1.
+</OL>
+<P>
+<PRE>
+#!/usr/bin/perl
+# Keks-Monster
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 2300;
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+$SIG{'CHLD'} = sub { wait(); };    # Zombies verhindern
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    $sock-&gt;close; # not needed in child
+    # Das Monster in Aktion
+    print $client "Ich will KEKSE!\n";
+    while (&lt;$client&gt;) 
+      {
+      chomp;
+      if ($_ =~ /KEKSE/)
+        {
+        print $client "\nMampf, Mampf....\n\n";
+        $client-&gt;close;
+        }
+      print $client "Ich will KEKSE!\n";
+      }
+    }
+   $client-&gt;close; # not needed in parent
+   }
+</PRE>
+<P>
+Der folgende Server ist etwas anspruchsvoller. Er liefert, wie das UNIX-Programm
+<TT>fortune</TT>, einen mehr oder weniger coolen Spruch. Dazu wird das 
+<TT>fortune</TT>-Programm in Perl nachempfunden. In der Datei
+<TT>/usr/share/fortune/fortunes</TT> stehen die meist mehrzeiligen Spr&uuml;che
+und sind jeweils durch eine Zeile getrennt, die nur ein %-Zeichen enth&auml;lt.
+Deshalb wird beim Zugriff auf die Datei der Zeilentrenner mit <TT>$/ = "\n%\n"</TT>
+umdefiniert. So kann ein mehrzeiliger Text in eine skalare Stringvariable eingelesen
+und auf einmal an den Client gesendet werden. Nach der Ausgabe des Cookies wird
+die Verbindung sofort beendet.
+<PRE>
+#!/usr/bin/perl
+# Fortune-Server
+
+use strict;
+use IO::Socket;
+
+use constant MYPORT =&gt; 2000;
+my $sock = '';
+my $client = '';
+
+$sock = new IO::Socket::INET(LocalPort =&gt; MYPORT,
+		             Reuse     =&gt; 1,
+		             Listen    =&gt; 5)
+    or die "can't create local socket: $@\n";
+
+$SIG{'CHLD'} = sub { wait(); };    # Zombies verhindern
+
+print "Accepting connections on Port ", MYPORT, "...\n";
+while ($client = $sock-&gt;accept()) 
+  {
+  # Verbindung ist aufgebaut
+  print "Accepted connection from ",
+        $client-&gt;peerhost(), ":", $client-&gt;peerport(), "\n";
+
+  # Erzeugen eines Kindprozesses und Uebergabe an $client.
+  if (fork() == 0) # Kindprozess 
+    {
+    $sock-&gt;close; # not needed in child
+    # Jetzt kommt der Spruch
+    $/ = "\n%\n";
+    my ($data,$cookie);
+
+    $data = '/usr/share/fortune/fortunes';
+    srand($$);
+    open(KEKS,"$data") || die "Keine Kekse\n";
+    rand($.) &lt; 1 && ($cookie = $_) while &lt;KEKS&gt;;
+    $cookie =~ s/%$//;
+    print $client "\n$cookie\n";
+    close(KEKS);
+    $client-&gt;close;
+    }
+   $client-&gt;close; # not needed in parent
+   }
+</PRE>
+<P>
+
+<H3>Ein Timeserver-Proxy</H3>
+"Proxy" hei&szlig;t "Stellvertreter". Der folgende Server wird als ein Stellvertreter 
+f&uuml;r einen anderen Server arbeiten und dabei gleich auch noch das Protokoll umsetzen.
+<P>
+RFC 867 behandelt die Spezifikation des Protokolls "daytime", das sowohl &uuml;ber 
+TCP/IP als auch &uuml;ber UDP auf dem Port 13 abgewickelt wird. F&uuml;r die Syntax 
+des zur&uuml;ckgegebenen Daytime-Strings gibt es keine allgemeinen Regeln, dieser 
+String ist von Server zu Server unterschiedlich und kann beispielsweise das Format
+<PRE>
+Tag Monat Jahr Stunde:Minute:Sekunde
+</PRE>
+besitzen. Au&szlig;er dem Service "daytime" gibt es noch einen Dienst "time" 
+welcher ebenfalls &uuml;ber TCP/IP im Internet von einigen Servern zur 
+Verf&uuml;gung gestellt wird. Hier wird die genaue Zeit im Bin&auml;rformat auf 
+Port 37 zur&uuml;ckgegeben. 
+<p>
+Das folgende Perl-Script liefert die Systemzeit des lokalen Rechners im Klartext.
+<PRE>
+#!/usr/bin/perl
+# Ein einfacher Daytime-Server
+
+use IO::Socket;
+
+my $serversock = new IO::Socket::INET (
+                   LocalPort =&gt; 13,
+                   Listen    =&gt; $SOMAXCONN,
+                   Proto     =&gt; 'tcp',
+                   Reuse     =&gt; 1) || die "$!\n";
+
+# In der Schleife auf eingehende Verbindungen warten... 
+print "Accepting connections on Port 13...\n";
+
+while (my $clientsock = $serversock-&gt;accept() ) 
+  {
+  my $cur_time = localtime(time);
+  print $clientsock "$cur_time\n";
+  $clientsock-&gt;close() if defined $clientsock;
+  }
+</pre>
+Das war nicht weiter interessant, denn es handelt sich nur um eine leichte Modifikation
+des allerersten Servers. Interessanter wird es dagegen, wenn die Uhrzeit nicht vom lokalen
+Server geholt wird, sondern von einem Server, der die Zeit einer Atomuhr bezieht (oder von
+einem Server, der seinerseits auf die Atomzeit zugreift). Solche "Timeserver" liefern die 
+Uhrzeit jedoch im Bin&auml;rformat - und auch nicht zur Basis des 1.1.1970 0 Uhr GMT (die 
+UNIX-Epoche), sondern zur Basis 1.1.1900 0 Uhr GMT. <BR>
+Beim Zugriff auf einen solchen Server sind somit folgende Schritte notwendig:
+<OL>
+<LI>Aktuellen Bin&auml;rwert holen und in eine "Perl-Zahl" entpacken.
+<LI>Die Anzahl Sekunden zwischen 1.1.1970, 0 Uhr GMT und 1.1.1900, 0 Uhr GMT subtrahieren
+    (das sind nach RFC 868 genau 2'208'988'800 Sekunden).
+<LI> Das Ergebnis in einen Datumsstring f&uuml;r "Daytime" umwandeln.
+</OL>
+Genau das macht das folgende Programm. Sobald es als Daytime-Server auf Port 13 angesprochen 
+wird, er&ouml;ffnet es seinerseits eie Verbindung zum Zeitserver auf Port 37 und holt
+als Time-Client die Zeit. Danach erfolgt die Konvertierung und der Client bekommt
+seine Uhrzeit.
+<P>
+Damit stellt dies Programm nicht mehr einen einfachen Server dar, sondern hat 
+Proxy-Funktion. Es wird nicht nur die Anfrage an einen anderen Rechner 
+weitergereicht, sondern auch zwei verschiedene (wenn auch sehr einfache) Protokolle 
+implementiert. Da es sich trotz aller Einfacheit um h&ouml;here Protokolle handelt,
+wird hiermit auch das Prinzip eines Gateways demonstriert.
+<pre>
+#!/usr/bin/perl
+# Script baut eine Verbindung zum ausgewaehlten "Zeitserver" auf
+# und liefert dann die genaue Uhrzeit an den Client
+
+use IO::Socket;
+use strict;
+
+# Clientport und Serverport
+use constant CLPORT =&gt; 13;
+use constant SVPORT =&gt; 37;
+
+# Differenz zwischen 1.1.1900 (Time-Server) 
+# und 1.1.1970 (UNIX-Epoche)
+use constant KORR =&gt; 2208988800;
+
+# Mein Zeitserver
+my $hostname = "ptbtime1.ptb.de"; # Timeserver der Physikalisch-Technischen
+#       oder    ptbtime2.ptb.de   # Bundesanstalt in Braunschweig                                  
+
+my $serversock = new IO::Socket::INET (
+                   LocalPort =&gt; CLPORT,
+                   Listen    =&gt; 5,
+                   Proto     =&gt; 'tcp',
+                   Reuse     =&gt; 1)
+     or die "can't create local socket: $@\n";
+
+# In der Schleife auf eingehende Verbindungen warten... 
+print "Accepting connections on Port ", CLPORT, "...\n";
+
+while (my $clientsock = $serversock-&gt;accept() ) 
+  {
+  my $cur_time = &amp;get_time;
+  print $clientsock "$cur_time\n";
+  $clientsock-&gt;close() if defined $clientsock;
+  }
+
+# Zeit vom anderen Server holen
+sub get_time
+  {
+  my ($binarytime, $servertime);
+  my $ts_sock = new IO::Socket::INET (
+                      PeerAddr =&gt; $hostname,
+                      PeerPort =&gt; SVPORT,
+                      Proto    =&gt; 'tcp')
+       or die "can't create local socket: $@\n";
+
+  read($ts_sock,$binarytime,4);
+  $ts_sock-&gt;close();
+  $servertime = unpack('N',$binarytime);
+  $servertime = localtime($servertime - KORR);
+  return "$servertime";
+  }
+</pre>
+<P>
+
+<H3>Preforking</H3>
+Ist damit zu rechnen, da&szlig; die Serverlast st&auml;ndig recht hoch ist
+(z. B. bei einem WWW-Server), kann es sinnvoll sein, schon beim Start des
+Serverprozesses einige Kundprozesse zu starten. So wird bei mehreren gleichzeitigen
+Anfragen die Zeit zum Starten der Kindprozesse gespart und die Performance
+des Systems gesteigert. Eine &uuml;bliche L&ouml;sung ist das sogenannte
+"preforking", wobei der Serverproze&szlig; gleich eine Anzahl von Kindprozessen
+startet und jeder dieser Kindprozesse individuell einen <TT>accept()</TT>-Aufruf.
+Jeder Kindproze&szlig; behandelt dann ein eingehende Anfrage und kann entweder
+endlos weiterlaufen oder sich beenden. Der urspr&uuml;ngliche Elternproze&szlig;
+&uuml;berwacht alle laufenden Kindprozesse und startet gegebenenfalls neue, wenn
+sich die Kinder beenden. Au&szlig;erdem mu&szlig; er beim Herunterfahren des
+Serverdienstes auch alle Kinder beenden. Prinzipiell stellt sich der Ablauf
+folgenderma&szlig;en dar:
+<PRE>
+for (1..ANZ_PREFORK)
+  {
+  $child = fork();
+  next if ($child != 0); # Elternprozess macht nix
+  do_child($child);       # Ablauf Kindprozess
+  exit(0);                # Ende Kindprozess
+  }
+
+sub do_child
+  {
+  my $socket = shift;
+  my $connection_count = 0;
+  while ($ch = $socket->accept())
+    {
+    handle_connection($ch);
+    $ch->close();
+    }
+  }
+</PRE>
+Eine reale Implemetierung erfordert jedoch noch die Beachtung (und
+programmtechnische Realisierung) vieler Details und gestaltet sich relativ komplex.
+<P>
+
+<H3>Einen D&auml;mon erzeugen</H3>
+D&auml;monen sind Prozesse, die sich vom steuernden Terminal abkoppeln und 
+im Hintergrund weiterlaufen. Beim Start versetzt sich der D&auml;mon selbst
+in den Hintergrund und koppelt sich vom steuernden Terminal ab. Ein D&auml;mon
+reagiert auch nicht auf ein HUP-Signal uns l&auml;uft so weiter, auch wenn
+sich der startende Proze&szlig; beendet. Ausserdem mu&szlig; ein richtiger
+D&auml;mon noch mehr tun:
+<UL>
+<LI>das Rootverzeichnis als aktuelles Verzeichnis w&auml;hlen, da der
+Start ja auch von einem unmountbarem Verzeichnis aus erfolgen k&ouml;nnte,
+<LI>umask auf einen bekannten Wert &auml;ndern,
+<LI>die PATH-Variable anpassen,
+<LI>Proze&szlig;-ID in einer Datei in <TT>/var/run/</TT> ablegen,
+<LI>gegebenenfalls Logging initialisieren (Logfile oder Syslog-Mechanismus),
+<LI>gegebenenfalls Signalhandler einrichten (z. B. HUP f&uuml;r einen Restart)
+<LI>gegebenenfalls Konfigurationsdatei einlesen und verarbeiten,
+<LI>gegebenenfalls User- und Gruppen-ID &auml;ndern (z. B. von <I>root</I> 
+auf <I>nobody</I>),
+<LI>gegebenenfalls mit <TT>chroot()</TT> eine gesch&uuml;tzte Umgebung schaffen.
+</UL>
+Ganz einfache D&auml;monen lassen sich fast so simpel erzeugen, wie ein 
+Multi-Thread-Server:
+<pre>
+#!/usr/bin/perl
+
+$|=1;
+use strict;
+
+my ($pid, $i);
+
+$pid = fork();
+die "cannot fork: $!\n" if ($pid == -1);
+
+# Parent beendet sich
+if ($pid &gt; 0)
+  {
+  print "Parent exits\n";
+  exit(0);
+  }
+
+# Kindprozess wird von init adoptiert
+chdir "/tmp" or die "could not chdir to /tmp: $!\n";
+
+for($i = 0; $i &lt; 100; $i++)
+  {
+  print "This is the Daemon.\n";
+  sleep(5);
+  }
+</pre>
+Der wesentliche Punkt ist, da&szlig; der Parent terminiert, so da&szlig; der 
+Kindproze&szlig; von Init adoptiert wird und im Hintergrund weiterl&auml;uft. 
+Der <TT>chdir</TT>-Aufruf setzt das aktuelle Verzeichnis in diesem Fall 
+auf das <TT>/tmp</TT>-Verzeichnis. Wenn man bei obigem Beispiel 
+die Shell beendet, in welche die D&auml;mon-Ausgaben laufen, l&auml;uft der D&auml;mon 
+im Hintergrund weiter; die <TT>print</TT>-Aufrufe w&uuml;rden dann Fehler liefern. 
+Im Beispiel st&ouml;rt das nicht, korrekterweise m&uuml;&szlig;te man die drei
+Standard-Dateihandles (<TT>stdin, stdout, stderr</TT>) im Kindproze&szlig; 
+schlie&szlig;en. 
+<P>
+Das folgende Unterprogramm erledigt einige weitere Aufgaben und eignet sich
+daher schon besser f&uuml;r den Praxiseinsatz. Die POSIX-kompatible Funktion
+<TT>setsid()</TT> kreiert jeweils neue neue Session- und Proze&szlig;-Gruppe
+und macht den aktuellen Proze&szlig; zum Session-Leader (wird an dieser Stelle
+nicht vertieft). Gleichzeitig wird der Proze&szlig; komplett vom steuernden
+Terminal getrennt. Amschlie&szlig;end werden die Standarddateien wieder 
+ge&ouml;ffnet, aber dabei auf <TT>/dev/null</TT> umgeleitet. So werden 
+eventuelle Schreib- und Leseversuche von Subprozessen vernichtet. Man kann
+sie aber auch mittels <TT>close(\*STDIN); close(\*STDOUT); close(\*STDERR);</TT>
+komplett schlie&szlig;en.
+<PRE>
+use POSIX 'setsid';
+
+sub become_daemon # ()
+  {
+  my $child = fork();
+  unless (defined($child)) die "Cannot fork!\n";
+  exit(0) if ($child &gt; 0);      # Eltenprozess beendet sich
+  make_pidfile(PIDFILE,$$);         # Pid-Datei anlegen (s. u.)
+  setsid();                         # Abtrennen
+  open(STDIN, "&lt;/dev/null");     # Standarddateien umlenken
+  open(STDOUT, "&gt;/dev/null");
+  open(STDERR, "&gt;&amp;STDOUT");
+  chdir('/');                       # Arbeitsverzeichnis /
+  umask(0);                         # UMASK definieren
+                                    # Pfad definiert setzen:
+  $ENV{PATH} = '/bin; /sbin; /usr/bin; /usr/sbin;';
+  return $$;
+  }
+</PRE>
+Die zweite hier vorzustellende Funktion legt eine Datei mit der Proze&szlig;-ID
+des D&auml;mons an, damit er leicht leicht mit dem Kommando
+<PRE>
+kill -TERM `cat /var/run/server.pid`
+</PRE>
+beendet werden kann. Der D&auml;mon sollte dann die Datei <TT>server.pid</TT>
+auf jeden Fall noch l&ouml;schen, bevor er sich beendet. Die Funktion trifft 
+gegebenfalls auf eine noch vorhandene pid-Datei. Dann l&auml;uft entweder noch
+ein Serverproze&szlig; oder ein fr&uuml;herer Serverproze&szlig; ist abgest&uuml;rzt,
+ohne die Datei zu l&ouml;schen. Durch den Aufruf "<TT>kill 0 prozessnummer</TT>"
+kann festgestellt werden, ob es noch einen laufenden Proze&szlig; mit dieser Nummer 
+gibt und damit arbeitet die Funktion recht intelligent:
+<PRE>
+sub make_pidfile # (dateiname, newpid)
+  {
+  my $filename = shift;
+  my $newpid = shift;
+  if (-e $filename)  # Datei schon vorhanden
+    {
+    open PID "&lt;$filename";
+    my $pid = &lt;PID&gt;;
+    close PID;
+    # gibt's den Server noch?
+    die "Server already running ($pid)\n" if kill 0 =&gt; $pid;
+    # Hier ggf. noch nachsehen, ob der Prozess auch ein alter
+    # Serverprozess ist und nicht zufaellig ein anderer Prozess
+    # diese Prozessnummer besitzt
+    # Nun die alte Datei platt machen
+    unlink $filename || die "Cannot delete $filename\n";
+    }
+  # Neue Datei anlegen und Zugriffsrechte setzen
+  open PID "&gt;$filename";
+  print PID $newpid;
+  close PID;
+  chmod(644 $filename);
+  }
+</PRE>
+Im Hauptprogramm sind dann nur noch einige Aufrufe und Festlegungen
+n&ouml;tig:
+<PRE>
+# Namen der PID-Datei festlegen
+use constant PIDFILE =&gt; '/var/run/myserver.pid';
+
+# Exit-Handler setzen
+$SIG{TERM} = $SIG{INT} = sub { exit 0; }
+
+# Daemon werden
+my $daemonpid = become_daemon();
+
+# Sicherstellen, dass beim Exit die PID-Datei 
+# auf jeden Fall geloescht wird
+# (Der Elternprozess muss die Datei aber in Ruhe lassen)
+END { unlink(PIDFILE) if ($daemonpid == $$); }
+</PRE>
+<P>
+
+<H3>Benutzer- und Gruppen-ID &auml;ndern</H3>
+Ein privilegierter Proze&szlig; kann seine (reale und effektive) User-ID wechseln. 
+Die heute allgemein anerkannte Methode zum Abfragen von Daten aus einem 
+privilegierten Programm heraus ist es, einen Kindproze&szlig; abzuspalten, im Kind 
+dann die Identit&auml;t des nichtprivilegierten Users anzunehmen, die Aktion 
+auszuf&uuml;hren, und den Elternproze&szlig; zu benachrichtigen. 
+Perl hat vier spezielle Variablen zur Steuerung von User und Gruppe:
+<UL>
+<LI><TT>$&lt;</TT>&nbsp;&nbsp;&nbsp;Reale User-ID des Prozesses (numerisch)
+<LI><TT>$(</TT>&nbsp;&nbsp;&nbsp;Reale Gruppen-ID des Prozesses (numerisch)
+<LI><TT>$&gt;</TT>&nbsp;&nbsp;&nbsp;Effektive User-ID des Prozesses (numerisch)
+<LI><TT>$)</TT>&nbsp;&nbsp;&nbsp;Effektive Gruppen-ID des Prozesses (numerisch)
+</UL>
+Ein Proze&szlig; der von <TT>root</TT> gestartet wurde, kann also mittels &Auml;derung von <TT>$&gt;</TT>
+seine Benutzeridentit&auml;t &auml;ndern und damit seine Privilegien reduzieren.
+Werden reale und effektive User-ID ge&auml;ndert, ist der Weg zur&uuml;ck zu
+root-Privilegien versperrt. 
+<P>
+Analog lassen sich auch die Gruppenrechte ver&auml;ndern. Ist der Benutzer in
+mehreren Gruppen vertreten, enthalten die Variablen <TT>$)</TT> und <TT>$(</TT>
+eine Liste der Gruppen-IDs, jeweils durch Leerzeichen getrennt. F&uuml;r den
+Wechsel der "primary group" wird ein einziger Wert an die Variable <TT>$(</TT>
+zugewiesen. Um die effektive Gruppen-ID zu wechseln, wird ein einziger Wert
+in <TT>$)</TT> gespeichert. Wird eine Liste von (durch Leerzeichen getrennten) 
+Gruppen-IDs an <TT>$)</TT> zugewiesen, wird die erste Zahl zur effektiven Gruppen-ID 
+und die folgenden zu den "supplementary groups". Besteht die Liste aus nur zweimal
+demselben Wert, hat der Proze&szlig; nur noch eine einzige Gruppen-ID.
+<P>
+
+<H3>Protokollierung</H3>
+Da ein Serverproze&szlig; normalerweise vom kontrollierenden Terminal abgetrennt
+wird, kann Information &uuml;ber die ausgef&uuml;hrte Arbeit des Servers oder
+aufgetretenen Unregelm&auml;ssigkeiten nicht direkt an die Standardausgabe oder
+die Standardfehlerausgabe geleitet werden. Die Protokollierung der Server-T&auml;tigkeit
+mu&szlig; also auf anderem Wege erfolgen. Dazu bieten sich (neben anderen) zwei 
+M&ouml;glichkeiten an:
+<UL>
+<LI>Verwendung des Syslog-Mechanismus<BR>
+Unter UNIX gibt es den Syslog-Daemon, der Nachrichten per Proze&szlig;kommunikation
+(UNIX Domain Socket) entgegennimmt und im Standard-Logfile speichert. Perl erlaubt
+die komfortable Syslog-Nutzung mit Hilfe des Pakets <TT>Sys::Syslog</TT>, auf
+das an dieser Stelle nicht weiter eingegangen wird.
+<LI>Schreiben in eine Log-Datei<BR>
+Eine einfache Alternative zum Syslog ist das f&uuml;hren einer eigenen Logdatei,
+die - wie andere Logfiles - unterhalb von <TT>/var/log</TT> beheimatet sein sollte.
+Eine eigene Log-Datei gestattet auch eine einfache statistische Auswertung, da
+nur Eintr&auml;ge eines einzigen Serverdienstes in der Datei stehen und der Programmierer
+frei im Aufbau eines Eintrags ist. Das einzige Problem taucht auf, wenn es ggf.
+mehrere Kondprozesse gibt, die alle in dieselbe Log-Datei schreiben wollen und
+dies auch noch gleichzeitig. Daf&uuml;r stellt Perl aber einen einfachen 
+Filelocking-Mechanismus zur Verf&uuml;gung. F&uuml;r die Dauer des Schreibvorgangs
+kann die Datei mit der Funktion <TT>flock()</TT> f&uuml;r andere Zugriffe gesperrt 
+und sp&auml;ter wieder freigegeben werden. Die Syntax lautet
+<TT>$boolean = flock(FILEHANDLE, $how);</TT>, wobei <TT>$how</TT> den Modus 
+enth&auml;lt:
+<P>
+<TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0>
+<TR><TD>Wert</TD><TD>Name</TD><TD>Beschreibung</TD></TR>
+<TR><TD>1</TD><TD>LOCK_SH</TD><TD>Shared Lock</TD></TR>
+<TR><TD>2</TD><TD>LOCK_EX</TD><TD>Exclusive Lock</TD></TR>
+<TR><TD>4</TD><TD>LOCK_NB</TD><TD>Non-Blocking Lock</TD></TR>
+<TR><TD>8</TD><TD>LOCK_UN</TD><TD>Unlock (Freigabe)</TD></TR>
+</TABLE>
+</UL>
+<P>
+Netterweise erlaubt uns Perl auch die Umleitung der Standardfunktionen <TT>die</TT>
+und <TT>warn</TT>, sie lassen sich also im Programm weiterhin verwenden, nur da&szlig;
+jetzt der Output im Logfile landet. Das ist besonders dann interessant, wenn man 
+nachtr&auml;glich Logging hinzuf&uuml;gt.
+<P>
+F&uuml;r das Logging sind nur wenige Unterprogramme n&ouml;tig:
+<UL>
+<LI><TT>start_log($dateiname)</TT>: &Ouml;ffnet die die Datei (append) und
+leitet <TT>die</TT> und <TT>warn</TT> um.
+<LI><TT>log_info($message)</TT>: gibt eine informative Nachricht ins Logfile aus.
+<LI><TT>log_warn($message)</TT>: gibt eine Warnung (Fehlermeldung) ins Logfile aus.
+<LI><TT>log_die($message)</TT>: gibt eine Fehlermeldung ins Logfile aus und beendet
+den Proze&szlig;.
+<LI><TT>end_log</TT>: schliesst die Logdatei.
+</UL>
+Die Implementierung ist ohne Besonderheiten. F&uuml;r die Dateioperationen wird
+<TT>IO::File</TT> ben&ouml;tigt.
+<PRE>
+use strict;
+
+sub start_log #(Dateiname)
+  {
+  my $filename = shift;
+  open(FH,"&gt;&gt;".$filename) || return 0;
+  chmod($filename,644);
+  # Autoflush setzen fuer FH
+  my $oldfh = select(FH); $| = 1; select($oldfh);
+  # Lock freigeben
+  flock(FH,8);
+  # warn und die umleiten
+  $SIG{__WARN__} = \&log_warn;
+  $SIG{__DIE__} = \&log_die;
+  return 1;
+  }
+
+sub end_log
+  {
+  close(FH);
+  }
+
+sub log_info #(Message)
+  {
+  my $time = localtime;
+  my $mesg = join(' ',@_) || "Oops!";
+  $mesg = $time . " [INFO] " . $mesg . "\n";
+  flock(FH,2);
+  print FH $mesg;
+  flock(FH,8);
+  }
+
+sub log_warn #(Message)
+  {
+  my $time = localtime;
+  my $mesg = join(' ',@_) || "Oops!";
+  $mesg = $time . " [ERROR] " . $mesg . "\n";
+  flock(FH,2);
+  print FH $mesg;
+  flock(FH,8);
+  }
+
+sub log_die #(Message)
+  {
+  my $time = localtime;
+  my $mesg = join(' ',@_) || "Oops!";
+  $mesg = $time . " [FATAL] " . $mesg . "\n";
+  flock(FH,2);
+  print FH $mesg;
+  flock(FH,8);
+  close(FH);
+  die @_;
+  }
+</PRE>
+<P>
+
+<H3>Timeouts abfangen</H3>
+Bei Clients und Proxies kann es durchaus vorkommen, da&szlig; der angesprochene
+Server nicht reagiert oder auf dem Ziel-Port kein Serverproze&szlig; l&auml;uft.
+In diesem Fall w&uuml;rde der Connect h&auml;ngen bleiben, bis der Netzwerk-Timeout
+die Verbindung schlie&szlig;t, was mitunter lange dauern kann.
+Dieser Fall kann &uuml;ber einen Timeout mit der Perl-Funktion <TT>alarm()</TT>
+abgefangen werden. Der Timeout l&ouml;st einen Interrupt aus, der die Verbindung 
+schlie&szlig;t oder den Proze&szlig; beendet. Es mu&szlig; ein Signalhandler
+f&uuml;r <TT>ALRM</TT> eingesetzt und &uuml;ber die Funktion <TT>alarm()</TT>
+die Timeout-Zeit (in Sekunden) festgelegt werden. Bei jedem Aufruf von <TT>alarm()</TT>
+wird die Zeit wieder neu gesetzt. Das folgende Beispiel zeigt die Arbeitsweise:
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+
+# Signalhandler setzen
+$SIG{"ALRM"} = sub { print "Timeout - terminated!\n"; exit(1); };
+
+# Timeout nach 10 Sekunden
+alarm(10);
+
+# Damit was passiert
+my $count = 0;
+while (1)
+  {
+  $count++;
+  print "Rumpelstilzchen $count!\n";
+  sleep(1);
+  }
+</PRE>
+<P>
+
+<A NAME="4.4"></A>
+<H2>4.4 Perl-Clients f&uuml;r Standard-Dienste</H2>
+
+<H3>Client f&uuml;r Bin&auml;rdaten</H3>
+Das folgende Programm hat eine URL als Parameter. Diese URL wird in Host, 
+Port und Dateipfad gesplittet. Dann &ouml;ffnet das Programm eine Verbindung
+zum Host und versucht, per HTTP-Get die Datei zu erhalten. Im Erfolgsfall wird
+der HTTP-Header ueberlesen und danach die Bin&auml;rdaten in ein Programm
+geleitet. Das Programm kann dann (hoffentlich) die mp3-Daten abspielen.
+Analog funktioniert das Programm auch mit anderen Dateien (z.B. Bilder
+oder Programme).
+<pre>	
+#!/usr/bin/perl
+# Ein einfacher TCP-Client zum Abspielen von mp3-Dateien
+# Verwendung: $0 URL
+
+use strict;
+use IO::Socket;
+
+use constant TIMEOUT =&gt; 5;
+my $SOCK = '';
+my $reply = '';
+my $content = ''; 
+my $header = '';
+
+my $handler = '/usr/bin/audioplay';                # Abspielprogramm
+
+my $url = shift @ARGV;                             # URL zerlegen
+$url=~m/http\:\/\/([^\:^\/]*)(?:\:(\d+))?\/(.*)/;
+my $host = $1;
+my $port = $2;
+$port = 80 unless($port);
+my $file = '/'.$3;
+
+$SOCK = new IO::Socket::INET(PeerAddr =&gt; $ARGV[0],
+			     PeerPort =&gt; $ARGV[1],
+			     Proto    =&gt; 'tcp', Timeout =&gt; TIMEOUT)
+    or die "can't connect to $ARGV[0]:$ARGV[1]: $@\n";
+
+my $old_fh = select(SOCK);                         # Ungepufferte Ausgabe 
+$|=1;                                              # fuer SOCK einstellen
+select($old_fh);
+
+print "Requesting $file..\n";
+print SOCK "GET $file HTTP/1.0\n";
+print SOCK "Accept: */*\n";
+print SOCK "User-Agent: webamp 007\n\n";
+print "Waiting for reply..\n";
+$header = &lt;SOCK&gt;;
+exit unless($header=~m/200|OK/);                   # Ende bei Fehlermeldung
+while($header = &lt;SOCK&gt;)                            # Header ueberlesen
+  {
+  chomp;
+  last unless(m/\S/);
+  }
+open(HANDLER, "|$handler") or die "Cannot pipe input to $handler: $!\n";
+print "Redirecting HTTP filestream to $handler..\n";
+while(read(SOCK, $content, 512))
+  {
+  print HANDLER $content;                          # Perl-Strings sind
+  }                                                # "binaerfest"
+$sock-&gt;close() if defined $sock;
+</PRE>
+<P>
+
+
+<H3>Portscanner</H3>
+Das folgende Programm verwendet <TT>IO::Socket</TT>, um die TCP-Ports
+eines Rechners zu untersuchen. Dazu wird ein Socket er&ouml;ffnet und ein
+Connect auf dem gew&uuml;nschten Port versucht. Wenn auf dem entsprechenden
+Port kein Serverproze&szlig; l&auml;uft, w&uuml;rde der Connect h&auml;ngen bleiben.
+Dieser Fall wird &uuml;ber einen Timeout mit der Perl-Funktion <TT>alarm()</TT>
+abgefangen. Der Timeout l&ouml;st einen Interrupt aus, der die Verbindung schlie&szlig;t.
+Per Schleife werden alle Ports zwischen zwei Parameterangaben abgefragt.
+Das Programm erlaubt die Angabe der zu untersuchenden Rechner (IP-Adresse) auf 
+der Kommandozeile.
+<PRE>
+#!/usr/bin/perl -w
+
+use IO::Socket;
+use strict;     
+
+my $pinghost = '';
+$|=1;
+
+foreach $pinghost (@ARGV)
+  {
+  &port_scan($pinghost, 1, 1024);
+  }
+exit;   
+
+
+sub port_scan  # ($hostip, $lowport, $highport)
+  {
+  my $port = 0;
+  my $iaddr = 0;
+  my $paddr = 0;
+  my $connect_time = 1;
+  my $protocol_name = "tcp";
+  my $protocol_id = getprotobyname($protocol_name);
+  my $hostip = shift;
+  my $lowport = shift;
+  my $highport = shift;
+
+
+  print "Portscan von $hostip.\n";
+  for ($port = $lowport; $port &lt;= $highport; $port++) 
+    {
+    $SIG{"ALRM"} = sub { close(SOCKET); };
+    alarm $connect_time;
+  
+    socket(SOCKET, PF_INET, SOCK_STREAM, $protocol_id);
+
+    $iaddr  = inet_aton($hostip);
+    $paddr  = sockaddr_in($port, $iaddr);   
+        
+    print "  Port $port offen.\n" if (connect(SOCKET, $paddr));
+    close(SOCKET); 
+    }
+  }
+</PRE>
+<P>
+
+<H3>FTP-Clients</H3>
+
+Mit dem Modul <TT>Net::FTP</TT> von Graham Barr lassen sich Client-FTP-Methoden 
+in Perl-Programmen einfach realisieren. Alle Methoden geben, soweit es nicht anders 
+vermerkt ist, einen "wahren" Wert (ungleich Null) im Erfolgsfall zur&uuml;ck und "false"
+(gleich Null) bei Fehlern. Bei Methoden, die einen Wert zur&uuml;ckgeben, wird im 
+Misserfolgsfall 'undef' oder eine leere Liste zur&uuml;ckgeben.
+<UL>
+<LI><TT>new (HOST [,OPTIONS])</TT>
+<BR>
+ist der Constructor f&uuml;r ein <TT>Net::FTP</TT>-Objekt. <TT>HOST</TT> spezifiziert 
+den FTP-Server, mit Verbindung aufgenommen werden soll. Dieser Parameter mu&szlig; 
+angegeben werden. Optionen werden in einer Hash-&auml;hnlichen Schreibweise in
+<TT>OPTIONS</TT> &uuml;bergeben. M&ouml;gliche Werte sind u. a.:
+<UL>
+<LI><TT>Timeout</TT>: Die maximale Zeit in Sekunden, die gewartet wird,
+bis der Server antwortet (Voreinstellung: 120 Sekunden).
+<LI><TT>Port</TT>: Die Nummer des Ports des FTP-Servers, zu dem die Verbindung
+aufgenommen werden soll. Voreinstellung: 21.
+<LI><TT>Debug</TT>: Erm&ouml;glicht Diagnosemeldungen auf STDERR (Voreinstellung: false).
+<LI><TT>Passive</TT>: Falls true werden Datentransfers im "passive mode"
+ausgef&uuml;hrt. Einige Proxy-Konfigurationen erfordern diesen Modus. Dieser Wert
+wird durch die Umgebungsvariable FTP_PASSIVE &uuml;berschrieben.
+<LI><TT>Hash</TT>: Falls true werden Doppelkreuze (#), sog. Hashmarks, 
+w&auml;hrend des Transfers auf STDERR ausgegeben.
+</UL>
+Im Fehlerfall wird undef zur&uuml;ckgegeben und eine Fehlermeldung in $@ gesetzt. 
+Beispiel:
+<PRE>
+#!/usr/bin/perl -w
+
+use Net::FTP;
+use strict;     
+
+my $host = 'ftp.netzmafia.de';
+
+my $ftp = Net::FTP-&gt;new ($host,
+                        Timeout =&gt; 360,
+                        Port    =&gt; 21,
+                        Debug   =&gt; 1,
+                        Hash    =&gt; 0
+                       );
+
+unless (defined $ftp) 
+  {
+  print "$@\n";
+  die "Can't create Net::FTP-Object\n";
+  }
+</PRE>
+Erzeugen eines neuen FTP Objekts, das mit der Addresse des FTP Servers initialisiert 
+wird. Gleichzeitig wird die Verbindung mit dem FTP Server hergestellt. Dieses 
+"Verbindungsobjekt" wird nun &uuml;ber seinen Namen (<TT>$ftp</TT>) angesprochen. 
+NNun kann es nun mittels passender Methoden manipuliert bzw. verwendet werden werden. 
+Genau dies geschieht in den folgenden Skriptzeilen:<BR>
+Man loggt sich ein mittels Benutzernamen und Pa&szlig;wort, l&auml;dt eine Datei 
+herunter oder hinauf und loggt sich wieder aus. 
+
+<LI><TT>login ([USER [,PASSWORD [, ACCOUNT] ] ])</TT><BR>
+F&uuml;hrt den Login-Prozess auf dem FTP-Server mit den angegebenen Informationen 
+(Username, Passwort, etc.) durch. Werden keine Argumente angegeben, verwendet 
+<TT>Net::FTP</TT> das Modul <TT>Net::Netrc</TT> zur Ermittlung dieser
+Daten. Falls keine Information in der Datei <TT>.netrc</TT> gefunden wird, 
+wird ein anonymer Login ausgef&uuml;hrt. In diesem Fall wird bei Fehlen des Passworts 
+die E-Mail-Adresse des lokalen Users verwendet. Beispiel:
+<PRE>
+$user = 'plate';
+$password = 'geheim';
+$ftp-&gt;login($user,$password) || die "Can't login $!";
+</PRE>
+oder unter Verwendung von <TT>.netrc</TT>:
+<PRE>
+$ftp-&gt;login(); # Sucht einen passenden Eintrag in .netrc f&uuml;r HOST aus new()
+</PRE>
+Anonymer Login:
+<PRE>
+$ftp-&gt;login('anonym','webhamster@netzmafia.de');
+</PRE>
+
+<LI><TT>site (ARGS)</TT>
+<BR>Sendet das FTP-Kommando SITE mit dem gegebenen Argument und wartet auf die
+Antwort des Servers. Zur&uuml;ckgegeben wird das erste Digit des Antwortcodes; zum
+Beispiel:
+<PRE>
+$return_code = $ftp-&gt;site("chmod 755 $file");
+</PRE>
+Das erste Digit hat gem&auml;ss RFC 959 folgende Bedeutung
+<UL>
+<LI>1yz   Positive Preliminary reply
+<LI>2yz   Positive Completion reply
+<LI>3yz   Positive Intermediate reply
+<LI>4yz   Transient Negative Completion reply
+<LI>5yz   Permanent Negative Completion reply
+</UL>
+<P>
+M&ouml;gliche Fehlerbehandlung:
+<PRE>
+print "Kommando O.K. - Datentransfer\n" if ($return_code == 1);
+print "Kommando erfolgreich\n"          if ($return_code == 2);
+print "Kommando O.K. - Weiter!\n"       if ($return_code == 3);
+print "Temporaerer Fehler\n"            if ($return_code == 4);
+print "Fehler \n"                       if ($return_code == 5);
+</PRE>
+<P>
+<LI><TT>type (TYPE)</TT>
+<BR>Setzt den Typ der Daten&uuml;bertragung. Zur&uuml;ckgegeben wird der vorherige
+Typ. <TT>Net::FTP</TT> verwendet folgende Synonyme um den Typ zu spezifzieren:
+<PRE>
+   ascii  =&gt; A
+   binary =&gt; I
+   ebcdic =&gt; E
+   byte   =&gt; L
+</PRE>
+Beispiel:
+<PRE>
+# ascii-transfer
+$ftp-&gt;type("A");
+
+# binaer-transfer
+$ftp-&gt;type("I");
+</PRE>
+<TT>ebcdic</TT> und <TT>byte</TT> werden nicht vollst&auml;ndig unterst&uuml;tzt.
+
+<LI><TT>rename (OLDNAME, NEWNAME)</TT>
+<BR>benennt die Datei OLDNAME in NEWNAME auf dem FTP-Server um.
+Zum Umbennen von Dateien auf dem lokalen Rechner steht Ihnen die
+Perlfunktion <TT>rename()</TT> zur Verf&uuml;gung 
+(<TT>rename($old_name,$new_name);)</TT>
+Beispiel (Datei auf dem FTP-Server umbenennen):
+<PRE>
+$old_name = 'test.txt';
+$new_name = 'Protokoll.txt';
+
+$ftp-&gt;rename($old_name,$new_name) || die "Can't rename\n";
+</PRE>
+<P>
+
+<LI><TT>delete (FILENAME)</TT>
+<BR>L&ouml;scht die angegebene Datei auf dem FTP-Server. Zum L&ouml;schen von Dateien auf 
+dem lokalen Rechner steht Ihnen die Perlfunktion <TT>unlink($file)</TT> zur 
+Verf&uuml;gung. Beispiel:
+<PRE>
+$ftp-&gt;delete($file) || die "Can't unlink remote $file $!";
+</PRE>
+
+<LI><TT>cwd ([DIR])</TT>
+<BR>change working directory. Wechselt in das angegebene Verzeichnis auf
+dem FTP-Server. Falls DIR nicht spezifiziert ist, wird ins Wurzelverzeichnis 
+gewechselt. Beispiel:
+<PRE>
+$dir = '/pub/perl/CPAN/';
+$ftp-&gt;cwd($dir) || die "Can't change working directory $dir $!";
+</PRE>
+
+<LI><TT>cdup ()</TT>
+<BR>change directory up. Wechselt in das &uuml;bergeordnete Verzeichnis auf 
+dem FTP-Server. Beispiel:
+<PRE>
+$ftp-&gt;cdup();
+</PRE>
+
+<LI><TT>pwd ()</TT>
+<BR>print working directory. Gibt den Namen des aktuellen Verzeichnisses
+auf dem FTP-Server zur&uuml;ck. Beispiel:
+<PRE>
+print "Aktuelles Verzeichnis: ", $ftp-&gt;pwd() , "\n";
+</PRE>
+
+<LI><TT>rmdir (DIR [,RECURSE])</TT>
+<BR> L&ouml;scht das Verzeichnis DIR auf dem FTP-Server. Zum L&ouml;schen von Verzeichnissen 
+auf dem lokalen Server k&ouml;nnen Sie die Perlfunktion <TT>rmdir()</TT> verwenden.
+Falls RECURSE auf "wahr" gesetzt wird, werden alle angegebenen Verzeichnisse 
+rekursiv gel&ouml;scht. Beispiel:
+<PRE>
+$dir = 'temp_files';
+
+$OK = $ftp->rmdir($dir,0);
+</PRE>
+
+<LI><TT>mkdir (DIR [,RECURSE])</TT>
+<BR>Erstellt das Verzeichnis DIR auf dem FTP-Server und gibt den Pfad zum neu 
+angelegten Verzeichnis zur&uuml;ck. Zum Erstellen von Verzeichnissen auf dem lokalen 
+Server k&ouml;nnen Sie die Perlfunktion <TT>mkdir()</TT> verwenden. Beispiel:
+<PRE>
+$dir = '/pub/foo';
+
+$path = $ftp-&gt;mkdir($dir) || die "Can't create remote $dir $!";
+print "$path\n";
+</PRE>
+Falls RECURSE auf "wahr" gesetzt wird, werden alle angegebenen Verzeichnisse 
+rekursiv angelegt, zum Beispiel:
+<PRE>
+$dir = '/pub/perl/new-files';
+$ftp-&gt;mkdir($dir,1) || die "Can't create remote $dir recursively $!";
+</PRE>
+erzeugt die Verzeichnisse <TT>/pub</TT> und <TT>/pub/perl</TT> und 
+<TT>/pub/perl/new-files</TT>.
+
+<LI><TT>ls ([DIR])</TT>
+<BR>Liefert das Directory-Listing f&uuml;r <TT>DIR</TT> oder (ohne Parameter) das 
+aktuelle Verzichnis auf dem FTP-Server zur&uuml;ck. Je nach Kontext wird eine 
+Liste oder eine Referenz auf eine Liste mit Dateinamen zur&uuml;ckgegeben.
+Beispiel f&uuml;r  Listenkontext:
+<PRE>
+@files = $ftp-&gt;ls();
+foreach $file (@files) 
+  {
+  print "$file\n";
+  }
+</PRE>
+Beispiel f&uuml;r skalalen Kontext:
+<PRE>
+$array_ref = $ftp-&gt;ls();
+foreach $file (@$array_ref) 
+  {
+  print "$file\n";
+  }
+</PRE>
+Die meisten FTP-Server verwenden das Unix-Kommando <TT>ls</TT> oder etwas
+dazu analoges.
+
+<LI><TT>dir ([DIR])</TT>
+<BR>Wie <TT>ls()</TT>. Es wird jedoch das lange Format (Zugriffsrechte,
+Eigent&uuml;mer, Datum, Dateigr&ouml;sse, etc.) verwendet. Die meisten FTP-Server daf&uuml;r
+das Unix-Kommando <TT>ls -l</TT>.
+
+<LI><TT>get (REMOTE_FILE [,LOCAL_FILE [,WHERE]])</TT>
+<BR>holt die Datei <TT>REMOTE_FILE</TT> vom FTP-Server. Falls keine Name 
+f&uuml;r die lokale Datei angegeben wird, erh&auml;lt sie dien Namen von <TT>REMOTE_FILE</TT>.
+<TT>WHERE</TT> spezifiziert die Anzahl Bytes der Datei, die beim Transfer 
+&uuml;bersprungen werden sollen. Dies ist sinnvoll, wenn ein unterbrochener Dateitransfer
+vervollst&auml;ndigt werden soll. Beispiel f&uuml;r das Holen eines kompletten Verzeichnisses:
+<PRE>
+@files = $ftp-&gt;ls();
+foreach $file (@files) 
+  {
+  $ftp-&gt;get($file);
+  }
+</PRE>
+<TT>Hinweis:</TT> Falls die Datei(en) im ASCII-Modus &uuml;bertragen wurden, k&ouml;nnen 
+sich die Gr&ouml;ssenangaben bzw. Startpunkte auf dem lokalen Server und dem FTP-Server 
+unterscheiden (Unterschiede bei der Darstellung des Zeilenendes).
+
+<LI><TT>put (LOCAL_FILE [,REMOTE_FILE])</TT>
+<BR>Transferiert die Datei <TT>LOCAL_FILE</TT> zum FTP-Server. Falls es sich
+bei <TT>LOCAL_FILE</TT> um ein Dateihandle handelt, mu&szlig; <TT>REMOTE_FILE</TT> 
+angegeben werden. Ist <TT>REMOTE_FILE</TT> nicht spezifiziert, wird der Name der 
+lokalen Datei verwendet. Zur&uuml;ckgeben wird der Name (ohne Verzeichnis) der Datei 
+auf dem FTP-Server. Beispiel:
+<PRE>
+$file = '/home/plate/foo.bar';
+$remote_file_name = $ftp-&gt;put($file) || die "Can't put $file $!";
+print "$remote_file_name\n";	# ergibt foo.bar
+</PRE>
+
+<LI><TT>supported (CMD)</TT>
+<BR>Gibt "wahr" zur&uuml;ck, falls der FTP-Server das angegebene Kommando akzeptiert.
+Beispiel:
+<PRE>
+$OK = $ftp-&gt;supported('STOU');
+$OK ? print "STOU supported\n" : "STOU is not supported\n";
+</PRE>
+
+<LI><TT>abort()</TT>
+<BR>Unterbricht den augenblicklichen Datentransfer.
+Beispiel:
+<PRE>
+$OK = $ftp-&gt;abort();
+</PRE>
+
+<LI><TT>quit()</TT>
+<BR>Sendet das Kommando QUIT an den FTP-Server und schliesst die
+Socketverbindung. Beispiel:
+<PRE>
+$ftp-&gt;quit();
+</PRE>
+</UL>
+
+Beispiel: Automatisch Dateien holen
+<PRE>
+#!/bin/perl
+
+use Net::FTP;
+use strict;
+
+my $host = 'localhost';
+my $user = 'plate';
+my $password = 'geheim';
+my $file = '';
+my $array_ref = '';
+
+# Neues Net::FTP-Objekt
+my $ftp = Net::FTP->new($host,
+                        Timeout => 360,
+                        Debug   => 1
+                       );
+unless (defined $ftp) 
+  {
+  print "$@\n";
+  die "Can't create Net::FTP-Object\n";
+  }
+
+$ftp->login($user,$password) || die "Can't login $!";
+print "Aktuelles Verzeichnis: ", $ftp->pwd() , "\n";
+
+$array_ref = $ftp->ls();
+foreach $file (@$array_ref) 
+  {
+  # Transfermodus in Abh&auml;ngigkeit von der Dateiendung setzen
+  if ($file =~ /(\.gif|\.jpg|\.tar|\.tar\.gz|\.tgz|\.zip)$/)
+    { $ftp->type(I); } 
+  else { $ftp->type(A); }
+  $ftp->get($file); 
+  }
+
+$ftp->quit();
+</PRE>
+<P>
+
+<H3>Ping</H3>
+Das Hilfsprogramm ping wird verwendet, um die Ereichbarkeit eines Rechners zu testen.
+<TT>Net::Ping</TT> ist eine Perl-Variante des Programms <TT>ping</TT>.
+Es hat zwar bei weitem nicht alle Features des Originals, l&auml;uft daf&uuml;r aber
+&uuml;berall wo Perl l&auml;uft. Falls Router oder Firewalls icmp-Pakete ausfiltern oder 
+UDP- bzw. TCP-Echo abgeschaltet ist, meldet <TT>ping</TT> f&auml;lschlicherweise, 
+da&szlig; die Maschine unerreichbar ist.
+<TT>Net::Ping</TT> kann mit drei Protokollen verwendet werden.
+<OL>
+<LI>UDP: <TT>Net::Ping</TT> schickt ein UDP-Packet an den echo-Port des 
+gew&uuml;nschten Rechners. Falls das gesendete Datagramm mit dem zur&uuml;ckgeliefertem 
+&uuml;bereinstimmt, gilt der Rechner als erreichbar.
+<LI>TCP: <TT>Net::Ping</TT> versucht eine TCP-Verbindung zum echo-Port des 
+gew&uuml;nschten Rechners aufzubauen. Im Erfolgsfall gilt der Rechner als erreichbar. 
+<LI>icmp: <TT>Net::Ping</TT> sendet eine icmp-Nachricht an den gew&uuml;nschten Rechner. 
+Falls gesendete und empfangene Daten &uuml;bereinstimmen gilt der Rechner als
+erreichbar. Das Programm mu&szlig; in diesem Fall unter der von root laufen.
+</OL>
+<UL>
+<LI><TT>new([PROTO [,TIMEOUT [, BYTES]]])</TT>
+<BR>Der Constructor f&uuml;r ein neues <TT>Net::Ping</TT>-Objekt. Alle Parameter sind
+optional.
+<TT>PROTO</TT> spezifiziert das zu verwendende Protokoll. M&ouml;gliche Werte sind:
+<TT>tcp</TT>, <TT>udp</TT> (Voreinstellung) oder <TT>icmp</TT>.
+<TT>Net::Ping</TT> verwendet intern die Funktion <TT>alarm()</TT>, wenn das 
+Protokoll <TT>tcp</TT>verwendet wird. Falls in Ihrem Programm 
+bereits ein Alarm gesetzt ist, wird dieser &uuml;berschrieben.<BR>
+<TT>TIMEOUT</TT> setzt die Timeoutzeitspanne in Sekunden. Voreinstellung: 5 Sekunden.
+Dieser Wert wird f&uuml;r die Methode <TT>ping()</TT> verwendet.<BR>
+<TT>BYTES</TT> spezifiziert die Anzahl Bytes, die f&uuml;r die ping-Anfrage verwendet 
+werden sollen. Dieser Wert wird ignoriert, wenn TCP verwendet wird. Voreinstellung:
+UDP: 1, ICMP: 0.
+<P>
+
+<LI><TT>ping(HOST [, TIMEOUT])</TT>
+<BR>pingt die entfernte Maschine <TT>HOST</TT>. Falls die Maschine erreichbar 
+ist, wird "wahr" zur&uuml;ckgegeben. Falls der Host nicht gefunden werden kann, wird 
+undef zur&uuml;ckgegeben. In der Praxis sollten Sie 'undef' und 'false' als identisch 
+betrachten. Beispiel:
+<PRE>
+if ( $p->ping($host) ) 
+  { print "$host is reachable\n"; } 
+else { print "$host is unreachable\n"; }
+</PRE>
+
+<LI><TT>close()</TT>
+<BR>Schlie&szlig;t die Netzwerkverbindung. Die Verbindung wird
+ebenfalls geschlossen, wenn der Scope verlassen wird. Beispiel:
+<PRE>
+$p->close();
+</PRE>
+
+<LI><TT>pingecho(HOST [, TIMEOUT])</TT><BR>
+Veraltet. Existiert aus Kompatibilit&auml;tsgr&uuml;nden zu &auml;lteren Versionen.
+</UL>
+Das folgende Unterprogramm pingt einen Host (IP-Nummer) mittels ICMP-Protokoll
+an. Aufruf beispielsweise <TT>pinger(192.168.23.1)</TT>:
+<PRE>
+sub pinger # (Host)
+  {
+  # Parameter: Host-IP-Nummer
+  my $host = shift;         # zu pingender Host
+  my $retval = 0;           # Ergebnis: 0 nicht erreicht, 1 erreicht, 2 Fehler
+  # Neues Net-Ping Objekt
+  my $p = Net::Ping->new('icmp');
+  unless (defined $p) 
+    { die "*** can't create Net::Ping object $!";}
+
+  # Exceptions auffangen
+  eval 
+    {
+    $retval = 1 if ($p->ping($host)); 
+    if ($@) 
+      {
+      print "*** Ping failed\n*** $@\n";
+      $retval = 2;
+      }
+    $p->close;
+    undef ($p);
+    sleep(1);       # avoid network flooding
+    return $retval;
+    }
+  }
+</PRE>
+
+Das Unterprogramm kann verwendet werden, um alle Rechner eines C-Netzes
+auf Erreichbarkeit zu testen:
+<PRE>
+#!/usr/bin/perl -w
+
+use Net::Ping;
+use strict;	
+
+my $network = '192.168.33';
+
+print "Scanning Network $network.0 \n";
+for ($count = 1; $count &lt;= 254; $count++)
+  {
+  $pinghost = $network . "." . $count;
+  $ret = &pinger($pinghost);
+  if ($ret == 1)
+    { print "$pinghost reached\n"; }
+  }
+
+ exit;
+</PRE>
+
+Das folgende Beispiel testet die Erreichbarkeit eines Rechners mit
+den drei zur Verf&uuml;gung stehenden Protokollen.
+<PRE>
+#!/usr/bin/perl -w
+
+use Net::Ping; 		# Standardmodul
+use strict;	
+
+my $host = '127.0.0.1';
+
+# Protokoll TCP
+my $p = Net::Ping->new('tcp');
+unless (defined $p) { die "can't create Net::Ping object $!";}
+
+if ($p->ping($host)) { print "$host reachable via TCP\n" ; }
+else                 { print "$host unreachable via TCP\n"; }
+$p->close;
+
+# avoid network flooding
+sleep(1);
+
+# Protokoll UDP
+
+$p = Net::Ping->new(); # UDP ist Voreinstellung
+unless (defined $p) { die "can't create Net::Ping object $!";}
+
+# Exceptions auffangen
+eval 
+  {
+  if ($p->ping($host)) { print "$host reachable via UDP\n"; }
+  else { print "$host unreachable via UDP\n"; }
+  };
+
+if ($@) { print "$@: UDP failed\n"; }
+undef $p;
+
+# avoid network flooding
+sleep(1);
+
+
+if ($&gt; == 0) 
+  {
+  # Falls das Skript als 'root' (UID 0) l&auml;uft
+  # Protokoll 'icmp' verwenden
+  $p = Net::Ping->new('icmp');
+
+  unless (defined $p) { die "can't create Net::Ping object $!";}
+
+  if ($p->ping($host)) { print "$host reachable via icmp\n"; }
+  else { print "$host unreachable via icmp\n"; }
+  undef $p;
+  }
+
+exit;	
+</PRE>
+
+<H3>Webapplikationen</H3>
+Die Programmierung von Webapplikationen setzt gute Kenntnisse des zugrundeliegenden 
+Protokolls voraus. Sie finden hier eine kurze Einf&uuml;hrung in den Umgang mit 
+HTTP mit dem Modul <TT>LWP</TT>.
+
+<TT>LWP</TT>behandelt zur Durchf&uuml;hrung von Interaktionen mindestens folgende
+Variablen bzw. Objekte:
+<OL>
+<LI> UserAgent-Objekt
+<LI> URI
+<LI> Request-Objekt
+<LI> Response-Objekt
+</OL>
+Beispiel:
+<PRE>
+# UserAgent
+use LWP::UserAgent;
+$ua = LWP::UserAgent->new();
+	
+# URI 
+$url = 'http://www.netzmafia.de/';
+
+# Request
+$Anfrage  = HTTP::Request->new('GET', $url);	
+
+# Response
+$Antwort = $ua->request($Anfrage);
+</PRE>
+
+Zur Erfolgskontrolle bzw. Fehlerbehandlung stehen die beiden Methoden
+<TT>is_success()</TT> bzw. </TT>is_error()</TT> zur Verf&uuml;gung, zum
+Beispiel:
+<PRE>
+unless ($Antwort->is_success() ) 
+  { 
+  print "Fehlernummer : ", $Antwort->code() , "\n";
+  print "Fehlermeldung: ", $Antwort->message(), "\n";
+  }
+</PRE>
+
+<H4>HTTP-Header</H4>
+H&auml;ufig will man nur wissen, wie gro&szlig; eine Datei ist, ob sie sich seit
+dem letzten Zugriff ver&auml;ndert hat oder ob die URI noch exisitert.
+<TT>HTTP</TT> stellt die Methode <TT>HEAD</TT> f&uuml;r derartige Anfragen 
+zur Verf&uuml;gung. Hier einige Beispiele zum Zugriff auf die HTTP-Header mit 
+LWP-Methoden. Das erste Beispiel zeigt das Holen der HTTP-Header mit LWP::Simple:
+<PRE>
+use LWP::Simple;
+
+$url = "http://www.netzmafia.de/index.html";
+
+# Header ermitteln
+($content_type, $document_length, $modified_time, $expires, $server) = head($url);
+
+# Ergebnisse ausgeben
+print "Content-type:    ", $content_type,       "\n";
+print "Document-Length: ", $document_length,    "\n";
+print "Modified-Time:   ", $modified_time,      "\n";
+print "Expires:         ", $expires,            "\n";
+print "Server:          ", $server,             "\n";
+</PRE>
+Falls man nur wissen will, ob die URI noch existiert:
+<PRE>
+$exists = head($url);
+if ($exists) { print "URI existiert\n"; }
+else { print "\a\a\aKein Anschluss unter dieser URI.\n"; }
+</PRE>
+
+<H4><TT>LWP::Simple</TT></H4>
+<TT>LWP::Simple</TT> stellt drei Funktionen zur Verf&uuml;gung:
+<OL>
+<LI> <TT>get</TT> zum Holen eines Dokuments, z. B.:
+<PRE>
+use LWP::Simple;
+$url = 'http://www.netzmafia.de/index.html'
+$dokument = get($url);
+unless (defined $dokument) { print "ERROR\n"; exit };
+</PRE>
+
+<LI> <TT>getprint</TT>, um das ganze Dokument zu holen und den 
+Inhalt auszugeben:
+<PRE>
+use LWP::Simple;
+$url = 'http://www.netzmafia.de/index.html'
+getprint($url);
+</PRE>
+<LI> <TT>getstore</TT>, um das ganze Dokument zu holen und in 
+einer Datei zu speichern:
+<PRE>
+use LWP::Simple;
+$url = 'http://www.netzmafia.de/index.html'
+$localfile = '/home/plate/tmp/index.html';
+getstore($url, $localfile);
+</PRE>
+</OL>
+<P>
+
+<H4><TT>LWP::UserAgent</TT></H4>
+Erweiterter Zugriff auf HTTP-Header mit <TT>LWP::UserAgent</TT>
+<PRE>
+#!/usr/bin/perl -w
+
+use LWP::UserAgent;
+use strict;
+
+my ($url, $ua, $request, $response);
+
+$url = "http://www.netzmafia.de/index.html";
+
+# User Agent
+$ua = LWP::UserAgent-&gt;new();
+
+# Anfrage mit Methode HEAD
+$request = HTTP::Request-&gt;new('HEAD', $url);
+
+# Antwort holen	
+$response = $ua-&gt;request($request);
+
+if ($response-&gt;is_success()) 
+  {
+  # Header als ASCII-Text ausgeben
+  print $response-&gt;headers_as_string() , "\n"
+  }
+else
+  {
+  # Fehlermeldung ausgeben
+  print $response-&gt;message() , "\n";
+  }
+</PRE>
+
+Falls man nur an bestimmten Feldern interessiert ist, kann man die
+Methode <TT>header()</TT>, etwa zum Bestimmen der Gr&ouml;sse der Datei, 
+verwenden:
+<PRE>
+...
+$size = $response-&gt;header('Content-Length');
+print "URL: $url  Gr&ouml;sse: $size Bytes\n";
+...
+</PRE>
+Den HTTP-Status-Antwort-Header erh&auml;lt man mit:
+<PRE>
+#!/usr/bin/perl -w
+
+use LWP::UserAgent;
+use strict;
+
+my ($url, $ua, $request, $response);
+
+$url = "http://192.168.33.2/index.html";
+
+# User Agent
+$ua = LWP::UserAgent-&gt;new();
+
+$request = HTTP::Request-&gt;new('HEAD', $url);
+$response = $ua-&gt;request($request);
+
+print "HTTP-Status-Antwort-Header: ", $response-&gt;code , "\n";
+</PRE>
+Beispiel: Hat sich die URL seit gestern ge&auml;ndert?
+Der Request ben&ouml;tigt die Zeit in Unix-Sekunden, daher ein paar Umrechnungsfaktoren:
+<UL>
+<LI> Tag: 86400 s
+<LI> Woche: 604800 s
+<LI> Monat (30,5 Tage): 2635200 s
+<LI> Jahr (365 Tage): 31536000 s  
+</UL>
+<PRE>
+use HTTP::Status;
+use HTTP::Date;
+use LWP::UserAgent;
+use strict;
+
+my ($url, $ua, $request, $response);
+
+$url = 'http://192.168.33.2/';
+
+$request = HTTP::Request-&gt;new(HEAD, $url );
+
+# Tag               =&gt;    86400 s
+# Woche (7 Tage)    =&gt;   604800 s
+# Monat (30.5 Tage) =&gt;  2635200 s
+# Jahr  (365 Tage)  =&gt; 31536000 s  
+
+# Aktuelle Zeit in UnixSekunden - 1 Tag = gestern
+$mtime = time -  86400; 
+
+# Request-Header setzen
+$request-&gt;header('If-Modified-Since' =&gt; time2str($mtime));
+	
+# User Agent
+$ua = LWP::UserAgent-&gt;new();
+
+$response = $ua-&gt;request($req);
+
+# 304 --&gt; Keine Aenderung seit der angefragten Zeitspanne
+if ( $response-&gt;code() == RC_NOT_MODIFIED) 
+  { print "$url wurde seit time2str($mtime) nicht ge&auml;ndert\n"; } 
+else { print "\aWake up. $url changed\n"; }
+</PRE>
+<P>
+Die Methode <TT>response()</TT> von <TT>LWP::UserAgent</TT> bietet einen 
+komfortablen Zugriff auf Dokumente. Neben der verbesserten M&ouml;glichkeit zur
+Erfolgskontrolle stehen drei Varianten zur Verf&uuml;gung.
+<OL>
+<LI><TT>response($request)</TT><BR>
+holt das angeforderte Dokument. Der Inhalt des Dokumentes
+ist &uuml;ber die Methode <TT>content()</TT> erreichbar.
+<PRE>
+use LWP::UserAgent;
+
+$ua = LWP::UserAgent-&gt;new();
+$url = 'http://www.netzmafia.de/'
+$request = HTTP::Request-&gt;new('GET', $url);
+
+$response = $ua-&gt;request($request);
+if ( $response-&gt;is_error() ) 
+  { 
+  print "Fehlernummer : ", $response-&gt;code() ,    "\n";
+  print "Fehlermeldung: ", $response-&gt;message() , "\n";
+  }
+else 
+  {
+  print $response-&gt;content() , "\n";
+  }
+</PRE>
+
+<LI><TT>response($request, $file)</TT><BR>
+holt das ageforderte Dokument und speichert den Inhalt in der angegeben
+lokalen Datei.
+<PRE>
+use LWP::UserAgent;
+
+$file = 'local.html';
+$ua = LWP::UserAgent-&gt;new();
+$url = 'http://www.netzmafia.de/'
+$request = HTTP::Request-&gt;new('GET', $url);
+
+$response = $ua-&gt;request($request, $file);
+if ( $response-&gt;is_error() ) 
+  { 
+  print "Fehlernummer : ", $response-&gt;code() ,    "\n";
+  print "Fehlermeldung: ", $response-&gt;message() , "\n";
+  }
+else 
+  {
+  print $response-&gt;content() , "\n";
+  }
+</PRE>
+<LI><TT>response($request, \&amp;callback, $Chunk_Size)</TT><BR>
+holt das angeforderte Dokument h&auml;ppchenweise. Die Gr&ouml;sse der Happen wird mit 
+$Chunk_Size festgelegt. Nach dem Erhalt eines jeden Pakets wird
+dieses Paket an eine Callbackroutine weitergereicht, die bereits w&auml;hrend der
+Übertragung die angekommenen Daten verarbeiten kann.
+<PRE>
+use LWP::UserAgent;
+
+$file = 'local.html';
+$ua = LWP::UserAgent-&gt;new();
+$url = 'http://www.netzmafia.de/'
+$request = HTTP::Request-&gt;new('GET', $url);
+
+$Chunk_Size = 5 * 1024; # Wie gross soll der Happen sein
+
+$response = $ua-&gt;request($request, \&amp;Bearbeite, $Chunk_Size);
+
+sub Bearbeite 
+  {
+  $Bereits_erhaltene_Daten = shift;
+
+  ...
+  ++$x;
+  print "Happen Nummer $x\n\n";
+  print "$Bereits_erhaltene_Daten\n";
+  ...
+  }
+</PRE>
+Diese Vorgehensweise ist beispielsweise sinnvoll bei
+<UL>
+<LI> langsamen Netzverbindungen
+<LI> umfangreichen Downloads (Datei mu&szlig; nicht in den Hauptspeicher passen)
+<LI> Hintergrundverarbeitung des Inhalts
+<LI> Parsen des Dokuments schon w&auml;hrend der Übertragung
+<LI> Extrahieren von Links
+<LI> Verarbeitung des Inhaltes in einem separatem Prozess
+<LI> Verarbeitung kontinuierlicher Datenstr&ouml;me 
+</UL>
+</OL>
+
+<H4>Zugriff auf WWW-Formulare mit GET</H4>
+Die GET-Methode kann auch verwendet werden, um Daten an den Server (an ein
+CGI-Skript) zu senden. An die URI wird ein "?" angeh&auml;ngt, gefolgt vom QueryString. 
+Ein Name-Wert-Paar wird durch ein '=' zusammengehalten, die Wertepaare werden
+jeweils durch '&amp;' getrennt.
+<PRE>
+use LWP::UserAgent;
+
+$ua = LWP::UserAgent-&gt;new();
+$url = http://www.netzmafia.de/cgi-bin/info.cgi?Category=Soft&Language=Perl
+
+$request = HTTP::Request-&gt;new('GET', $url);
+
+$response = $ua-&gt;request($request);
+if ( $response-&gt;is_error() ) 
+  { 
+  print "Fehlernummer : ", $response-&gt;code() ,    "\n";
+  print "Fehlermeldung: ", $response-&gt;message() , "\n";
+  }
+else 
+  {
+  print $response-&gt;content() , "\n";
+  }
+</PRE>
+<P>
+Falls die Daten des Query-Strings Leerzeichen, Sonderzeichen oder &auml;hnliche
+kritische Zeichen enthalten, m&uuml;ssen diese entsprechend kodiert werden.
+Das Modul <TT>URI::Escape</TT> stellt die daf&uuml;r notwendigen Methoden zur 
+Verf&uuml;gung:
+<PRE>
+use URI::Escape;
+
+$querystring = 'Name=J&uuml;rgen Plate&Strasse=G&auml;nsemarkt 5';
+$safe_querystring = uri_escape($querystring);
+print $safe_querystring , "\n";
+</PRE>
+Liefert <TT>Name=J%FCrgen%20Plate&Strasse=G%E4nsemarkt%205</TT>.
+Nun l&auml;sst sich der Request vollst&auml;ndig angeben:
+<PRE>
+$querystring = 'Name=J&uuml;rgen Plate&Strasse=G&auml;nsemarkt 5';
+$safe_querystring = uri_escape($querystring);
+$url = 'http://www.netzmafia.de/cgi-bin/info.cgi?';
+$url .= "$safe_querystring";
+...
+
+$request = HTTP::Request-&gt;new('GET', $url);
+...
+</PRE>
+<P>
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server3.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server5.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><TT>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</TT></H6>
+</BODY>
+</HTML>

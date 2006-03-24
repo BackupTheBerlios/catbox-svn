@@ -1,0 +1,937 @@
+<HTML>
+<HEAD>
+<TITLE>Internet-Technologie</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" ALINK="#FF0000" VLINK="#FF00FF">
+<CENTER><TABLE BORDER=0 WIDTH="90%" >
+<TR><TD ALIGN=LEFT><IMG SRC="netzwerk.gif"></TD>
+<TD ALIGN=RIGHT><H3>Internet-Technologie</H3> 
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD></TR>
+</TABLE></CENTER>
+<HR>
+<P>
+<H2 ALIGN=CENTER>Manualpage <TT>tcpdump</TT></H2>
+<PRE>
+TCPDUMP(8)              OpenBSD System Manager's Manual             TCPDUMP(8)
+
+<a name="NAME" href="#end"><B>NAME</B></a>
+     <B>tcpdump</B> - dump traffic on a network
+
+<a name="SYNOPSIS" href="#end"><B>SYNOPSIS</B></a>
+     <B>tcpdump</B> [<B>-adeflnNOpqStvxX</B>] [<B>-c</B> <I>count</I>] [<B>-F</B> <I>file</I>] [<B>-i</B> <I>interface</I>] [<B>-r</B> <I>file</I>]
+             [<B>-s</B> <I>snaplen</I>] [<B>-T</B> <I>type</I>] [<B>-w</B> <I>file</I>] [<I>expression</I>]
+
+<a name="DESCRIPTION" href="#end"><B>DESCRIPTION</B></a>
+     <B>tcpdump</B> prints out the headers of packets on a network interface that
+     match the boolean <I>expression</I>. You must have read access to <I>/dev/bpf*</I>.
+
+     The options are as follows:
+
+     <B>-a</B>      Attempt to convert network and broadcast addresses to names.
+
+     <B>-c</B> <I>count</I>
+             Exit after receiving <I>count</I> packets.
+
+     <B>-d</B>      Dump the compiled packet-matching code in a human readable form
+             to standard output and stop.
+
+     <B>-dd</B>     Dump packet-matching code as a C program fragment.
+
+     <B>-ddd</B>    Dump packet-matching code as decimal numbers preceded with a
+             count.
+
+     <B>-e</B>      Print the link-level header on each dump line.
+
+     <B>-f</B>      Print ``foreign'' internet addresses numerically rather than sym-
+             bolically.  This option is intended to get around serious brain
+             damage in Sun's yp server -- usually it hangs forever translating
+             non-local internet numbers.
+
+     <B>-F</B> <I>file</I>
+             Use <I>file</I> as input for the filter expression.  Any additional ex-
+             pressions given on the command line are ignored.
+
+     <B>-i</B> <I>interface</I>
+             Listen on <I>interface</I>. If unspecified, <B>tcpdump</B> searches the system
+             interface list for the lowest numbered, configured ``up'' inter-
+             face (excluding loopback).  Ties are broken by choosing the ear-
+             liest match.
+
+     <B>-l</B>      Make stdout line buffered.  Useful if you want to see the data
+             while capturing it. e.g.,
+
+                   <B>tcpdump -l</B> | tee dat
+             or
+                   <B>tcpdump -l</B> &gt; dat &amp; tail -f dat
+
+     <B>-n</B>      Do not convert addresses (i.e., host addresses, port numbers,
+             etc.)  to names.
+
+     <B>-N</B>      Do not print domain name qualification of host names.  For exam-
+             ple, if you specify this flag then <B>tcpdump</B> will print ``nic'' in-
+             stead of ``nic.ddn.mil''.
+
+     <B>-O</B>      Do not run the packet-matching code optimizer.  This is useful
+             only if you suspect a bug in the optimizer.
+
+     <B>-p</B>      Do not put the interface into promiscuous mode.  The interface
+             might be in promiscuous mode for some other reason; hence, <B>-p</B>
+             cannot be used as an abbreviation for ``ether host {local-hw-
+
+             addr}'' or ``ether broadcast''.
+
+     <B>-q</B>      Quick (quiet?) output.  Print less protocol information so output
+             lines are shorter.
+
+     <B>-r</B> <I>file</I>
+             Read packets from a <I>file</I> which was created with the <B>-w</B> option.
+             Standard input is used if <I>file</I> is `-'.
+
+     <B>-s</B> <I>snaplen</I>
+             Analyze at most the first <I>snaplen</I> bytes of data from each packet
+             rather than the default of 68.  68 bytes is adequate for IP,
+             ICMP, TCP, and UDP but may truncate protocol information from
+             name server and NFS packets (see below).  Packets truncated be-
+             cause of a limited <I>snaplen</I> are indicated in the output with
+             ``[|<I>proto</I>]'', where <I>proto</I> is the name of the protocol level at
+             which the truncation has occurred.  Taking larger snapshots both
+             increases the amount of time it takes to process packets and, ef-
+             fectively, decreases the amount of packet buffering.  This may
+             cause packets to be lost.  You should limit <I>snaplen</I> to the small-
+             est number that will capture the protocol information you're in-
+             terested in.
+
+     <B>-T</B> <I>type</I>
+             Force packets selected by <I>expression</I> to be interpreted as the
+             specified <I>type</I>. Currently known types are <B>cnfp</B> (Cisco NetFlow
+             protocol), <B>rpc</B> (Remote Procedure Call), <B>rtp</B> (Real-Time
+             Applications protocol), <B>rtcp</B> (Real-Time Applications control
+             protocol), <B>sack</B> (RFC 2018 No Selective Acknowledgements), <B>vat</B>
+             (Visual Audio Tool), and <B>wb</B> (distributed White Board).
+
+     <B>-S</B>      Print absolute, rather than relative, TCP sequence numbers.
+
+     <B>-t</B>      Do not print a timestamp on each dump line.
+
+     <B>-tt</B>     Print an unformatted timestamp on each dump line.
+
+     <B>-ttt</B>    Print day and month in timestamp.
+
+     <B>-v</B>      (Slightly more) verbose output.  For example, the time to live
+             and type of service information in an IP packet is printed.
+
+     <B>-vv</B>     Even more verbose output.  For example, additional fields are
+             printed from NFS reply packets.
+
+     <B>-w</B> <I>file</I>
+             Write the raw packets to <I>file</I> rather than parsing and printing
+             them out.  They can be analyzed later with the <B>-r</B> option.  Stan-
+             dard output is used if <I>file</I> is `-'.
+
+     <B>-x</B>      Print each packet (minus its link-level header) in hex.  The
+             smaller of the entire packet or <I>snaplen</I> bytes will be printed.
+
+     <B>-X</B>      Like <B>-x</B> but dumps the packet in emacs-hexl like format.
+
+     <I>expression</I>
+             selects which packets will be dumped.  If no <I>expression</I> is given,
+             all packets on the net will be dumped.  Otherwise, only packets
+             satisfying <I>expression</I> will be dumped.
+
+             The <I>expression</I> consists of one or more primitives.  Primitives
+             usually consist of an <I>id</I> (name or number) preceded by one or more
+             qualifiers.  There are three different kinds of qualifiers:
+
+             <I>type</I>   Specify which kind of address component the <I>id</I> name or
+                    number refers to.  Possible types are <B>host</B>, <B>net</B> and <B>port</B>.
+                    E.g., ``host foo'', ``net 128.3'', ``port 20''. If there
+                    is no type qualifier, <B>host</B> is assumed.
+
+             <I>dir</I>    Specify a particular transfer direction to and/or from <I>id</I>.
+                    Possible directions are src, dst, <B>src or</B> dst, and <B>src and</B>
+                    <B>dst</B>. E.g., ``src foo'', ``dst net 128.3'', ``src or dst
+                    port ftp-data''. If there is no <I>dir</I> qualifier, <B>src or</B> dst
+                    is assumed.  For null link layers (i.e., point-to-point
+                    protocols such as SLIP or the pflog header) the <B>inbound</B>
+                    and <B>outbound</B> qualifiers can be used to specify a desired
+                    direction.
+
+             <I>proto</I>  Restrict the match to a particular protocol.  Possible
+                    protocols are: <B>ether</B>, <B>fddi</B>, <B>ip</B>, <B>arp</B>, <B>rarp</B>, <B>decnet</B>, <B>lat</B>,
+                    <B>moprc</B>, <B>mopdl</B>, <B>tcp</B>, and <B>udp</B>. E.g., ``ether src foo'', ``arp
+                    net 128.3'', ``tcp port 21''. If there is no protocol
+                    qualifier, all protocols consistent with the type are as-
+                    sumed. e.g., ``src foo'' means ``(ip or arp or rarp) src
+                    foo'' (except the latter is not legal syntax), ``net bar''
+                    means ``(ip or arp or rarp) net bar'' and ``port 53''
+                    means ``(tcp or udp) port 53''.
+
+                    <B>fddi</B> is actually an alias for <B>ether</B>; the parser treats
+                    them identically as meaning "the data link level used on
+                    the specified network interface". FDDI headers contain
+                    Ethernet-like source and destination addresses, and often
+                    contain Ethernet-like packet types, so you can filter on
+                    these FDDI fields just as with the analogous Ethernet
+                    fields.  FDDI headers also contain other fields, but you
+                    cannot name them explicitly in a filter expression.
+
+             In addition to the above, there are some special primitive key-
+             words that don't follow the pattern: <B>gateway</B>, <B>broadcast</B>, <B>less</B>,
+             <B>greater</B>, and arithmetic expressions.  All of these are described
+             below.
+
+             More complex filter expressions are built up by using the words
+             <B>and</B>, <B>or</B>, and <B>not</B> to combine primitives.  e.g., ``host foo and not
+             port ftp and not port ftp-data''. To save typing, identical qual-
+             ifier lists can be omitted.  e.g., ``tcp dst port ftp or ftp-data
+             or domain'' is exactly the same as ``tcp dst port ftp or tcp dst
+             port ftp-data or tcp dst port domain''.
+
+             Allowable primitives are:
+
+             <B>dst host</B> <I>host</I>      True if the IP destination field of the packet
+                                is <I>host</I>, which may be either an address or a
+                                name.
+
+             <B>src host</B> <I>host</I>      True if the IP source field of the packet is
+                                <I>host</I>.
+
+             <B>host</B> <I>host</I>          True if either the IP source or destination of
+                                the packet is <I>host</I>.
+
+                                Any of the above <I>host</I> expressions can be
+                                prepended with the keywords, <B>ip</B>, <B>arp</B>, or <B>rarp</B>
+                                as in:
+
+                                      <B>ip host</B> <I>host</I>
+
+                                which is equivalent to:
+
+                                      <B>ether proto</B> <I>ip</I> <B>and host</B> <I>host</I>
+
+                                If <I>host</I> is a name with multiple IP addresses,
+                                each address will be checked for a match.
+
+             <B>ether dst</B> <I>ehost</I>    True if the Ethernet destination address is
+                                <I>ehost</I>. <I>ehost</I> may be either a name from
+                                <I>/etc/ethers</I> or a number (see <A HREF="/cgi-bin/man.cgi?query=ethers&sektion=3&arch=i386&apropos=0&manpath=OpenBSD+Current">ethers(3)</A> for a
+                                numeric format).
+
+             <B>ether src</B> <I>ehost</I>    True if the Ethernet source address is <I>ehost</I>.
+
+             <B>ether host</B> <I>ehost</I>   True if either the Ethernet source or destina-
+                                tion address is <I>ehost</I>.
+
+             <B>gateway</B> <I>host</I>       True if the packet used <I>host</I> as a gateway;
+                                i.e., the Ethernet source or destination ad-
+                                dress was <I>host</I> but neither the IP source nor
+                                the IP destination was <I>host</I>. <I>host</I> must be a
+                                name and must be found in both <I>/etc/hosts</I> and
+                                <I>/etc/ethers</I>. An equivalent expression is
+
+                                      <B>ether host</B> <I>ehost</I> <B>and not</B> host <I>host</I>
+
+                                which can be used with either names or numbers
+                                for <I>host</I>/<I>ehost</I>.
+
+             <B>dst net</B> <I>net</I>        True if the IP destination address of the
+                                packet has a network number of <I>net</I>. <I>net</I> may be
+                                either a name from <I>/etc/networks</I> or a network
+                                number (see networks(5)</A> for details).
+
+             <B>src net</B> <I>net</I>        True if the IP source address of the packet
+                                has a network number of <I>net</I>.
+
+             <B>net</B> <I>net</I>            True if either the IP source or destination
+                                address of the packet has a network number of
+                                <I>net</I>.
+
+             <B>dst port</B> <I>port</I>      True if the packet is ip/tcp or ip/udp and has
+                                a destination port value of <I>port</I>. The <I>port</I> can
+                                be a number or a name used in <I>/etc/services</I>
+                                (see tcp(4) and udp(4)). If a name is used,
+                                both the port number and protocol are checked.
+                                If a number or ambiguous name is used only the
+                                port number is checked; e.g., ``<B>dst port</B> 513''
+                                will print both tcp/login traffic and udp/who
+                                traffic, and ``<B>dst port</B> domain'' will print
+                                both tcp/domain and udp/domain traffic.
+
+             <B>src port</B> <I>port</I>      True if the packet has a source port value of
+                                <I>port</I>.
+
+             <B>port</B> <I>port</I>          True if either the source or destination port
+                                of the packet is <I>port</I>.
+
+                                Any of the above port expressions can be
+                                prepended with the keywords <B>tcp</B> or <B>udp</B>, as in:
+
+                                      <B>tcp src</B> port <I>port</I>
+
+                                which matches only TCP packets whose source
+                                port is <I>port</I>.
+
+             <B>less</B> <I>length</I>        True if the packet has a length less than or
+                                equal to <I>length</I>. This is equivalent to:
+
+                                      <B>len</B> &lt;<B>=</B> <I>length</I>.
+
+             <B>greater</B> <I>length</I>     True if the packet has a length greater than
+                                or equal to <I>length</I>. This is equivalent to:
+
+                                      <B>len</B> &gt;<B>=</B> <I>length</I>.
+
+             <B>ip proto</B> <I>proto</I>     True if the packet is an IP packet (see ip(4))
+                                of protocol type <I>proto</I>. <I>proto</I> can be a number
+                                or one of the names <B>icmp</B>, <B>udp</B>, <B>nd</B>, or <B>tcp</B>. The
+                                identifiers <B>tcp</B>, <B>udp</B>, and <B>icmp</B> are also shell
+                                keywords and must be escaped.
+
+             <B>ether broadcast</B>    True if the packet is an Ethernet broadcast
+                                packet.  The <B>ether</B> keyword is optional.
+
+             <B>ip broadcast</B>       True if the packet is an IP broadcast packet.
+                                It checks for both the all-zeroes and all-ones
+                                broadcast conventions and looks up the local
+                                subnet mask.
+
+             <B>ether multicast</B>    True if the packet is an Ethernet multicast
+                                packet.  The <B>ether</B> keyword is optional.  This
+                                is shorthand for ``<B>ether</B>[0] &amp; 1 != 0''.
+
+             <B>ip multicast</B>       True if the packet is an IP multicast packet.
+
+             <B>ether proto</B> <I>proto</I>  True if the packet is of ether type <I>proto</I>.
+                                <I>proto</I> can be a number or a name like <B>ip</B>, <B>arp</B>,
+                                or <B>rarp</B>. These identifiers are also shell key-
+                                words and must be escaped.  In the case of
+                                FDDI (e.g., ``<B>fddi protocol</B> arp''), the proto-
+                                col identification comes from the 802.2 Logi-
+                                cal Link <A HREF="/cgi-bin/man.cgi?query=Control&sektion=LLC&arch=i386&apropos=0&manpath=OpenBSD+Current">Control (LLC)</A> header, which is usual-
+                                ly layered on top of the FDDI header.  <B>tcpdump</B>
+                                assumes, when filtering on the protocol iden-
+                                tifier, that all FDDI packets include an LLC
+                                header, and that the LLC header is in so-
+                                called SNAP format.
+
+             <B>decnet src</B> <I>host</I>    True if the DECNET source address is <I>host</I>,
+                                which may be an address of the form
+                                ``10.123'', or a DECNET host name.  DECNET
+                                host name support is only available on systems
+                                that are configured to run DECNET.
+
+             <B>decnet dst</B> <I>host</I>    True if the DECNET destination address is
+                                <I>host</I>.
+
+             <B>decnet host</B> <I>host</I>   True if either the DECNET source or destina-
+                                tion address is <I>host</I>.
+
+             <B>ifname</B> <I>interface</I>   True if the packet was logged as coming from
+                                the specified interface (applies only to pack-
+                                ets logged by pf(4)).
+
+             <B>on</B> <I>interface</I>       Synonymous with the <I>ifname</I> modifier.
+
+             <B>rnr</B> <I>num</I>            True if the packet was logged as matching the
+                                specified PF rule number (applies only to
+                                packets logged by pf(4)).
+
+             <B>rulenum</B> <I>num</I>        Synonomous with the <I>rnr</I> modifier.
+
+             <B>reason</B> <I>code</I>        True if the packet was logged with the speci-
+                                fied PF reason code.  The known codes are:
+                                <I>match</I>, <I>bad-offset</I>, <I>fragment</I>, <I>short</I>, <I>normalize</I>,
+                                and <I>memory</I>. (applies only to packets logged by
+                               pf(4)).
+
+             <B>action</B> <I>act</I>         True if PF took the specified action when the
+                                packet was logged.  Known actions are: <I>pass</I>,
+                                and <I>block</I>. (applies only to packets logged by
+                                pf(4)).
+
+             <B>ip</B>, <B>arp</B>, <B>rarp</B>, <B>decnet</B>, <B>lat</B>, <B>moprc</B>, <B>mopdl</B>
+                                Abbreviations for:
+
+                                      <B>ether proto</B> <I>p</I>
+
+                                where <I>p</I> is one of the above protocols.  <B>tcp-</B>
+                                <B>dump</B> does not currently know how to parse <B>lat</B>,
+                                <B>moprc</B>, or <B>mopdl</B>.
+
+             tcp, udp, icmp     Abbreviations for: <B>ip proto</B> <I>p</I> where <I>p</I> is one
+                                of the above protocols.
+
+             <I>expr</I> <I>relop</I> <I>expr</I>    True if the relation holds, where <I>relop</I> is one
+                                of `&gt;', `&lt;', `&gt;=', `&lt;=', `=', `!=', and <I>expr</I>
+                                is an arithmetic expression composed of inte-
+                                ger constants (expressed in standard C syn-
+                                tax), the normal binary operators (`+', `-',
+                                `*', `/', `&amp;', `|'), a length operator, and
+                                special packet data accessors.  To access data
+                                inside the packet, use the following syntax:
+
+                                      <I>proto</I> [<I>expr</I> : <I>size</I>]
+
+                                <I>proto</I> is one of <B>ether</B>, <B>fddi</B>, <B>ip</B>, <B>arp</B>, <B>rarp</B>,
+                                <B>tcp</B>, <B>udp</B>, or <B>icmp</B>, and indicates the protocol
+                                layer for the index operation.  The byte off-
+                                set, relative to the indicated protocol layer,
+                                is given by <I>expr</I>. <I>size</I> is optional and indi-
+                                cates the number of bytes in the field of in-
+                                terest; it can be either one, two, or four,
+                                and defaults to one.  The length operator, in-
+                                dicated by the keyword <B>len</B>, gives the length
+                                of the packet.
+
+                                For example, ``<B>ether</B>[0] &amp; 1 != 0'' catches all
+                                multicast traffic.  The expression ``<B>ip</B>[0] &amp;
+                                0xf != 5'' catches all IP packets with op-
+                                tions.  The expression ``<B>ip</B>[6:2] &amp; 0x1fff =
+                                0'' catches only unfragmented datagrams and
+                                frag zero of fragmented datagrams.  This check
+                                is implicitly applied to the <B>tcp</B> and index op-
+                                erations.  For instance, ``<B>tcp</B>[0]'' always
+                                means the first byte of the TCP header, and
+                                never means the first byte of an intervening
+                                fragment.
+
+             Primitives may be combined using a parenthesized group of primi-
+             tives and operators.  Parentheses are special to the shell and
+             must be escaped.  Allowed primitives and operators are:
+
+                   Negation (``<B>!</B>'' or ``<B>not</B>'')
+                   Concatenation (``&amp;&amp;'' or ``<B>and</B>'')
+                   Alternation (``<B>||</B>'' or ``<B>or</B>'')
+
+             Negation has highest precedence.  Alternation and concatenation
+             have equal precedence and associate left to right.  Explicit <B>and</B>
+             tokens, not juxtaposition, are now required for concatenation.
+
+             If an identifier is given without a keyword, the most recent key-
+             word is assumed.  For example,
+
+                   <B>not host</B> vs and ace
+
+             is short for
+
+                   <B>not host</B> vs <B>and host</B> ace
+
+             which should not be confused with
+
+                   <B>not</B> (<B>host</B> vs <B>or</B> ace)
+
+             Expression arguments can be passed to <B>tcpdump</B> as either a single
+             argument or as multiple arguments, whichever is more convenient.
+             Generally, if the expression contains shell metacharacters, it is
+             easier to pass it as a single, quoted argument.  Multiple argu-
+             ments are concatenated with spaces before being parsed.
+
+<a name="EXAMPLES" href="#end"><B>EXAMPLES</B></a>
+     To print all packets arriving at or departing from sundown:
+
+           <B>tcpdump host</B> sundown
+
+     To print traffic between helios and either hot or ace:
+
+           <B>tcpdump host</B> helios and (hot or ace)
+
+     To print all IP packets between ace and any host except helios:
+
+           <B>tcpdump ip</B> host ace <B>and not</B> helios
+
+     To print all traffic between local hosts and hosts at Berkeley:
+
+           <B>tcpdump net</B> ucb-ether
+
+     To print all FTP traffic through internet gateway snup:
+
+           <B>tcpdump</B> ' <B>gateway</B> snup <B>and</B> (<B>port</B> ftp <B>or</B> ftp-data) '
+
+           The expression is quoted to prevent the shell from mis-interpreting
+           the parentheses.
+
+     To print traffic neither sourced from nor destined for local hosts onto
+     your local net (if  you gateway to one other net, this stuff should never
+     make it):
+
+           <B>tcpdump ip</B> <B>and not</B> net localnet
+
+     To print the start and end packets (the SYN and FIN packets) of each TCP
+     connection that involves a non-local host:
+
+           tcpdump ' tcp[13] &amp; 3 != 0 <B>and not</B> <B>src and</B> <B>dst net</B> localnet '
+
+     To print IP packets longer than 576 bytes sent through gateway snup:
+
+           tcpdump ' <B>gateway snup</B> <B>and ip</B>[2:2] &gt; 576 '
+
+     To print IP broadcast or multicast packets that were <I>not</I> sent via Ether-
+     net broadcast or multicast:
+
+           tcpdump ' ether[0] &amp; 1 = 0 <B>and ip</B>[16] &gt;= 224 '
+
+     To print all ICMP packets that are not echo requests/replies (i.e., not
+     ping packets):
+
+           tcpdump ' icmp[0] != 8 <B>and icmp</B>[0] != 0 '
+
+<a name="OUTPUT+FORMAT" href="#end"><B>OUTPUT FORMAT</B></a>
+     The output of <B>tcpdump</B> is protocol dependent.  The following gives a brief
+     description and examples of most of the formats.
+
+     <I>Link</I> <I>Level</I> <I>Headers</I>
+
+     If the <B>-e</B> option is given, the link level header is printed out.  On Eth-
+     ernets, the source and destination addresses, protocol, and packet length
+     are printed.
+
+     On the packet filter logging interface <I>pflog</I>, logging reason (rule match,
+     bad-offset, fragment, short, normalize, memory), action taken
+     (pass/block), direction (in/out) and interface information is printed out
+     for each packet.
+
+     On FDDI networks, the <B>-e</B> option causes <B>tcpdump</B> to print the frame control
+     field, the source and destination addresses, and the packet length.  The
+     frame control field governs the interpretation of the rest of the packet.
+     Normal packets (such as those containing IP datagrams) are ``async''
+     packets, with a priority value between 0 and 7; for example, <B>async4</B>. Such
+     packets are assumed to contain an 802.2 Logical Link Control (LLC) pack-
+     et; the LLC header is printed if it is <I>not</I> an ISO datagram or a so-called
+     SNAP packet.
+
+     The following description assumes familiarity with the SLIP compression
+     algorithm described in RFC 1144.
+
+     On SLIP links, a direction indicator (`I' for inbound , `O' for
+     outbound), packet type, and compression information are printed out.  The
+     packet type is printed first.  The three types are <B>ip</B>, <B>utcp</B>, and <B>ctcp</B>. No
+     further link information is printed for <B>ip</B> packets.  For TCP packets, the
+     connection identifier is printed following the type.  If the packet is
+     compressed, its encoded header is printed out.  The special cases are
+     printed out as <B>*S+</B><I>n</I> and <B>*SA+</B><I>n</I>, where <I>n</I> is the amount by which the se-
+     quence number (or sequence number and ack) has changed.  If it is not a
+     special case, zero or more changes are printed.  A change is indicated by
+     `U' (urgent pointer), `W' (window), `A' (ack), `S' (sequence number), and
+     `I' (packet ID), followed by a delta (+n or -n), or a new value (=n). Fi-
+     nally, the amount of data in the packet and compressed header length are
+     printed.
+
+     For example, the following line shows an outbound compressed TCP packet,
+     with an implicit connection identifier; the ack has changed by 6, the se-
+     quence number by 49, and the packet ID by 6; there are 3 bytes of data
+     and 6 bytes of compressed header:
+
+           O <B>ctcp</B> * <B>A</B> +6 <B>S</B> +49 <B>I</B> +63 (6)</A>
+
+     <I>ARP/RARP</I> <I>Packets</I>
+
+     arp/rarp output shows the type of request and its arguments.  The format
+     is intended to be self-explanatory.  Here is a short sample taken from
+     the start of an rlogin from host rtsg to host csam:
+
+           arp who-has csam tell rtsg
+           arp reply csam is-at CSAM
+
+     In this example, Ethernet addresses are in caps and internet addresses in
+     lower case.  The first line says that rtsg sent an arp packet asking for
+     the Ethernet address of internet host csam. csam replies with its Ether-
+     net address CSAM.
+
+     This would look less redundant if we had done <B>tcpdump -n</B>:
+
+           arp who-has 128.3.254.6 tell 128.3.254.68
+           arp reply 128.3.254.6 is-at 02:07:01:00:01:c4
+
+     If we had done <B>tcpdump -e</B>, the fact that the first packet is broadcast
+     and the second is point-to-point would be visible:
+
+           RTSG Broadcast 0806 64: arp who-has csam tell rtsg
+           CSAM RTSG 0806 64: arp reply csam is-at CSAM
+
+     For the first packet this says the Ethernet source address is RTSG, the
+     destination is the Ethernet broadcast address, the type field contained
+     hex 0806 (type ETHER_ARP) and the total length was 64 bytes.
+
+     <I>TCP</I> <I>Packets</I>
+
+     The following description assumes familiarity with the TCP protocol de-
+     scribed in RFC 793. If you are not familiar with the protocol, neither
+     this description nor <B>tcpdump</B> will be of much use to you.
+
+     The general format of a tcp protocol line is:
+
+           <I>src</I> &gt; <I>dst</I>: <I>flags</I> <I>data-seqno</I> <I>ack</I> <I>window</I> <I>urgent</I> <I>options</I>
+
+     <I>src</I> and <I>dst</I> are the source and destination IP addresses and ports.  <I>flags</I>
+     is some combination of `S' (SYN), `F' (FIN), `P' (PUSH), or `R' (RST),
+     `W' (congestion Window reduced), `E' (ecn ECHO) or a single `.' (no
+     flags). <I>data-seqno</I> describes the portion of sequence space covered by the
+     data in this packet (see example below).  <I>ack</I> is the sequence number of
+     the next data expected by the other end of this connection.  <I>window</I> is
+     the number of bytes of receive buffer space available at the other end of
+     this connection.  <I>urg</I> indicates there is urgent data in the packet.
+     <I>options</I> are tcp options enclosed in angle brackets (e.g., &lt;mss 1024&gt;).
+
+     <I>src</I>, <I>dst</I> and <I>flags</I> are always present.  The other fields depend on the
+     contents of the packet's tcp protocol header and are output only if ap-
+     propriate.
+
+     Here is the opening portion of an rlogin from host rtsg to host csam.
+
+           rtsg.1023 &gt; csam.login: S 768512:768512(0) win 4096 &lt;mss 1024&gt;
+           csam.login &gt; rtsg.1023: S 947648:947648(0) ack 768513 win 4096 &lt;mss 1024&gt;
+           rtsg.1023 &gt; csam.login: . ack 1 win 4096
+           rtsg.1023 &gt; csam.login: P 1:2(1) ack 1 win 4096
+           csam.login &gt; rtsg.1023: . ack 2 win 4096
+           rtsg.1023 &gt; csam.login: P 2:21(19) ack 1 win 4096
+           csam.login &gt; rtsg.1023: P 1:2(1) ack 21 win 4077
+           csam.login &gt; rtsg.1023: P 2:3(1) ack 21 win 4077 urg 1
+           csam.login &gt; rtsg.1023: P 3:4(1) ack 21 win 4077 urg 1
+
+     The first line says that tcp port 1023 on rtsg sent a packet to port lo-
+     gin on host csam.  The `S' indicates that the SYN flag was set.  The
+     packet sequence number was 768512 and it contained no data.  The notation
+     is `<I>first</I>:<I>last</I>(<I>nbytes</I>)' which means sequence numbers <I>first</I> up to but not
+     including <I>last</I> which is <I>nbytes</I> bytes of user data.  There was no piggy-
+     backed ack, the available receive window was 4096 bytes and there was a
+     max-segment-size option requesting an mss of 1024 bytes.
+
+     Csam replies with a similar packet except it includes a piggy-backed ack
+     for rtsg's SYN. Rtsg then acks csam's SYN. The `.' means no flags were
+     set.  The packet contained no data so there is no data sequence number.
+     The ack sequence number is a 32-bit integer.  The first time <B>tcpdump</B> sees
+     a tcp connection, it prints the sequence number from the packet.  On sub-
+     sequent packets of the connection, the difference between the current
+     packet's sequence number and this initial sequence number is printed.
+     This means that sequence numbers after the first can be interpreted as
+     relative byte positions in the connection's data stream (with the first
+     data byte each direction being 1). <B>-S</B> will override this feature, causing
+     the original sequence numbers to be output.
+
+     On the 6th line, rtsg sends csam 19 bytes of data (bytes 2 through 20 in
+     the rtsg -&gt; csam side of the connection). The PUSH flag is set in the
+     packet.  On the 7th line, csam says it's received data sent by rtsg up to
+     but not including byte 21.  Most of this data is apparently sitting in
+     the socket buffer since csam's receive window has gotten 19 bytes small-
+     er.  Csam also sends one byte of data to rtsg in this packet.  On the 8th
+     and 9th lines, csam sends two bytes of urgent, pushed data to rtsg.
+
+     <I>UDP</I> <I>Packets</I>
+
+     UDP format is illustrated by this rwho packet:
+
+           actinide.who &gt; broadcast.who: udp 84
+
+     This says that port who on host actinide sent a udp datagram to port who
+     on host broadcast, the Internet broadcast address.  The packet contained
+     84 bytes of user data.
+
+     Some UDP services are recognized (from the source or destination port
+     number) and the higher level protocol information printed.  In particu-
+     lar, Domain Name service requests (RFC 1034/1035) and Sun RPC calls (RFC
+     1050) to NFS.
+
+     <I>UDP</I> <I>Name</I> <I>Server</I> <I>Requests</I>
+
+     The following description assumes familiarity with the Domain Service
+     protocol described in RFC 1035. If you are not familiar with the proto-
+     col, the following description will appear to be written in greek.
+
+     Name server requests are formatted as
+
+           <I>src</I> &gt; <I>dst</I>: <I>id</I> <I>op</I>? <I>flags</I> <I>qtype</I> <I>qclass</I> <I>name</I> (<I>len</I>)
+
+           e.g.,
+
+           h2opolo.1538 &gt; helios.domain: 3+ A? ucbvax.berkeley.edu. (37)
+
+     Host h2opolo asked the domain server on helios for an address record
+     (<I>qtype</I>=A) associated with the name ucbvax.berkeley.edu.  The query <I>id</I> was
+     3.  The `+' indicates the recursion desired flag was set.  The query
+     length was 37 bytes, not including the UDP and IP protocol headers.  The
+     query operation was the normal one (Query) so the <I>op</I> field was omitted.
+     If <I>op</I> had been anything else, it would have been printed between the 3
+     and the `+'. Similarly, the <I>qclass</I> was the normal one (C_IN) and was
+     omitted.  Any other <I>qclass</I> would have been printed immediately after the
+     A.
+
+     A few anomalies are checked and may result in extra fields enclosed in
+     square brackets: if a query contains an answer, name server or authority
+     section, <I>ancount</I>, <I>nscount</I>, or <I>arcount</I> are printed as ``[<I>n</I>a]'', ``[<I>n</I>n]'',
+     or ``[<I>n</I>au]'' where <I>n</I> is the appropriate count.  If any of the response
+     bits are set (AA, RA or rcode) or any of the ``must be zero'' bits are
+     set in bytes two and three, ``[b2&amp;3=<I>x</I>]'' is printed, where <I>x</I> is the hex
+     value of header bytes two and three.
+
+     <I>UDP</I> <I>Name</I> <I>Server</I> <I>Responses</I>
+
+     Name server responses are formatted as
+
+           <I>src</I> &gt; <I>dst</I>: <I>id</I> <I>op</I> <I>rcode</I> <I>flags</I> <I>a</I> / <I>n</I> / <I>au</I> <I>type</I> <I>class</I> <I>data</I> (<I>len</I>)
+
+           e.g.,
+
+           helios.domain &gt; h2opolo.1538: 3 3/3/7 A 128.32.137.3 (273)
+           helios.domain &gt; h2opolo.1537: 2 NXDomain* 0/1/0 (97)
+
+     In the first example, helios responds to query <I>id</I> 3 from h2opolo with 3
+     answer records, 3 name server records and 7 authority records.  The first
+     answer record is type A (address and its data is internet) address
+     128.32.137.3.  The total size of the response was 273 bytes, excluding
+     UDP and IP headers.  The <I>op</I> (Query) and <I>rcode</I> (NoError) were omitted, as
+     was the <I>class</I> (C_IN) of the A record.
+
+     In the second example, helios responds to query <I>op</I> 2 with a <I>rcode</I> of non-
+     existent domain (NXDomain) with no answers, one name server and no au-
+     thority records.  The `*' indicates that the authoritative answer bit was
+     set.  Since there were no answers, no <I>type</I>, <I>class</I> or <I>data</I> were printed.
+
+     Other flag characters that might appear are `-' (recursion available, RA,
+     <I>not</I> set) and ``|'' (truncated message, TC, set).  If the question section
+     doesn't contain exactly one entry, ``[<I>n</I>q]'' is printed.
+
+     Name server requests and responses tend to be large and the default
+     <I>snaplen</I> of 68 bytes may not capture enough of the packet to print.  Use
+     the <B>-s</B> flag to increase the <I>snaplen</I> if you need to seriously investigate
+     name server traffic.  ``<B>-s</B> 128'' has worked well for me.
+
+     <I>NFS</I> <I>Requests</I> <I>and</I> <I>Replies</I>
+
+     Sun NFS (Network File System) requests and replies are printed as:
+
+           <I>src</I>.<I>xid</I> &gt; <I>dst</I>.<I>nfs</I>: <I>len</I> <I>op</I> <I>args</I>
+           <I>src</I>.<I>nfs</I> &gt; <I>dst</I>.<I>xid</I>: <I>reply</I> <I>stat</I> <I>len</I> <I>op</I> <I>results</I>
+
+           sushi.6709 &gt; wrl.nfs: 112 readlink fh 21,24/10.73165
+           wrl.nfs &gt; sushi.6709: reply ok 40 readlink "../var"
+           sushi.201b &gt; wrl.nfs:
+                   144 lookup fh 9,74/4096.6878 "xcolors"
+           wrl.nfs &gt; sushi.201b:
+                   reply ok 128 lookup fh 9,74/4134.3150
+
+     In the first line, host sushi sends a transaction with ID 6709 to wrl.
+     The number following the src host is a transaction ID, <I>not</I> the source
+     port.  The request was 112 bytes, excluding the UDP and IP headers.  The
+     <I>op</I> was a readlink (read symbolic link) on fh (``file handle'')
+     21,24/10.731657119.  If one is lucky, as in this case, the file handle
+     can be interpreted as a major,minor device number pair, followed by the
+     inode number and generation number.  Wrl replies with a <I>stat</I> of ok and
+     the contents of the link.
+
+     In the third line, sushi asks wrl to lookup the name ``xcolors'' in di-
+     rectory file 9,74/4096.6878.  The data printed depends on the operation
+     type.  The format is intended to be self-explanatory if read in conjunc-
+     tion with an NFS protocol spec.
+
+     If the <B>-v</B> (verbose) flag is given, additional information is printed.
+     For example:
+
+           sushi.1372a &gt; wrl.nfs:
+                   148 read fh 21,11/12.195 8192 bytes @ 24576
+           wrl.nfs &gt; sushi.1372a:
+                   reply ok 1472 read REG 100664 ids 417/0 sz 29388
+
+     <B>-v</B> also prints the IP header TTL, ID, and fragmentation fields, which
+     have been omitted from this example.  In the first line, sushi asks wrl
+     to read 8192 bytes from file 21,11/12.195, at byte offset 24576.  Wrl
+     replies with a <I>stat</I> <I>of</I> ok; the packet shown on the second line is the
+     first fragment of the reply, and hence is only 1472 bytes long.  The oth-
+     er bytes will follow in subsequent fragments, but these fragments do not
+     have NFS or even UDP headers and so might not be printed, depending on
+     the filter expression used.  Because the <B>-v</B> flag is given, some of the
+     file attributes (which are returned in addition to the file data) are
+     printed: the file type (`REG', for regular file), the file mode (in
+     octal), the UID and GID, and the file size.
+
+     If the <B>-v</B> flag is given more than once, even more details are printed.
+
+     NFS requests are very large and much of the detail won't be printed un-
+     less <I>snaplen</I> is increased.  Try using ``<B>-s</B> 192'' to watch NFS traffic.
+
+     NFS reply packets do not explicitly identify the RPC operation.  Instead,
+     <B>tcpdump</B> keeps track of ``recent'' requests, and matches them to the
+     replies using the <I>xid</I> (transaction ID). If a reply does not closely fol-
+     low the corresponding request, it might not be parsable.
+
+     <I>KIP</I> <I>AppleTalk</I> (DDP in UDP)
+
+     AppleTalk DDP packets encapsulated in UDP datagrams are de-encapsulated
+     and dumped as DDP packets (i.e., all the UDP header information is
+     discarded). The file <I>/etc/atalk.names</I> is used to translate AppleTalk net
+     and node numbers to names.  Lines in this file have the form
+
+           <I>number</I>          <I>name</I>
+
+           1.254           ether
+           16.1            icsd-net
+           1.254.110       ace
+
+     The first two lines give the names of AppleTalk networks.  The third line
+     gives the name of a particular host (a host is distinguished from a net
+     by the 3rd octet in the number; a net number <I>must</I> have two octets and a
+     host number <I>must</I> have three octets).  The number and name should be sepa-
+     rated by whitespace (blanks or tabs).  The <I>/etc/atalk.names</I> file may con-
+     tain blank lines or comment lines (lines starting with a `#').
+
+     AppleTalk addresses are printed in the form
+
+           <I>net</I>.<I>host</I>. <I>port</I>
+
+           e.g.,
+
+           144.1.209.2 &gt; icsd-net.112.220
+           office.2 &gt; icsd-net.112.220
+           jssmag.149.235 &gt; icsd-net.2
+
+     If <I>/etc/atalk.names</I> doesn't exist or doesn't contain an entry for some
+     AppleTalk host/net number, addresses are printed in numeric form.  In the
+     first example, NBP (DDP port 2) on net 144.1 node 209 is sending to what-
+     ever is listening on port 220 of net icsd-net node 112.  The second line
+     is the same except the full name of the source node is known
+     (``office''). The third line is a send from port 235 on net jssmag node
+     149 to broadcast on the icsd-net NBP port.  The broadcast address (255)
+     is indicated by a net name with no host number; for this reason it is a
+     good idea to keep node names and net names distinct in <I>/etc/atalk.names</I>.
+
+     NBP (name binding protocol) and ATP (AppleTalk transaction protocol)
+     packets have their contents interpreted.  Other protocols just dump the
+     protocol name (or number if no name is registered for the protocol) and
+     packet size.
+
+     NBP packets are formatted like the following examples:
+
+     icsd-net.112.220 &gt; jssmag.2: nbp-lkup 190: "=:LaserWriter@*"
+     jssmag.209.2 &gt; icsd-net.112.220: nbp-reply 190: "RM1140:LaserWriter@*" 250
+     techpit.2 &gt; icsd-net.112.220: nbp-reply 190: "techpit:LaserWriter@*" 186
+
+     The first line is a name lookup request for laserwriters sent by net ics-
+     di-net host 112 and broadcast on net jssmag.  The nbp ID for the lookup
+     is 190.  The second line shows a reply for this request (note that it has
+     the same id) from host jssmag.209 saying that it has a laserwriter re-
+     source named RM1140 registered on port 250.  The third line is another
+     reply to the same request saying host techpit has laserwriter techpit
+     registered on port 186.
+
+     ATP packet formatting is demonstrated by the following example:
+
+           jssmag.209.165 &gt; helios.132: atp-req  12266&lt;0-7&gt; 0xae030001
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:0 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:1 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:2 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:3 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:4 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:5 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:6 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp*12266:7 (512) 0xae040000
+           jssmag.209.165 &gt; helios.132: atp-req  12266&lt;3,5&gt; 0xae030001
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:3 (512) 0xae040000
+           helios.132 &gt; jssmag.209.165: atp-resp 12266:5 (512) 0xae040000
+           jssmag.209.165 &gt; helios.132: atp-rel  12266&lt;0-7&gt; 0xae030001
+           jssmag.209.133 &gt; helios.132: atp-req* 12267&lt;0-7&gt; 0xae030002
+
+     Jssmag.209 initiates transaction id 12266 with host helios by requesting
+     up to 8 packets (the``&lt;0-7&gt;''). The hex number at the end of the line is
+     the value of the <I>userdata</I> field in the request.
+
+     Helios responds with 8 512-byte packets.  The ``:<I>n</I>'' following the trans-
+     action id gives the packet sequence number in the transaction and the
+     number in parentheses is the amount of data in the packet, excluding the
+     atp header.  The `*' on packet 7 indicates that the EOM bit was set.
+
+     Jssmag.209 then requests that packets 3 &amp; 5 be retransmitted.  Helios re-
+     sends them then jssmag.209 releases the transaction.  Finally, jssmag.209
+     initiates the next request.  The `*' on the request indicates that XO
+     (exactly once) was <I>not</I> set.
+
+     <I>IP</I> <I>Fragmentation</I>
+
+     Fragmented Internet datagrams are printed as
+
+           (<B>frag</B> <I>id</I> : <I>size</I> @ <I>offset</I> [+])
+
+     A `+' indicates there are more fragments.  The last fragment will have no
+     `+'.
+
+     <I>id</I> is the fragment ID.  <I>size</I> is the fragment size (in bytes) excluding
+     the IP header.  <I>offset</I> is this fragment's offset (in bytes) in the origi-
+     nal datagram.
+
+     The fragment information is output for each fragment.  The first fragment
+     contains the higher level protocol header and the fragment info is print-
+     ed after the protocol info.  Fragments after the first contain no higher
+     level protocol header and the fragment info is printed after the source
+     and destination addresses.  For example, here is part of an ftp from ari-
+     zona.edu to lbl-rtsg.arpa over a CSNET connection that doesn't appear to
+     handle 576 byte datagrams:
+
+           arizona.ftp-data &gt; rtsg.1170: . 1024:1332(308) ack 1 win 4096 (frag 595a:328@0+)
+           arizona &gt; rtsg: (frag 595a:204@328)
+           rtsg.1170 &gt; arizona.ftp-data: . ack 1536 win 2560
+
+     There are a couple of things to note here: first, addresses in the 2nd
+     line don't include port numbers.  This is because the TCP protocol infor-
+     mation is all in the first fragment and we have no idea what the port or
+     sequence numbers are when we print the later fragments.  Second, the tcp
+     sequence information in the first line is printed as if there were 308
+     bytes of user data when, in fact, there are 512 bytes (308 in the first
+     frag and 204 in the second). If you are looking for holes in the sequence
+     space or trying to match up acks with packets, this can fool you.
+
+     A packet with the IP <B>don't fragment</B> flag is marked with a trailing
+     ``(DF)''.
+
+     <I>Timestamps</I>
+
+     By default, all output lines are preceded by a timestamp.  The timestamp
+     is the current clock time in the form <I>hh</I>:<I>mm</I>:<I>ss</I>.<I>frac</I> and is as accurate as
+     the kernel's clock.  The timestamp reflects the time the kernel first saw
+     the packet.  No attempt is made to account for the time lag between when
+     the Ethernet interface removed the packet from the wire and when the ker-
+     nel serviced the ``new packet'' interrupt.
+
+<a name="SEE+ALSO" href="#end"><B>SEE ALSO</B> bpf(4), pcap(3)
+
+<a name="AUTHORS" href="#end"><B>AUTHORS</B></a>
+     Van Jacobson (<A HREF="mailto:van@ee.lbl.gov">van@ee.lbl.gov</A>), Craig Leres (<A HREF="mailto:leres@ee.lbl.gov">leres@ee.lbl.gov</A>) and Steven
+     McCanne (<A HREF="mailto:mccanne@ee.lbl.gov">mccanne@ee.lbl.gov</A>), all of the Lawrence Berkeley Laboratory,
+     University of California, Berkeley, CA.
+
+<a name="BUGS" href="#end"><B>BUGS</B></a>
+     Please send bug reports to <A HREF="mailto:tcpdump@ee.lbl.gov">tcpdump@ee.lbl.gov</A> or <A HREF="mailto:libpcap@ee.lbl.gov">libpcap@ee.lbl.gov</A>.
+
+     Some attempt should be made to reassemble IP fragments or, at least to
+     compute the right length for the higher level protocol.
+
+     Name server inverse queries are not dumped correctly: The (empty) ques-
+     tion section is printed rather than real query in the answer section.
+     Some believe that inverse queries are themselves a bug and prefer to fix
+     the program generating them rather than <B>tcpdump</B>.
+
+     Apple Ethertalk DDP packets could be dumped as easily as KIP DDP packets
+     but aren't.  Even if we were inclined to do anything to promote the use
+     of Ethertalk (we aren't, LBL doesn't allow Ethertalk on any of its net-
+     works so we'd would have no way of testing this code).
+
+     A packet trace that crosses a daylight saving time change will give
+     skewed time stamps (the time change is ignored).
+
+     Filter expressions that manipulate FDDI headers assume that all FDDI
+     packets are encapsulated Ethernet packets.  This is true for IP, ARP, and
+     DECNET Phase IV, but is not true for protocols such as ISO CLNS. There-
+     fore, the filter may inadvertently accept certain packets that do not
+     properly match the filter expression.
+
+OpenBSD 3.1                      May 25, 1999                               14
+</PRE>
+<a name="end">
+<hr noshade>
+<a href="#NAME">NAME</a> |
+<a href="#SYNOPSIS">SYNOPSIS</a> |
+<a href="#DESCRIPTION">DESCRIPTION</a> |
+<a href="#EXAMPLES">EXAMPLES</a> |
+<a href="#OUTPUT+FORMAT">OUTPUT FORMAT</a> |
+<a href="#SEE+ALSO">SEE ALSO</a> |
+<a href="#AUTHORS">AUTHORS</a> |
+<a href="#BUGS">BUGS</a>
+</BODY>
+</HTML>

@@ -1,0 +1,110 @@
+<html>
+
+<head>
+<meta name="description" content="SWBench is a simple program to measure
+  the hit rate of a webserver. It is in early stage of development but
+  nevertheless it is usable however. And it is free!">
+<meta name="keywords" content="swbench, webserver benchmark">
+</head>
+
+<body bgcolor="#ffffff">
+<center>
+<br><br>
+<table width=460 cellspacing=0 border=0 cellpadding=0>
+  <tr>
+    <td align="right"><img src="swbench.gif"></td>
+  </tr>
+  <tr>
+    <td align="right">
+      <br>
+      <i><b>SWBench - A Simple Webserver Benchmark program</b></i><br>
+      <font size="1"><i>(C) 1998 by Lars Hoss</i></font>
+    </td>
+  </tr>
+  <tr>
+    <td><hr noshade width="460"></td>
+  </tr>
+</table>
+[ <a href="index.html" target="_top">Home</a> ]
+<br><br><br>
+<table width="460">
+  <tr>
+    <td>
+      Current version: <b>0.1.0</b>
+    </td>
+    <td align="right">
+      <a href="swbench-0.1.0.tar.gz">Click here for download</a>
+    </td>
+  </tr>
+</table>
+<table width="460">
+  <tr>
+    <td>
+      <table width="460" bgcolor=#5555ee cellpadding=3>
+        <tr><td><font color=#ffffff size=3><b>What is it</b></font></td></tr>
+      </table>
+      SWBench is a very simple program to measure the hit rate of a given webserver.
+      Hit rate means the the capability to serve pages as many as possible per 
+      second. It uses the UNIX fork() system function to clone itself. Then each 
+      child runs a loop where it tries to get the page index.html from the webserver. 
+      Whenever a child gets  a page, it writes its result into a shared memory 
+      segment. When pressing control+c the program stops and adds the result
+      of all childs togehter. By dividing the total result through the elapsed time
+      of the benchmark the average hit rate is calculated.
+      SWBench is free and licensed under the GPL.
+      <br><br>
+      <table width="460" bgcolor=#5555ee cellpadding=3>
+        <tr><td><font color=#ffffff size=3><b>Why do I have written it</b></font></td></tr>
+      </table>
+      My employers decided to set up their own internet webserver.
+      We wanted to measure the performance of our system and how it 
+      changes by modifing some parameters. So I started to write my
+      own benchmark program. 
+      Furthermore I wanted to learn how things like shared memory and
+      fork() do work.
+      <br><br>
+      <table width="460" bgcolor=#5555ee cellpadding=3>
+        <tr><td><font color=#ffffff size=3><b>What do I need</b></font></td></tr>
+      </table>
+      I developed this program under Linux 2.0.33. The program uses Systen V
+      shared memory to communicate between the childs. Because it is completly
+      written in C, it must be possible to compile it on other operating systems
+      supporting System V shared memory.
+      <br><br>
+      <table width="460" bgcolor=#5555ee cellpadding=3>
+        <tr><td><font color=#ffffff size=3><b>What is planned for the future</b></font></td></tr>
+      </table>
+      There are many things todo. More command line options, better result output and
+      so on. This is the first release so many things can be done in the future :-)<p>
+      If you have some ideas or wishes, drop me a <a href="mailto:lars.hoss@munich.netsurf.de">mail</a>.
+      <br><br>
+      <table width="460" bgcolor=#5555ee cellpadding=3>
+        <tr><td><font color=#ffffff size=3><b>Who helped me</b></font></td></tr>
+      </table>
+      <ul>
+        <li>-mat- brandy: He added a nice replay mode
+      </ul>
+    </td>
+  </tr>
+</table>
+<br><br>
+<hr noshade width="460">
+<table width="460">
+  <tr valign="top">
+    <td>
+      <font size="1">
+        SWBench - A Simple Webserver Benchmark program<br>
+        (C) 1998 by Lars Hoss
+      </font>
+    </td>
+    <td align="right">
+      <font size="1">
+        Last update: 03/29/98
+      </font>
+    </td>
+  </tr>
+</table>
+</center>
+</body>
+
+</html>

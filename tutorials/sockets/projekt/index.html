@@ -1,0 +1,62 @@
+<HTML>
+<HEAD>
+<TITLE>Internet-Technologie - Praktikum</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF
+0000">
+<CENTER>
+<TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H2>Praktikum "Internet-Technologie"</H2>
+<B><I>von Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1 ALIGN=CENTER>Observer</H1>
+Das Projekt im WS 2005/06 sind Programme zum Monitoring der verschiedensten 
+Daten. Festgelegt wurden folgende Eigenschaften:
+<ul>
+<li>Stand-alone-Server
+<li>Port 1860
+<li>Klartext-Protokoll (wie immer)
+<li>Client-Authentisierung
+</ul>
+<P>
+
+<H4>Datenerfassung:</h4>
+Statische Daten:<br>
+<ul>
+<li>Hostname
+<li>OS-Version (uname, nmap)
+<li>CPU-Info (/proc/cpuinfo, geladene Module)
+<li>Speicher-Info (/proc/meminfo)
+<li>USB-Devices (/proc/bus/usb/devices)
+<li>Netzwerk-Info (ifconfig, iwconfig, route)
+<li>Bootmessages (dmesg)
+<li>Dateisystem, Plattengr&ouml;&szlig;e (df, mounti, /etc/[v]fstab)
+<li>Offene Ports (nmap)
+</ul>
+<p>
+
+Dynamische Daten:<br>
+<ul>
+<li>freier Platten-Speicher (df, du)
+<li>freier Arbeitsspeicher, Load, Anz. User, Uptime (top)
+<li>Netzwerk-Verkehr (/proc/net/dev, netstat)
+<li>laufende Prozesse (nur bestimmte, ps-Kommando)
+<li>User (last-Kommando, who[do]-Kommando)
+<li>ggf. Anfragen an Standard-Dienste (Monitoring)
+</ul>
+<p>
+...
+
+<p>
+<H4>Dateien (Links)</H4>
+<p>
+<UL>
+<LI>Die <A HREF="linuxtools.html">Liste der Linux-Tools</A>.
+<LI>Der erste Server heisst <A HREF="observer.pl">observer.pl</A>.
+<LI>Der erste Client heisst <A HREF="os-client.pl">os-client.pl</A>.
+<LI>Die ersten Ergebnisse heissen <A HREF="result">result</A>.
+</UL>
+<H6><I>Letzte Aktualisierung: 26. Nov 2005</I></H6>
+</BODY>
+</HTML>

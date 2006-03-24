@@ -1,0 +1,1065 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<A NAME="4"></A>
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>8 Sicherheit</H1>
+<P><CENTER><IMG SRC="bofh.gif"></CENTER><P>
+<A NAME="8.1"></A>
+<H2>8.1 Allgemeines</H2>
+Mit zunehmender Abh&auml;gigkeit von Servern im Rechnernetz spielt die
+Verf&uuml;gbarkeit dieser Systeme eine immer gr&ouml;&szlig;ere Rolle.
+Neben Verfahren der Fehlertoleranz zur Steigerung der Zuverl&auml;ssigkeit
+spielen Verfahren der Rechnersicherheit eine wichtige Rolle, 
+um die Verf&uuml;gbarkeit von Rechnersystemen zu steigern.
+Weiterhin sind Rechner mit Anschlu&szlig; an Netze, insbesondere an
+&ouml;ffentliche Netze, zus&auml;tzlichen Anforderungen an die 
+Sicherheit ausgesetzt, da sie von dort Angriffen ausgesetzt sein k&ouml;nnen.
+Der Zugang zum Netz und die Sicherheit im Netz sind sich durchaus manchmal
+widersprechende Anforderungen.
+<P>
+<TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0 BGCOLOR="#EEEEEE" ALIGN=CENTER WIDTH="60%">
+<TR><TD>Eine ausf&uuml;hrliche Beschreibung der wichtigsten Aspekte befinden
+sich im Skript <B><A HREF="../sicherheit/index.html">Netzwerksicherheit</A></B>.
+Deshalb werden an dieser Stelle nur einige Aspekte zusammengefasst, die sich
+auf UNIX/Linux-Server beziehen, administrative Erg&auml;nzungen gebracht und
+einige Standard-Tools beschrieben.
+</TD></TR></TABLE>
+<P>
+
+
+<A NAME="8.2"></A>
+<H2>8.2 System h&auml;rten</H2>
+Das H&auml;rten eines Systems beginnt schon mit der Betriebssystem-Neuinstallation. 
+Stellen Sie den Rechner in ein isoliertes Netzwerk. Zu keiner Zeit sollte man 
+das ungesch&uuml;tzte System an ein aktives Netz oder gar das Internet anbinden 
+und es so einer m&ouml;glichen Kompromittierung aussetzen. Der erste Schritt ist 
+die Auswahl der Installationspakete. Es wird nur das Minimum installiert, das 
+man braucht um maximale Effizienz zu behalten. Je weniger Software installiert 
+wird, desto weniger potentielle Sicherheitl&uuml;cken entstehen. Unabh&auml;ngig von der 
+Installationsvariante sollte man die man-pages und die HOWTOs mitinstallieren. 
+W&auml;hrend der Installation wird man aufgefordert, sein System zu partitionieren. 
+Man braucht zumindest eine root-Partition und eine separate Partition f&uuml;r <tt>/var</tt>, 
+wohin die Systemlogs und Mails geschrieben werden. Indem man <tt>/var</tt> isoliert, verhindert 
+man, das die root-Partition vollgeschrieben wird. Eventuell sprendoert man f&uuml;r die
+Datenbereiche des Web- oder FTP-Servers eine weitere Partition.
+Wenn auf dem System nicht vertrauensw&uuml;rdige Benutzer existieren, sollte 
+man evtl. eine extra <tt>/home</tt>-Partition anlegen, damit diese Nutzer nicht die 
+root-Partition vollschreiben k&ouml;nnen. Dazu kommt dann noch die swap-Partition. 
+Normalerweise nimmt man hier die doppelte RAM-Kapazit&auml;t.<br>
+Nachdem das System nach der Installation neu gestartet hat, sollte man unbedingt 
+die empfohlenen Sicherheitspatches einspielen. Diese Patches sind extrem wichtig, 
+um ein System zu h&auml;rten und sollten immer auf dem aktuellen Stand gehalten werden. 
+Ohne diese Updates ist das System leicht zu kompromittieren. 
+<p>
+
+<H4>Dienste eliminieren </H4> 
+Nach der Installation aller Pakete und Patches und dem Neustart des Systems 
+sind wir jetzt bereit das Betriebssystem zu h&auml;rten. H&auml;rten besteht 
+im wesentlichen darin, Dienste abzuschalten, Logging hinzuzuf&uuml;gen, verschiedene 
+Dateien zu bearbeiten und TCP-Wrapper zu implementieren. 
+<p>
+Linux ist ein m&auml;chtiges Betriebssystem, das viele n&uuml;tzliche Dienste anbietet. 
+Die meisten davon werden aber nicht gebraucht und stellen ein potentielles Risiko. 
+Der erste Ansatzpunkt ist die Datei <tt>/etc/inetd.conf</tt>. Diese Datei legt fest, 
+auf welche Dienste der Daemon lauscht. Im Ursprungszustand ist der <tt>inetd</tt> 
+f&uuml;r eine Vielzahl von Diensten konfiguriert. Es werden alle Zeilen auskommentiert, 
+die nicht ben&ouml;tigte Dienste enthalten ("#" an den Zeilenanfang setzen). Zur Sicherheit
+k&ouml;nnen Sie sich alle noch aktiven Dienste mittels <tt>grep -v "^#" /etc/inetd.conf</tt>
+anzeigen lassen. Danach mu&szlig; der inetd ein HUP-Signal bekommen. Da aber nach allen
+Arbeiten der Rechner sowieso nochmals gebootet wird, kann man sich das an dieser
+Stelle sparen.
+<p>
+Der n&auml;chste Ansatzpunkt sind die Start-Skripte. Diese Skripte bestimmen, welche 
+Dienste durch den init-Prozess gestartet werden. Man findet sie je nach Distribution
+in <tt>/etc/init.d</tt>, <tt>/sbin/init.d</tt> oder <tt>/etc/rc.d</tt>.
+Hier werden alle nicht ben&ouml;tigten Start/Stop-Skripte durch Anh&auml;ngen von ".inaktiv"
+umbenannt. Kritisch sind hier unter anderem:
+<PRE>
+telnetd    (Telnet abschalten, Logins nur per ssh erlauben)
+portmap    (wird von rpc-Diensten wie NIS oder NFS ben&ouml;tigt)
+netfs      (Der NFS-Client)
+rstatd     (Man sollte versuchen, auf alle "r"-Dienste zu verzichten)
+rusersd
+rwhod
+rwalld
+bootparamd (F&uuml;r diskless clients, abschalten)
+yppasswdd  (Nur bei NIS-Servern, ein extrem verwundbarer Dienst)
+ypserv
+atd        (Wird vom "at"-Dienst benutzt)
+snmpd      (SNMP daemon, kann detaillierte Informationen &uuml;ber das System geben)
+named      (DNS server)
+routed     (RIP: abschalten!)
+lpd        (Druckdienste)
+nfs        (Ben&ouml;tigt f&uuml;r den NFS Server, sonst abschalten)
+amd        (AutoMount daemon)
+gated      (f&uuml;r andere Routingprotokolle wie OSPF)
+sendmail   (man kann dann immer noch E-Mails senden, nur keine empfangen oder weiterleiten)
+ypbind     (n&ouml;tig, wenn man ein NIS-Client ist)
+xfs        (X font Server)
+innd       (News Server)
+linuxconf  (Fernkonfiguration per Browser. Der Traum jedes "b&ouml;sen Buben")
+</pre>
+<p>
+Nach der Anpassung der Skripte (und einem Reboot), kann man sich mit dem Kommando 
+<tt>ps -aux</tt> ansehen, wwelche Prozesse noch laufen. Au&szlig;erdem sollte man feststellen, 
+welche Dienste noch laufen: <tt>netstat -na --ip</tt>
+<p>
+
+<H4>Logging und Tuning </H4> 
+Alle Systemlogs liegen in <tt>/var/log</TT>. Standardm&auml;&szlig;ig hat Linux eine 
+hervorragende Logfunktion, au&szlig;er f&uuml;r ftp. Man hat zwei M&ouml;glichkeiten, ftp mitzuloggen: 
+entweder man editiert die Datei <tt>/etc/ftpaccess</tt> oder die Datei 
+<tt>/etc/inetd.conf</tt>. Letzteres ist einfacher. &auml;ndern Sie die Date wie folgt:
+<pre>
+ftp stream tcp nowait root /usr/sbin/tcpd in.ftpd -l -L -i -o 
+</pre>
+Die -l Option sorgt daf&uuml;r, da&szlig; jede ftp-Sitzung im syslog protokolliert wird.
+Wird das -L flag gesetzt, werden bei Aufruf des ftp-Servers alle USER-Befehle 
+mitprotokolliert. Die -i Option bewirkt, da&szlig; alle Dateien, die der FTP-Server 
+empf&auml;ngt, in der Datei xferlog mitprotokolliert werden  und durch die Option -o
+werden alle Dateien, die der Server gesendet hat, in der Datei xferlog 
+mitprotokolliert.
+<p>
+Der n&auml;chste Schritt besteht darin, die meisten Systemaccounts aus der Datei
+<tt>/etc/passwd</tt> zu entfernen. Linux stellt diese Accounts f&uuml;r verschiedene 
+Systemdienste zur Verf&uuml;gung, die eventuell nicht gebraucht werden. Je mehr Benutzer
+es gibt, um so einfacher ist es, Zugriff auf ein System zu bekommen. Ein Beispiel 
+ist der User "news". Wenn kein Newsserver l&auml;uft, ist dieser Benutzer &uuml;berfl&uuml;ssig 
+<p>
+Jetzt wird die Datei <tt>/etc/ftpusers</tt> angepa&szlig;t. Jeder Benutzer, der in dieser 
+Datei aufgef&uuml;hrt wird, darf sich <b>nicht</b> per FTP anmelden. Diese Anpassung verbietet 
+es g&auml;ngigen Systemaccounts wie <tt>root</tt> oder <tt>bin</tt> FTP-Sitzungen aufzubauen. 
+Bei Linux existiert diese Datei standardm&auml;&szlig;ig. Stellen sie sicher, das <tt>root</tt> auf 
+jeden Fall enthalten ist.
+<p>
+Die Datei <tt>/etc/securetty</tt> listet auf, mit welchen ttys sich <tt>root</tt> verbinden 
+darf. Lassen sie nur die Konsol-ttys (<tt>tty1, tty2</tt> usw.) in dieser Datei um 
+Root-Logins auf lokale Terminals zu beschr&auml;nken. 
+<P>
+Kontollieren Sie alle cron-Auftr&auml;ge (<tt>/etc/crontab</tt>, <tt>/etc/cron.d</tt>, die
+Crontab von <tt>root</tt> usw.), ob da nur das enthalten ist, was Sie wirklich wollen.
+<P>
+
+<H4>Verbindungen zum Server</H4>
+Es ist wichtig, zur Administration oder den Upload von Dateien eine sichere Verbindung 
+zum Server zu haben. Daf&uuml;r bieten sich zwei M&ouml;glichkeiten, <tt>ssh</tt> und der TCP-Wrapper.
+<tt>ssh</tt> verschl&uuml;sselt jede Kommunikation zwischen Administrator und Server. Ein 
+TCP-Wrapper wehrt zwar unerw&uuml;nschte Verbindungen ab, sch&uuml;tzt den Netzverkehr nicht 
+gegen das Abh&ouml;ren. Hacker k&ouml;nnen immer noch jeden Tastendruck im Netz mitlesen. 
+
+Ersetzen Sie <tt>telnet</tt> und <tt>ftp</tt> durch <tt>ssh</tt> und <tt>scp</tt>. 
+<tt>ssh</tt> &auml;hnelt TCP-Wrappern insofern, als es seine eigenen Protokollorierung 
+besitzt und einschr&auml;nken kann, welche Systeme sich mit dem Server verbinden k&ouml;nnen. 
+Mehr Informationen &uuml;ber <tt>ssh</tt> sowie das Programm selber inklusive Sourcecode 
+f&uuml;r Clients und den Serverdaemon findet man unter 
+<a href="http://www.ssh.org/download.html">http://www.ssh.org/download.html</a>. 
+Eine andere Variante ist OpenSSH 
+(<a href="http://www.openssh.com">http://www.openssh.com</a>).
+<p>
+Wenn man sich ohne Vorbereitung versucht anzumelden wird man wie gewohnt nach 
+einem Passwort gefragt. Vorher wird noch sichergestellt, ob man sich mit dem 
+Rechner &uuml;berhaupt verbinden will:
+<pre>
+$ <b>ssh tralala</b>
+The authenticity of host 'tralala (192.168.1.32)' can't be established.
+RSA key fingerprint is 69:fd:32:d8:cf:d6:f3:8c:37:41:97:3f:54:25:90:0b.
+Are you sure you want to continue connecting (yes/no)? <b>yes</b>
+Warning: Permanently added 'tralala,192.168.1.32' (RSA) to the list of known hosts.
+plate@tralala's password: <b>geheim</b>
+... 
+</pre>
+<p>
+Ein TCP-Wrapper kann zwar nicht verschl&uuml;sseln, ist aber in der Lage 
+zu protokollieren und zu kontrollieren wer Zugriff auf den Server hat. Es handelt 
+sich hier um ein Programm, das sich zwischen den <tt>inetd</tt> und die Dienste wie 
+<tt>telnet</tt> und <tt>ftp</tt> schaltet. Anhand der Dateien <tt>/etc/hosts.allow</tt>
+und <tt>/etc/hosts.deny</tt> wird die Zugriffsberechtigung &uuml;berpr&uuml;ft. Wenn der Zugriff 
+berechtigt erfolgt, &uuml;bergibt der Wrapper die Verbindung an das entsprechende 
+Programm. Ansonsten wird die Verbindung gekappt. Die Konfiguration wurde bereits in
+<a HREF="server3.html#3.4">Kapitel 3.4</A> besprochen. Deshalb hier nur noch zwei 
+Empfehlungen f&uuml;r den Einsatz von TCP-Wrappern:
+<OL>
+<li>IP-Adressen statt System- oder Dom&auml;nennamen verwenden
+<li>In der Datei <tt>/etc/hosts.deny</tt> jeden Zugriff verbieten und dann selektiv 
+in der Datei <tt>/etc/hosts.allow</tt> wieder freigeben.
+</OL>
+<p>
+
+<H4>Weitere Ma&szlig;nahmen</H4>
+Die oben beschriebenen Ma&szlig;nahmen sind absolut notwendig. Die folgenden Aktionen
+verbessern die Sicherheit weiter.
+<UL>
+<li>Erstellen Sie eine administrative Gruppe (<tt>wheel</tt> oder <tt>staff</tt>). 
+Diese Gruppe besteht aus ausgew&auml;hlten Personen, die administrative Kommandos wie 
+z.B. <tt>/usr/bin/su</tt> ausf&uuml;hren k&ouml;nnen. Durch Beschr&auml;nkung der Personengruppe
+steigert man die Systemsicherheit. Bei allen kritischen Systemprogrammen &auml;ndern 
+Sie die Gruppe auf <tt>wheel</tt> und beschr&auml;nken Sie die Execute-Berechtigungen 
+auf Eigent&uuml;mer und Gruppe (Achtung: das SUID- oder GUID-Bit mu&szlig; unver&auml;ndert bleiben),
+z. B. mit <tt>chmod o-x programmname</tt>.
+<li>Dann werden die Dateien <tt>.rhosts</tt>, <tt>.netrc</tt> und 
+<tt>/etc/hosts.equiv</tt> gesperrt, indem alle Rechte entfernt werden 
+(<tt>chmod 0 Dateiname</tt>). Die r-Befehle nutzen diese Dateien um auf Systeme 
+zuzugreifen. Sind die Dateinen nicht vorhanden, legt man sie per <tt>touch</tt>-Befehl 
+an.
+</UL>
+<P>
+
+<A NAME="8.3"></A>
+<H2>8.3 Tools</H2>
+<H3>Hackertools?</H3>
+</B>Das einzig wirklich gef&auml;hrliche Hackertool sitzt zwischen den Ohren 
+und vor dem Bildschirm.</B>
+<P>
+Welche Tools liegen auf meiner Platte?
+<P>
+<TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0>
+<TR><TD>bash, perl</TD>
+<TD>Werkzeuge zur Steuerung von Komponenten f&uuml;r den
+Netzwerkzugriff, mit dem Ziel, aus vorgefertigten
+Bauteilen schnell massgeschneiderte Angriffstools
+zusammenstellen zu k&ouml;nnen.
+</TD></TR><TR><TD>
+ldaplib</TD><TD>Bibliothek zum Erstellen von Programmen zum Auslesen
+von fremden Passwortservern (Active Directory-Angriffe)
+</TD></TR><TR><TD>
+free</TD><TD>Arbeitsspeicherverwendung
+</TD></TR><TR><TD>
+df</TD><TD>Speicherplatz auf gemounteten Geräten
+</TD></TR><TR><TD>
+uptime</TD><TD>Anzeige der Systemlast und der Uptime
+</TD></TR><TR><TD>
+hostname, uname</TD><TD>Host- und OS-Namen anzeigen
+</TD></TR><TR><TD>
+ifconfig, iwconfig</TD><TD>Informationen über Netzwerkgeräte (als root)
+und WLAN anzeigen
+</TD></TR><TR><TD>
+top</TD><TD>kurze Systeminformationen (Last, Speicher, etc) und Anzeige der Prozesse.
+htop macht das Ganze noch komfortabler.
+</TD></TR><TR><TD>
+ps, pstree</TD><TD>Anzeige der Prozesse (auch in Baumform)
+</TD></TR><TR><TD>
+netstat</TD><TD>Informationen über Netzwerkverbindungen, Routingtabelle, etc.
+</TD></TR><TR><TD>
+dmesg</TD><TD>Alle Systemstart-Informationen des Kernels (u.a. auch die Erkennung der Hardware)
+</TD></TR><TR><TD>
+iptraf</TD><TD>Viele Möglichkeiten zur Überwachung des IP-Verkehrs
+</TD></TR><TR><TD>
+wipe</TD><TD>Werkzeug zur Datenl&ouml;schung, spezifisch mit dem 
+Zweck sp&auml;tere Rekonstruktion der gel&ouml;schten Daten
+zu erschweren.
+</TD></TR><TR><TD>
+mysqllib</TD><TD>Unabdingbare Bibliothek zum Auslesen fremder Datenbankserver.
+</TD></TR><TR><TD>
+sash</TD><TD>"System Administrator Shell", kleines Tool, mit dem ein
+Eindringling auch dann viele Sysadmin-Funktionen aufrufen kann, wenn
+der Eigent&uuml;mer des Systems die notwendigen Administrationswerkzeuge
+eigentlich nicht installiert hat.
+</TD></TR><TR><TD>
+net_tool</TD><TD>enth&auml;lt mit "arp" ein Werkzeug zum F&auml;lschen der
+Mac-Adressen von Systemen und damit zum Address-Spoofing.
+</TD></TR><TR><TD>
+rzsz, kermit</TD><TD>Werkzeuge zum &uuml;bertragen von bin&auml;ren Dateien
+&uuml;ber Datenkan&auml;le, die eigentlich nur zur
+&Uuml;bertragung von Text geeignet sind.
+</TD></TR><TR><TD>
+lsof</TD><TD>Werkzeug zur Systemanalyse, kann verwendet werden, um
+versteckte Systemmonitore zur erkennen, Auditing zu unterlaufen.
+</TD></TR><TR><TD>
+bindutil</TD><TD>Alle notwendigen Werkzeuge, um DNS-Anfragen zu
+simulieren, fremde DNS-Zonen auszuspionieren und
+ggf. auch einen Nameserver mit falschen Informationen
+zu f&uuml;ttern.
+</TD></TR><TR><TD>
+tcpdump, etherreal</TD><TD>Netzwerksnooper, ideal geeignet, um in einem
+fremden Netz Passworte aufzuschnappen.
+</TD></TR><TR><TD>
+netcat</TD><TD>DAS Tool zum Faken von Serverdiensten, zum Redirect von
+legitimen Servern auf illegale Dienste und zum Tricksen
+und Tarnen schlechthin. Zusammen mit nmap und tcpdump
+essentielle Bestandteile in jedem Hackerwerkzeugkasten.
+</TD></TR><TR><TD>
+nmap</TD><TD>Portscanner zum Ausschn&uuml;ffeln von offenen Serverdienste
+und zum Erstellen von Netzwerkpl&auml;nen in Opfernetzwerken.
+</TD></TR><TR><TD>
+saint, nessus</TD><TD>Vulerability Scanner.
+</TD></TR><TR><TD>
+wget</TD><TD>Werkzeug zum Raubkopieren fremder Websites und
+geeignet, um DDOS-Angriffe auf fremde Websites zu treiben.
+</TD></TR><TR><TD>
+cracklib</TD><TD>Bibliothek zum Schreiben und Betreiben von Passwortcrackern.
+</TD></TR><TR><TD>
+gdb, ddd, strings</TD><TD>Werkzeuge zur Analyse fremder Bin&auml;rprogramme.
+</TD></TR></TABLE>
+<P>
+
+<H3>Systeminfos</H3>
+Unter /proc befinden sich beim klassischen Unix nur Informationen zu Prozessen. Bei
+Linux findet man jedoch noch einiges mehr. Die Informationen können ganz einfach z.B.
+per cat-Kommando auf der normalen Konsole angezeigt werde, da es sich um reine (Pseudo-
+Textdateien handelt.
+<p>
+
+<pre>
+/proc/cpuinfo       - Informationen zur CPU (u.a. Name, Taktfrequenz, Cache-Größe)
+/proc/meminfo       - Informationen über den Arbeitsspeicher (u.a. Gesamtgröße, Cache, Swap)
+/proc/partitions    - Informationen über Partitionen des Massenspeichers (u.a. Partitionsname,
+                      Anzahl der Blöcke)
+/proc/modules       - Übersicht über die geladenen Module (u.a. Name, Speicheradresse)
+/proc/devices       - Übersicht über vorhandene Char- und Block-Devices
+/proc/version       - Informationen über die Kernelversion
+/proc/loadavg       - aktuelle Systemauslastung
+/proc/stat          - Prozesse
+/proc/interrupts    - Übersicht über Interrupts
+/proc/net/dev       - Statistik der Netzwerkgeräte (u.a. übertragene Bytes, Fehler)
+/proc/bus           - Informationen und Übersichten über die Busse im Rechner.
+/proc/bus/*/devices - Übersichten über die jeweiligen Geräte des Bus
+/proc/ide           - Hier finden sich die IDE-Geräte
+/proc/ide/*/model   - Die Modellbezeichnung des Geräts
+/proc/acpi/thermal-zone/THRG/temperature - CPU-Temperatur
+</pre>
+<p>
+
+<A NAME="tcpdump"></A>
+<H3>tcpdump</H3>
+tcpdump ist ein Sniffer, der alle Pakete im LAN mitlesen und auswerten kann. Das Programm
+ist in nahezu allen UNIX- und Linux-Distributionen enthalten. Es ist ein Standard-Tool, das
+auch schon viele Filterfunktionen implementiert hat. Eine ausf&uuml;hrliche Beschreibung
+liefert die <A HREF="tcpdump.html">Manual-Seite.</A>.
+<P>
+
+<A NAME="ethereal"></A>
+<H3>ethereal</H3>
+Ethereal ist ein Freewaresniffer mit grafischer Oberfl&auml;che, der alle Pakete im LAN 
+mitlesen und auswerten kann. Die abgeh&ouml;rten Pakete werden &uuml;bersichtlich dargestellt, 
+definierte Filter sortieren die gew&uuml;nschten Pakete. Ethereal analysiert alle Pakete 
+des ISO/OSI-Layers vom Ethernetframe bis zur telnet-Session. Zu finden unter
+<A HREF="http://www.ethereal.com">www.ethereal.com</A>.
+<P>
+
+<A NAME="crack"></A>
+<H3>Crack</H3>
+Der Standard Passwort-Cracker f&uuml;r Unix. Benutzeraccounts, die nicht oder nur
+unzureichend gesch&uuml;tzt sind, bieten einen m&ouml;glichen Angriffspunkt in
+das System. Das Programm Crack versucht, mit verschiedenen Methoden,
+Pa&szlig;w&ouml;rter zu raten und gibt bei Erfolg Warnmeldungen aus.
+<P>
+Dem Programm werden als Eingabe ein oder mehrere Pa&szlig;wortdateien, sowie
+W&ouml;rterb&uuml;cher (z. B. <TT>/usr/dict/words</TT>) &uuml;bergeben. Crack 
+sortiert die W&ouml;rter aus den W&ouml;rterb&uuml;chern, verschl&uuml;sselt sie 
+nach dem Standardverfahren (crypt) und vergleicht die so erhaltenen W&ouml;rter mit 
+den Eintr&auml;gen aus den Pa&szlig;wortdateien. Dabei wird jeder Eintrag mehrfach
+&uuml;berpr&uuml;ft; basierend auf einer Reihe von Regeln, welche auf die
+W&ouml;rterb&uuml;cher angewendet werden (z.B. Wortkombinationen, etc.). 
+Diese Regeln k&ouml;nnen vom Anwender beliebig ver&auml;ndert bzw. erg&auml;nzt
+werden. Crack versucht nicht, in Benutzeraccounts einzubrechen! Es h&auml;lt
+auch keinen Benutzer davon ab, "leicht" zu ratende
+Pa&szlig;w&ouml;rter zu benutzen!
+<P>
+Bezugsquelle: <A HREF="http://www.users.dircon.co.uk/~crypto/"> http://www.users.co.uk/~crypto/ </A><BR>
+Handbuch: <A HREF="/software/net-tools/crack-manual.html">HTML-Fassung des Manuals</A>
+<P>
+Hinweise:<br>
+<UL>
+<LI>Editieren sie zuerst die Datei "Crack", insbesondere d&uuml;rfte bei den 
+    meisten der gcc der richtige Compiler sein. Kommentieren Sie aus:
+    <PRE>
+    #CC=cc
+    #CFLAGS="-g -O $CSFLAGS"
+    #LIBS=lcrypt # uncomment only if necessary to use stdlib crypt()
+    </PRE>
+    und aktivieren Sie:
+    <PRE>
+    CC=gcc
+    CFLAGS="-g -O2 -Wall $CSFLAGS"
+    #LIBS=lcrypt # uncomment only if necessary to use stdlib crypt()
+    </PRE>
+Da bei Crack die unabh&auml;ngig entwickelte (und gepflegte) DES-Library
+beiliegt, mu&szlig; dort auch die Anpassung des Makefiles erfolgen
+(<tt>src/libdes/Makefile</tt>).
+<BR>
+Da bei zahlreichen System die crypt() Routine nicht mehr mit libc verbunden ist, 
+muss ein anderes Makefile (f&uuml;r Crack) verwendet werden. Ein Ersatz des 
+Makefile in <TT>/src/util/</TT>: 
+<a href="http://www.users.dircon.co.uk/~crypto/download/c50-linux-util-makefile.txt">http://www.users.dircon.co.uk/~crypto/download/c50-linux-util-makefile.txt</a> <br>
+
+<LI>F&uuml;hren sie <TT>./Crack -makeonly</TT> durch
+<LI>bei <TT>Crack: makeonly done</TT> k&ouml;nnen sie mit <TT>./Crack -makedict</TT> 
+fortfahren (generiert die W&ouml;rterb&uuml;cher)
+</UL>
+Das Verzeichnis <TT>Dicts</TT> steht f&uuml;r zus&auml;tzliche W&ouml;rterb&uuml;cher 
+zur Verf&uuml;gung.
+<P>
+Das Programm wird von der Kommandozeile aus gestartet. Es werden ein oder mehrere zu 
+&uuml;berpr&uuml;fende Pa&szlig;wortdateien &uuml;bergeben. Es ist g&uuml;nstig,
+mit einer Kopie von <TT>/etc/passwd</TT> zu arbeiten. Da in der Regel die
+Datei <TT>/etc/shadow</TT> die Pa&szlig;w&ouml;rter enth&auml;lt, gibt
+es Programme, welche die Shadow-Pa&szlig;w&ouml;rter in die <TT>/etc/passwd</TT>
+integriert. Crack l&auml;uft im Hintergrund und schreibt seine Ausgaben in Dateien,
+die in vorher festgelegten Verzeichnissen stehen.
+<P>
+Einige der Programm-Optionen sind:
+<UL>
+<LI><TT>-f</TT><BR>
+Crack l&auml;uft nicht im Hintergrund. Diese Option ist nur bei sehr kleinen
+Pa&szlig;wortdateien sinnvoll.
+<P>
+<LI><TT>-m</TT><BR>
+Falls das Pa&szlig;wort eines Benutzers geraten wurde, wird diesem eine Nachricht
+gesendet. Der Text dieser Nachricht ist in der Datei
+<CODE>Scripts/nastygram</CODE> individuell ver&auml;nderbar.
+<P>
+<LI><TT>-v</TT><BR>
+Stellt den "verbose"-Modus ein. Es werden sehr(!) viel mehr Ausgaben erzeugt.
+<P>
+<LI><TT>-network</TT><BR>
+L&auml;&szlig;t das Programm im Netzwerk-Modus laufen. Die zu untersuchende
+Pa&szlig;wortdatei wird gesplittet und Crack wird auf mehreren im Netzwerk
+angeschlossenen Hosts gestartet. Dies erfordert eine Anpassung der Datei
+<TT>Scripts/network.conf</TT>.
+</UL>
+<P>
+
+<A NAME="john"></A>
+<H3>John the Ripper</H3>
+John the Ripper ist ein modernerer
+Password-Crack-Programm, das auch per DES (<I>Data
+Encryption Standard</I>) verschl&uuml;sselte Passw&ouml;rter
+entschl&uuml;sseln kann. (Linux- und Unix-Passw&ouml;rter werden
+standardm&auml;&szlig;ig per DES verschl&uuml;sselt). 
+<p>
+Im <b>Single Mode</b> versucht John, die in der
+Password-Datei gespeicherten GECOS-Informationen (<I>General
+Electric Comprehensive Operating System</I>), also die
+pers&ouml;nlichen Daten zu jedem User wie z.B. Name, Telefonnummer
+ect, als Passwort einzusetzen. John braucht eine Passwort-Datei
+(/etc/passwd) im alten Stil, d.h. mit gespeichertem Passwort. Heute 
+wird jedoch in der Regel das Passwort in der Datei /etc/shadow 
+gespeichert. In diesem Fall hilft das Programm "unshadow", das die 
+beiden Dateienm zusammenf&uuml;hrt.
+Dieser Mode ist nat&uuml;rlich nur dann effektiv, wenn die User auch
+ihre pers&ouml;nlichen Informationen als Passwort verwenden.
+Allerdings ist dieser Mode auch sehr schnell, weshalb man ihn
+nicht untersch&auml;tzen sollte. Die Effektivit&auml;t dieses Modes
+steigt mit der Anzahl der in der Password-Datei enthalten User,
+da er die GECOS-Informationen jedes Users bei allen anderen Usern
+auch als m&ouml;gliches Passwort &uuml;berpr&uuml;ft.
+<p>
+Der zweite Modus ist der <b>Wordlist Mode</b>.
+Die Effizienz dieses Modes h&auml;ngt
+von der Gr&ouml;&szlig;e und vor allem von der Qualit&auml;t der
+verwendeten Wortliste ab. So kann man server- bzw.
+adminspeziefische Wordlists erstellen und damit die
+Erfolgswahrscheinlichkeit erh&ouml;hen, da man s&auml;mtliche zur
+Verf&uuml;gung stehenden Informationen benutzen kann; und genau darin
+liegt die St&auml;rke dieses Modes. In der Wordlist-Dateisteht in jeder 
+Zeile nur eine Zeichenfolge.
+Auch sollte darauf geachted werden, dass die Wordlist
+beispielsweise alphabetisch sortiert ist, da John ein wenig
+schneller arbeitet wenn aufeinaderfolgende W&ouml;rter oder
+Zeichenfolgen sich nicht allzu stark voneinander unterscheiden.
+<p>
+Der <b>Incremental Mode</b> ist Johns m&auml;chtigster Modus. Er
+kann jedes existierende Password, unabh&auml;ngig davon ob es aus
+Buchstaben, Sonderzeichen, Zahlen oder Kombinationen besteht,
+decrypten indem er s&auml;mtliche m&ouml;glichen Kombinationen
+&uuml;berpr&uuml;ft. Diese Methode wird auch Brute-Force genannt. Hierbei
+ist allerdings zu beachten, dass die zum decrypten ben&ouml;tigte
+Zeitspanne (abh&auml;ngig von Prozessorleistung, Passwortl&auml;nge und
+der im Passwort verwendeten Zeichen) sehr gro&szlig; sein kann.
+<p>
+
+Der <b>External Mode</b> ist eher f&uuml;r die erfahrenen
+Benutzer ausgelegt, da er vollst&auml;ndig konfiguriert werden muss.
+Durch das definieren der Parameter hinter [LIST.EXTERNAL:MODE] in
+der john.ini Datei, wird ein komplett neuer, individueller Mode
+erstellt. Dadurch wird es vor allem den Benutzern, die mit John
+schon Erfahrungen gemacht haben, erm&ouml;glicht einen Mode ihren
+pers&ouml;nlichen Bed&uuml;rfnissen anzupassen.
+<p>
+Die wichtigsten Befehle von John sind:</p>
+
+<table border="0" cellpadding=3 cellspacing=0>
+    <tr>
+        <td><b>john -single</b></td>
+        <td>dieser Befehl started John im
+        Single-Mode</td>
+    </tr>
+    <tr>
+
+        <td><b>john -i</b></td>
+        <td>dieser Befehl started John im
+        Incremental-Mode</td>
+    </tr>
+    <tr>
+        <td><b>john -w:namederwordlist
+        </b></td>
+        <td>dieser Befehl started John im
+        Wordlist-Mode</td>
+    </tr>
+
+    <tr>
+        <td><b>john -e:MODE</b></td>
+        <td>dieser Befehl started John im
+        External-Mode unter Verwendung der bei LIST.EXTERNAL:
+        definierten MODE Eigenschaften</td>
+    </tr>
+    <tr>
+        <td><b>john</b></td>
+        <td>dieser Befehl l&auml;sst John
+        zuerst den Single- dann den Wordlist und schlie&szlig;lich
+        noch den Incremental-Mode durchlaufen</td>
+
+    </tr>
+    <tr>
+        <td><b>john -show</b></td>
+        <td>dieser Befehl zeigt die
+        decrypteten Passw&ouml;rter an</td>
+    </tr>
+</table>
+
+<p>Hinter jedem dieser Befehle muss noch
+die Passwort-Datei angegeben werden. Ohne Parameterangabe
+listed John alle verf&uuml;gbaren Parameter auf.
+<p>
+Die neusten Versionen von John the Ripper findet man unter
+<a href="http://www.openwall.com/john/">www.openwall.com/john/</a>.
+<P>
+
+<A NAME="nmap"></A>
+<H3>Nmap</H3>
+Nmap ist ein &auml;usserst m&auml;chtiger Portscanner unter Linux und Windows. 
+Er wurde entwickelt, um Systemadministratoren eine M&ouml;glichkeit zu bieten, 
+Netzwerke zu analysieren, festzustellen, welche Hosts aktiv sind 
+und welche Dienste sie anbieten. Portscanner pr&uuml;fen IP-Komponenten auf ge&ouml;ffnete 
+oder geschlossene TCP/UDP-Ports. Mit Hilfe von unterschiedlichen Analysen k&ouml;nnen 
+R&uuml;ckschl&uuml;sse auf das untersuchte Betriebsystem und die eingestellten Paketfilterregeln 
+gezogen werden. Die FIN-Analyse verschickt TCP-Pakete an die Zieladresse, um zu testen, 
+ob ein Port aktiv ist, aber nicht auf einen Verbindungsaufbau (angezeigt durch ein 
+SYN-Paket) reagiert. Ein Stealth-Scan f&uuml;hrt keinen kompletten Verbindungsaufbau 
+durch, so dass die Kommunikation nicht in Logdateien vermerkt wird. Pingscans 
+&uuml;berpr&uuml;fen die Aktivit&auml;t in Netzen und geben dem User einen &uuml;berblick &uuml;ber die Anzahl 
+der eingesetzten Hosts. <BR>
+Nmap unterst&uuml;tzt viele Abtastverfahren:
+<UL>
+<LI>UDP- und TCP Connects
+<LI>TCP SYN-Scans
+<LI>FTP-Proxy (Bounce-Attacks)
+<LI>Reverse-Ident
+<LI>ICMP-Scans (Ping-Schleife)
+<LI>FIN-Scans
+<LI>ACK Schleifen (Antwortpakete)
+<LI>Weihnachtsbaum
+<LI>SYN-Schleifen
+<LI>Null-Scan
+</UL>
+Zudem kann Nmap Remote-OS-Abfragen &uuml;ber 
+einen TCP/IP Fingerabdruck, Stealth-Scans, dynamische Verz&ouml;gerung 
+und &Uuml;bertragungsberechnungen, Parallel-Scans, Abfragen von 
+inaktiven Hosts &uuml;ber parallele Pings, Portfilter-Identifikation, 
+RPC-Scans, Scans auf fragmentierte Pakets sowie Ziel- und Port-Scans 
+durchf&uuml;hren. Das Resultat der Scans ist immer eine 
+Auflistung von interessanten Ports, die f&uuml;r Einbr&uuml;che 
+benutzt werden k&ouml;nnen. Nmap gibt dabei stets die Portzahl und 
+den Namen des Services an. Der Zustand des Ports wird mit "ge&ouml;ffnet", 
+"gefiltert" oder "ungefiltert" angegeben. "Offen" 
+hei&szlig;t dabei, der Port kann beliebig angesprochen werden. "Gefiltert" 
+hei&szlig;t, ein Firewall verhindert den Zugriff auf den angepeilten 
+Port. "Ungefiltert" hei&szlig;t, ein Firewall ist am Ziel-Host zwar 
+installiert, blockiert aber den Zugriff auf den angepeilten Port nicht.
+Abh&auml;ngig von den verwendeten Parametern k&ouml;nnen das benutzte 
+Betriebssystem, die TCP-Sequenz, angemeldete Benutzer, der DNS-Namen und 
+einige andere Informationen ermittelt werden. 
+<p>
+Der kostenlose Port-Scanner unterst&uuml;tzt beispielsweise:
+<UL>
+<LI><TT>-sT</TT> TCP connect port scan (default)
+<LI><TT>-sS</TT> TCP SYN stealth port scan
+<LI><TT>-sU</TT> UDP port scan
+<LI><TT>-sP</TT> Ping Scan
+<LI><TT>-sF, -sX, -sN</TT> Stealth FIN, XMAS, Null scan
+<LI><TT>-O</TT> use TCP/IP fingerprint to guess remote os
+<LI><TT>-p</TT> ports to scan
+<LI><TT>-P0</TT> don't ping hosts
+</UL>
+Beispiel f&uuml;r einen nmap-Scan:<br>
+<TT>nmap -sS -O -p 1-65535 IP -oN Ausgabe.on -oM Ausgabe.om</TT>
+<p>
+<U>Bezugsquelle:</U> <br>
+<UL>
+<LI><a href="http://www.insecure.org/nmap/">http://www.insecure.org/nmap/</a><br>
+<LI><a href="http://www.eeye.com/html/Research/Tools/nmapNT.html">http://www.eeye.com/html/Research/Tools/nmapNT.html</a> (Windows Version)
+</UL>
+<P>
+Die Installation erfolgt nach Standard-Schema:
+<PRE>
+gzip -cd nmap-VERSION.tgz | tar xvf -
+cd nmap-VERSION
+./configure
+make
+su root
+make install
+</PRE>
+F&uuml;r Linux gibt es passende RPM-Archive.
+<p>
+Nmap wird &uuml;ber zahlreichen Kommandozeilenparameter gesteuert. 
+Sind angebene Kombinationen nicht sinnvoll, gibt Nmap eine entsprechende 
+Warnmeldung aus und informiert den Nutzer dar&uuml;ber. Wenn Sie 
+sich nicht sicher sind, k&ouml;nnen Sie sich die einzelnen Parameter 
+auch anzeigen lassen. Dies geschieht &uuml;ber die Eingabe von:
+<TT>nmap -h</TT>.
+<p>
+<H4>Scan-Arten </H4>
+<UL>
+<LI>-sT<br>
+Der TCP-Connect-Scan ist der grundlegendste Scan und er wird dazu 
+benutzt, um einen Port zu &ouml;ffnen. Ein gro&szlig;er Vorteil 
+hierbei ist, dass der Nutzer keine besonderen Privilegien f&uuml;r 
+die Ausf&uuml;hrung ben&ouml;tigt, da der TCP-Connect-Scan auf den 
+meisten Unix-Maschinen privileglos ausgef&uuml;hrt werden kann.<p>
+<LI>-sS<br>
+Der TCP-SYN-Scan ist ein halb offener Scan, weil keine vollst&auml;ndige 
+TCP-Verbindung aufgebaut wird. Es wird lediglich ein SYN-Paket (SYN=Synchronisation) 
+geliefert, dass eine Antwort erwartet, um dann eine Verbindung zu 
+&ouml;ffnen. Ein SYN/ACK (ACK=Empfangsbest&auml;tigung) setzt den 
+Port auf "listening", also horchend. Wird ein SYN/ACK 
+empfangen, wird von dort sofort ein RST (zur&uuml;cksetzen) der 
+Verbindung signalisiert. Auf die Weise erh&auml;lt der Angreifer 
+eine Best&auml;tigung, dass dieser Port ansprechbar ist. Der Nachteil 
+hierbei ist, dass viele Firewalls diesen Kunstgriff nicht bemerken 
+und entsprechend nicht loggen.<p>
+<LI>-sF -sX -sN<br>
+Stealth FIN (beenden), Xmas tree (weil einige Hardware-Firewalls 
+dabei wie ein Weihnachtsbaum aufleuchten) oder ung&uuml;ltige Null-Scans 
+werden eingesetzt, wenn Firewalls oder Paketfilter explizit auf 
+SYNs achten, die auf &uuml;berwachte Ports oder Programme treffen. 
+Die Idee dabei ist, dass ein geschlossener Port in jedem Fall mit 
+einem RST (zur&uuml;cksetzen der Verbindung) reagiert, w&auml;hrend 
+ein offener Port das Paket ignorieren muss (RFC 793 pp 64). Der 
+Vorteil liegt hier eindeutig bei NT-Maschinen, da Microsoft diesen 
+Standard v&ouml;llig ignoriert. <p>
+<LI>-sP<br>
+Die Ping-Abtastung erm&ouml;glicht es zu ermitteln, welche Hosts 
+in einem Netzwerk ansprechbar sind. Nmap sendet dazu einfach ein 
+ICMP-Echo und wartet auf eine Antwort. Erfolgt die Antwort als Block-Echo-Paket, 
+so kann alternativ auch ein TCP-ACK (Empfangsbest&auml;tigung) gesendet 
+werden. Erfolgt ein RST (zur&uuml;cksetzen), ist der angepingte 
+Host ansprechbar.<p>
+<LI>-sU<br>
+Der UDP Scan ist eine gute Methode, um zu ermitteln, welche UDP-Ports 
+an der betroffenen Maschine offen sind (User Datagram Protocol, 
+RFC 768). Gesendet wird dabei ein 0 Byte UDP-Paket. Erfolgt eine 
+ICMP-Meldung (Destination unreachable), ist der Port geschlossen. 
+Anderenfalls ist davon auszugehen, der Port ist ge&ouml;ffnet. Einige 
+Leute sind &uuml;brigens der Ansicht, Scans von UDP-Ports sind sinnlos, 
+weil sie keine Gefahr darstellen. Solaris zum Beispiel besitzt jedoch 
+ein bekanntes Sicherheitsloch, bei dem rcpbind &uuml;ber einen undokumentierten 
+UDP-Port oberhalb von 32770 entdeckt und genutzt werden. So macht 
+es nichts, wenn Port 111 vom Firewall blockiert wird, der Angreifer 
+kann trotzdem &uuml;ber den UDP-Port darauf zugreifen.<br>
+Nach einem Vorschlag in RFC 1812 (Abschnitt 4,3,2,8) wurde die Anzeigerate 
+der "Destination unreachable" zwar verlangsamt (z.B. im 
+Linux-Kernel bei 80 pro Sekunde und bei Solaris sogar nur bei 2 
+pro Sekunde), allerdings ist nmap dann in der Lage, die Rate zu 
+ermitteln und bremst den Scan dann entsprechend ab, statt das Netz 
+mit ung&uuml;ltigen Pakets zu &uuml;berschwemmen, die durch die 
+Zielmaschine ignoriert werden. So zeigt sich allerdings an der Zielmaschine 
+ein scheinbar normaler Datenverkehr, der von unachtsamen Administratoren 
+falsch interpretiert werden k&ouml;nnte.<br>
+Microsoft &uuml;brigens hat, wie so oft, die Empfehlung ignoriert 
+und entsprechend keine Begrenzung der Rate im System von Windows 
+integriert. Es k&ouml;nnen also in schnellst m&ouml;glicher Geschwindigkeit 
+s&auml;mtliche Ports gescannt werden. <p>
+<LI>-sA<br>
+Der ACK-Scan (ACK=Emfpangsbest&auml;tigung) ist eine gute Methode 
+zum Test von Rulesets (Filterregeln) am eingesetzten Firewall. Auf 
+die Weise l&auml;sst sich ermitteln, ob ein Firewall sicher ist 
+oder ob es nur ein einfacher Paketfilter ist, der ankommende SYN-Pakets 
+blockiert. Es wird hierzu von nmap ein ACK-Paket mit einer zuf&auml;lligen 
+Sequenzzahl abgeschickt, um zu ermitteln, ob und wie die Ports spezifiziert 
+sind. Erfolgt als Antwort ein RST (zur&uuml;cksetzen), ist der Port 
+ungefiltert. Erfolgt keine Antwort oder ein ICMP "Destination 
+unreachable", ist der Port gefiltert. <p>
+<LI>-sW<br>
+Der Fenster-Scan ist ein erweiterter Scan, der dem ACK-Scan sehr 
+&auml;hnlich ist, aber im Gegensatz zum ACK-Scan auch offene Ports 
+ermitteln kann. Der Scan nutzt dazu eine Sicherheitsl&uuml;cke in 
+diversen Systemen wie AIX, Amiga, BeOS, BSDI, Cray, Tru64 Unix, 
+DG7ux, OpenVMS, Digital Unix, FreeBSD, OpenStep, QNX, Rhapsody, 
+SunOS 4.x, Ultrix, VAX und VxWorks. <p>
+<LI>-sR<br>
+Der RPC-Scan arbeitet mit verschiedenen Portscan-Methoden von nmap. 
+Er ermittelt alle offenen Ports und &uuml;berschwemmt sie mit SunRPC-NULL-Befehlen, 
+um zu ermitteln, ob es RPC-Ports sind und welches System mit welcher 
+Versionsnummer sich dahinter verbirgt. <p>
+<LI>-b<br>
+Die FTP-Bounce-Attacke nutzt eine Eigenschaft des FTP-Protokolls, 
+dass Unterst&uuml;tzung auch f&uuml;r Proxy-FTP-Ports besitzt. Mit 
+anderen Worten hei&szlig;t das, wenn es gelingt, von evil.com auf 
+den FTP-Server von target.com zuzugreifen, k&ouml;nnen von dort 
+aus Daten &uuml;berall hin ins Netz verschickt werden. Als das RFC 
+1985 geschrieben wurde, dachte noch niemand an diese M&ouml;glichkeit. 
+Im heutigen Internet kann dieser Protokollfehler aber dazu genutzt 
+werden, eine bestehende FTP-Verbindung zu "hijacken" und 
+von dort aus Daten &uuml;berall ins Internet zu versenden.
+</UL>
+<P>
+
+<H4>Allgemeine Optionen</H4>
+<UL> 
+<LI>-PT<br>
+Mit einem TCP Ping k&ouml;nnen erreichbare Maschinen ermittelt werden, 
+auch wenn ein Firewall ICMP Pings oder Echos blockiert werden. Hierzu 
+verwendet diese Scan-Methode ein TCP-Paket mit ACK (Empfangsbest&auml;tigung). 
+Ist die Zielmaschine ansprechbar, antwortet sie mit einem RST (zur&uuml;cksetzen). 
+In der Regel wird hierzu der Port 80 benutzt, da er nur sehr selten 
+von Firewalls gefiltert wird.<p>
+<LI>-PS<br>
+Diese Option sendet SYN-Pakets, also eine Aufforderung zum Verbindungsaufbau, 
+statt eines Pakets mit ACK (Empfangsbest&auml;tigung). Hier antwortet 
+der Zielrechner mit einem RST (zur&uuml;cksetzen) und es wird klar, 
+der Rechner ist vorhanden und ansprechbar.<p>
+<LI>-PI<br>
+Die PI-Option sendet einfach nur Pings und hofft auf Server, die 
+ansprechbar sind und im eigenen Netz auch nach Broadcast-Adressen 
+suchen. Dies sind IP-Adressen, die von au&szlig;en erreichbar sind 
+und Broadcasts (es wird kein festes Ziel definiert sondern an alle 
+im Netz befindlichen Rechner gesendet) bei ankommenden IP-Paketen 
+absenden. Sollte dies der Fall sein, sollte das Loch schnell beseitigt 
+werden, denn der PI-Scan kann eine erste Vorbereitung zu einer Denial 
+of Service Attacke sein. Genauer gesagt, zu einem Smurf-Angriff.<p>
+<LI>-PB<br>
+Diese Option stellt den Default-Ping dar. Er verwendet sowohl ACK- 
+wie auch ICMP Pakets parallel. Auf diese Weise k&ouml;nnen Firewalls 
+&uuml;berwunden werden, die nur eins von beiden filtern.<p>
+<LI>-O<br>
+Diese Option aktiviert die Identifikation des Zielrechners &uuml;ber 
+einen TCP/IP-Fingerabdruck. Sie benutzt dazu eine Reihe von Techniken, 
+die die notwendigen Informationen aus dem Netzwerk-Stack des Zielrechners 
+ziehen und diese Informationen dann mit denen in einer Datenbank 
+mit bekannten OS-Fingerabdr&uuml;cken vergleichen.<p>
+<LI>-I<br>
+Mit der Option I l&auml;sst sich die TCP-R&uuml;ckkennungs-Abtastung 
+aktivieren. Aufgrund eines Bugs im Kennzeichnungsprotokoll (RFC 
+1413) erfolgt &uuml;ber das Protokoll die Freigabe des Usernamens, 
+der jedem Prozess angef&uuml;gt ist, der eine TCP-Verbindung aufgemacht 
+hat.<p>
+<LI>-f<br>
+Die Option f verursacht die ben&ouml;tigten SYN- FIN oder NULL Pakets 
+zur Nutzung von fragmentierten IP-Pakets. Die Idee hierbei ist, 
+die TCP-Header auf mehrere kleine Pakete zu verteilen, um sie schwerer 
+sichtbar zu machen. Einige Firewalls haben und Intrusion-Detection-Systeme 
+haben in der Tat Probleme mit der Erkennung fragmentierter Pakets. <p>
+<LI>-oN<br>
+Mit der Option -oN k&ouml;nnen die Scan-Ergebnisse in eine Datei 
+geschrieben werden. <p>
+<LI>-p<br>
+Mit der Option -p lassen sich Folgen von zu scannenden Ports oder 
+einen Bereich von zu scannenden Ports angeben.<p>
+<LI>-D<br>
+Die Option -D ist besonders gerissen, denn mit Hilfe dieser Option 
+k&ouml;nnen weitere Maschinen als Lockv&ouml;gel eingesetzt werden, 
+die alle den gleichen Zielrechner scannen. Auch wenn an der Zielmaschine 
+die Abtastversuche registriert werden, kann in der Regel keine Zuordnung 
+erfolgen, von wo aus der Scanversuch startete. <p>
+<LI>-S<br>
+Mit der Option -S k&ouml;nnen gesendete Pakets gespooft, also mit 
+einer falschen Absender IP-Adresse versehen werden. Auch wenn die 
+Schutzsysteme des Zielrechners Scans registrieren, k&ouml;nnen Sie 
+ihn nicht zum Ursprung zur&uuml;ckverfolgen.<p>
+<LI>-g<br>
+Die Option -g setzt einen Quellport in die verschickten Pakets. 
+Viele naive Firewalls und Paketfilter bilden eine Ausnahme in ihren 
+Filterregeln, erlauben DNS (53) und FTP-Data ( 20) Pakets und akzeptieren 
+eine Verbindung. Dieser Umstand f&uuml;hrt die Sicherheit ad absurdum, 
+denn Angreifer markieren den Zugriff als DNS oder FTP und ver&auml;ndern 
+darunter ihren Quellport.<p>
+<LI>-r<br>
+Diese Option gibt nmap die Anweisung, bis zu 2048 zuf&auml;llige 
+Maschinen f&uuml;r einen Scan zu benutzen, um die Sicherungssystem 
+der eigentlichen Zielmaschine zu verwirren. Besonders dann, wenn 
+diese Option mit anderen Optionen zum Verlangsamen des Timings der 
+Scans kombiniert wird. <p>
+<LI>-m<br>
+Mit der Option -m (max sockets) l&auml;sst sich die H&ouml;chstzahl 
+der Sockets einstellen, die parallel benutzt werden. Diese Option 
+wird gerne dazu benutzt, um die Scans langsamer zu machen und zu 
+verhindern, dass die Zielrechner abst&uuml;rzen. 
+</UL>
+
+<H4>Timing-Einstellungen</H4>
+Nmap ist an sich schon ein Werkzeug, mit dem Scans weitestgehend 
+unentdeckt bleiben. In einigen F&auml;llen kann mit zus&auml;tzlichen 
+Optionen das Timing noch feiner abgestimmt werden.
+<TT>-T (Paranoid, Sneaky, Polite, Normal, Aggressive, Insane)</TT><br>
+Mit den -T Optionen l&auml;sst sich das Timing der Scans passgenau 
+auf das Zielsystem einstellen. <br>
+Der Paranoid-Modus verlangsamt den Scan 
+sehr, um eine Entdeckung mittels Intrusion-Detection-System zu vermeiden. 
+Er serialisiert alle Scand und wartet allgemein 5 Minuten bis zur 
+Sendung des Folgepaketes.<br>
+Der Sneaky-Modus ist mit dem Paranoid-Modus 
+vergleichbar, nur sendet er die Pakete im Abstand von 15 Sekunden.<br>
+Der Polite-Modus erleichtert die Netzlast 
+und verkleinert die Gefahr des Crashs der Zielmaschine. Er serialisiert 
+die zu senden Paktes ebenfalls und wartet ca. 0.4 Sekunden bis zum 
+Folgepaket.<br>
+Der Normal-Modus scannt so schnell, wie 
+es m&ouml;glich ist, ohne das Netz zu &uuml;berlasten.
+Der Aggressive-Modus setzt einen 5-Minuten-Timeout 
+pro Maschine, wartet aber nie l&auml;nger als 1,25 Sekunden auf 
+eine Antwort. <br>
+Insane ist eigentlich nur f&uuml;r sehr 
+schnelle Netze verwendbar oder wo akzeptiert werden kann, wenn einzelne 
+Informationen dabei verloren gehen. Der Insane-Modus wartet nur 
+0.3 Sekunden bis zum n&auml;chsten Paket.
+<P>
+
+<A NAME="hunt"></A>
+<H3>hunt</H3>
+hunt von Pavel Krauz ist ein weiterer Sniffer, der sich anbietet, wenn Sie weniger 
+Wert auf pure Datenkolonnen als auf eine einfach lesbare, direkte Aufzeichnung von 
+Befehlseingaben und Sitzungen legen.
+<P>
+Bezugsquelle: <A HREF="http://lin.fsid.cvut.cz/~kra/index.html#HUNT">http://lin.fsid.cvut.cz/~kra/index.html#HUNT</A>
+<P>
+Der Autor von hunt hat neben dem Quellpaket auch dynamisch/statisch gelinkte 
+Bin&auml;rdateien zur Verf&uuml;gung gestellt. hunt erhalten Sie als tarball. Als Erstes 
+m&uuml;ssen Sie das komprimierte Archiv dekomprimieren und auspacken. Als Ergebnis dieses 
+Vorgangs erhalten Sie die Quellcode-Distribution und die vorkompilierten Bin&auml;rdateien.
+Die statische Bin&auml;rdatei f&uuml;r Linux hei&szlig;t hunt-static. Ich empfehle Ihnen, diese Datei 
+zu verwenden, da es beim Kompilieren des Quellcodes zu Problemen kommen kann, wenn 
+Ihnen die erforderlichen Bibliotheken fehlen.
+hunt basiert auf Curses und ist deshalb recht benutzerfreundlich. Das Startmen&uuml; sieht 
+folgenderma&szlig;en aus:
+<PRE>
+--- Main Menu --- rcvpkt 0, free/alloc 63/64
+l/w/r) list/watch/reset connections
+u)     host up tests 
+a)     arp/simple hiiack (avoids ack storm if arp used) 
+s)     simple hijack 
+d)     daemons rst/arp/srliff/mac 
+o)     options 
+x)     exit
+* &gt;
+</PRE>
+
+hunt liefert in der Regel Klartextausgaben der gescannten Verbindung. Das sind
+zwar weniger Informationen als bei tcpdump, reicht aber oft vollkommen aus.
+Man kann sich bestimmte Verbindungen f&uuml;r die &Uuml;berwachung aussuchen. hunt
+erkennt nicht nur neu gestartete Verbindungen, sondern auch solche, die beim
+Starten von hunt schon etabliert waren. Au&szlig;erdem verf&uuml;gt das Programm &uuml;ber
+Spoofing-Tools und es kann Verbindungen &uuml;bernehmen.
+<P>
+
+<A NAME="saint"></A>
+<H3>SAINT (Security Administrator's Integrated Network Tool)</H3>
+SAINT wurde von World Wide Digital Security, Inc. (WWDSI) herausgebracht 
+und ist eine aktualisierte, stark verbesserte Version von SATAN, die viele 
+neuere Schwachstellen erkennen kann. Voreinstellungen werden in den
+Konfigurationsdateien <TT>config/saint.cf</TT> und <TT>paths.pl</TT> abgelegt.
+<P>
+Bezugsquelle: <A HREF="http://www.wwdsi.com/saint/">http://www.wwdsi.com/saint/</A>
+<P>
+Bislang war der eigentliche Scanner kostenlos, seit September 2001 gibt es allerdings 
+eine (neuere) Version, die nur in Verbindung mit den kommerziellen 
+Auswertungsprogrammen (Saintwriter, Saintexpress) erh&auml;ltlich ist. 
+Die frei verf&uuml;gbare Version von Saint ist dementsprechend nicht mehr ganz aktuell 
+und wird wohl zuk&uuml;nftig immer etwas hinter der kommerziellen Version hinterher hinken 
+(was f&uuml;r Security-Scanner extrem ung&uuml;nstig ist).
+<P>
+Benutzer von Linux mit einer Kemel-Version ab 2.4 ben&ouml;tigen einen zus&auml;tzlichen 
+Patch, um Fehlalarme zu vermeiden (diesen Patch finden Sie unter 
+http://www.wwdsi.com/saint/patches.html#linux24). Bei anderen Problemen mit der 
+Kompilierung von SAINT sollten Sie sich an die Autoren wenden oder Mitglied der SAINT-Mailingliste werden (Eintrag unter http://www.wwdsi.com/saint/list-server.html).
+<P>
+Unter anderem &uuml;berwacht SAINT folgende Schwachstellen:
+<UL>
+<LI>CGI-basierter Web-Angriffe
+<LI>Denial-of-Service-Angriffe
+<LI>POP-Serverangriffe
+<LI>SSH-Schwachstellen
+<LI>Remote-Puffer&uuml;berl&auml;ufe
+</UL>
+Bei der Installation von SAINT gehen Sie genauso vor wie bei den meisten Programmen.
+Auspacken, "make linux" aufrufen, installieren. SAINT kommuniziert per Webbrowser
+mit dem Anwender. Zur Konfiguration ist ein Wenig Studium der Dokumentation n&ouml;tig.<BR>
+WWDSI bietet auch WebSAINT an, einen benutzerfreundlicheren f&auml;higen Scanner, der 
+grafische Java-basierte Netzwerkstatistiken generiert. Er ist f&uuml;r weniger 
+technisch orientierte Anwender gedacht, die keine Zeit oder Lust haben, sich mit 
+der SAINT-Konfiguration auseinander zu setzen. WebSAINT verwendet SSL zur 
+Verschl&uuml;sselung Ihrer Daten&uuml;bertragung und ist zahlreichen Berichten zufolge recht 
+sicher.
+<P>
+Ein Ergebnis von Saint sieht folgenderma&szlig;en aus; im Normalfall gibt SAINT
+eine HTML-Datei aus, so mu&szlig; man sich die Unterpunkte als Link vorstellen.
+<PRE>
+Results - victim.provider.de
+
+ General host information:
+
+    Host type: Linux 2.4.2
+    Subnet 192.168.220
+    Scanning level: heavy
+    Last scan: Wed Jun 26 13:42:23 2002
+
+ Network Services:
+
+    FTP server
+    Finger server
+    POP server
+    R Series server
+    SSH server
+    Telnet server
+    WWW (non-standard port 1043) server
+    X Windows server
+    8 other services (show all services)
+
+ Vulnerable Services:
+
+    rshd is enabled
+    pop receives password in clear
+    rlogin is enabled
+</PRE>
+Neben der normalen Suche die sich haupts&auml;chlich auf Dienste bezieht, kann man die
+M&ouml;glichkeiten von Saint noch weiter ausbauen, indem man weitere Scanm&ouml;glichkeiten
+einstellt.<BR>
+Saint bietet zu erkannten Problemen recht ausf&uuml;hrliche Hintergrundinfos und 
+L&ouml;sungsm&ouml;glichkeiten.  Angenommen, SAINT hat ein rlogin-Sicherheitsloch gefunden,
+dann kommt folgende Info:
+<FONT SIZE="-1">
+<PRE>
+Remote Login on the Internet
+
+Impact
+
+If configured to trust all remote hosts, the remote login service could allow 
+any remote user to gain shell access to a target system without ever being 
+prompted for a password.
+
+Background
+
+The rlogin service allows remote users, using an rlogin client, to log on to an 
+rlogin server without the need for a password. The rlogin process is similar to 
+telnet, in that it gives users shell access to a remote computer. But, unlike 
+telnet, rlogin does not prompt the user for a username (although, in most cases, 
+the user is prompted for a password). The rlogin process uses the .rhosts file 
+to list trusted hosts (those machines allowed to use the service). If the .rhosts 
+file is not configured properly, it is possible for a hacker to gain access to a 
+target machine, via the rlogin process, without being prompted for a password.
+
+The Problem
+
+This service, if misconfigured, allows unauthorized, untrusted users to gain shell 
+access to a target machine without being prompted for a password. In other words, 
+hackers exploiting this vulnerability can gain access to a target machine as a trusted 
+user and then delete system files, change configuration files and generally wreak 
+havoc on the target machine. Another problem with this service is that even when 
+passwords are prompted for, they are transmitted plaintext and in the clear (in other 
+words, they are sent to and from the machine unencrypted), so that any hacker using a
+password sniffer program can "grab" them and then access the target system as a 
+trusted user.
+
+Resolution
+
+One fix for this vulnerability is to disable login in /etc/inetd.conf. If that is not 
+practical, be sure that /etc/hosts.equiv and users' .rhosts files contain only trusted 
+hosts, and contain no "+" characters. The risks of password sniffing may be minimized 
+by using an encrypted version, such as Kerberos. Or, you may use TCP wrappers to help 
+secure your network.
+
+Where can I read more about this?
+
+Search your system's man pages for information on the rlogind or in.rlogind service for 
+more information.
+</PRE>
+</FONT>
+<P>
+
+<A NAME="nessus"></A>
+<H3>nessus - Security Scanner</H3>
+Nessus geh&ouml;rt zur Gruppe der Securityscanner. Nessus ist Freeware und arbeitet auf der 
+Basis einer regelm&auml;&szlig;ig aktualisierten Datenbank, die die neuesten Schwachstellen enth&auml;lt. 
+&auml;hnlich wie bei nmap gibt man die gew&uuml;nschten IP-Adressen oder -bereiche an, und erh&auml;lt 
+kurze Zeit sp&auml;ter eine Analyse &uuml;ber ge&ouml;ffnete Ports, Softwareversionen dieser und eine 
+nach Dringlichkeit sortierte Liste aller Schwachstellen, welche &uuml;ber Links zu n&auml;heren 
+Informationen des Certs verbunden sind. &uuml;ber Plugins sind eine Reihe von weiteren 
+Tests wie Denial of Service-Tests u.&auml;. m&ouml;glich. 
+<P>
+Bezugsquelle: <A HREF="http://www.nessus.org/download.html">http://www.nessus.org/download.html</A>
+<P>
+
+<A NAME="hping2"></A>
+<H3>hping2</H3>
+hping2 ist ein Paketgenerator, der dem User Zugriff auf alle Eigenschaften von 
+TCP/UDP/ICMP/IP erlaubt. &uuml;ber Optionen der Kommandozeilen ist so m&ouml;glich einzelne 
+Flags von TCP-Paketen zu setzen, die Payloadgr&ouml;&szlig;e festzulegen und den Ziel- und 
+Quellport zu w&auml;hlen. Mit diesem Tool lassen sich sogar Source-IP-Adressen f&auml;lschen. 
+<PRE>
+-1       Protokoll tcp
+-2	     Protokoll udp 
+-3       Protokoll icmp
+-a	     Source IP-Adresse
+-s	     Source Port (-> Ethereal)
+-p	     Destination Port
+-d	     Datenpaketgr&ouml;&szlig;e
+--fast	 Flooding der Pakete
+</PRE>
+<P>
+Bezugsquelle: <A HREF="http://www.hping.org/download.html">http://www.hping.org/download.html</A>
+<P>
+
+<A NAME="isic"></A>
+<H3>ISIC - IP Stack Integrity Checker</H3>
+ISIC testet die Stabilit&auml;t des implementierten IP-Stacks. Es generiert je nach Angabe 
+zuf&auml;llige TCP, UDP, IP oder ICMP- Pakete. &uuml;ber Prozentangaben hat der User Einfluss auf 
+die jeweiligen Paketeigenschaften wie gesetzte Flags, falsche Paketpr&uuml;fsumme, 
+fragmentierte Pakete usw. 
+<PRE>
+-p 	Protokoll
+-s 	Source IP Adresse,
+    Option rand erzeugt zuf&auml;llige IP-Adressen
+-d	Destination IP-Adresse
+</PRE>
+<P>
+Bezugsquelle: <A HREF="http://www.packetfactory.net/Projects/ISIC/">http://www.packetfactory.net/Projects/ISIC/</A>
+<P>
+Warning: ISIC may break shit, melt your network, knock out your firewall, or singe 
+the fur off your cat.
+<P>
+
+<A NAME="iftop"></A>
+<H3>iftop: display bandwidth usage on an interface</H3>
+iftop does for network usage what top(1) does for CPU usage.  It listens to
+network traffic on a named interface and displays a table of current bandwidth
+usage by pairs of hosts.  Handy for answering the question "why is our ADSL
+link so slow?".
+<P>
+
+<A NAME="whisker"></A>
+<H3>Whisker</H3>
+Whisker ist ein freier Scanner der speziell f&uuml;r Webserver-Tests ausgelegt 
+ist und zahlreiche CGI-Tests durchf&uuml;hrt.
+<P>
+Bezugsquelle: <a href="http://www.wiretrip.net/rfp/p/doc.asp?id=21&iface=2">http://www.wiretrip.net/rfp/p/doc.asp?id=21&iface=2</a>
+<P>
+Eine Liste der Top 75 Security Tools finden Sie bei
+<A HREF="http://www.insecure.org/tools.html">http://www.insecure.org/tools.html</A>.
+<P>
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server7.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server9.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><I>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</I></H6>
+<H6><I>Letzte Aktualisierung: 10. Nov 2005</I></H6>
+</BODY>
+</HTML>
+

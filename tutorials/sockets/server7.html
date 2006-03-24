@@ -1,0 +1,2894 @@
+<HTML>
+<HEAD><TITLE>Internet-Technologie</TITLE></HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000FF" VLINK="#FF00FF" ALINK="#FF0000">
+<CENTER><TABLE WIDTH="90%" BORDER=0><TR><TD ALIGN=left><IMG SRC="netzwerk.gif"></TD>
+<TD align=right><H3>Internet-Technologie</H3>
+<B><I>Prof. J&uuml;rgen Plate</I></B></TD>
+</TR></TABLE></CENTER><HR>
+
+<H1>7 Die Last mit der Serverlast</H1>
+
+<A NAME="7.1"></A>
+<H2>7.1 Verz&ouml;gerung und Verlust in paketvermittelten Netzen</H2>
+Die Qualit&auml;t, die ein Kommunikationssystem anbieten kann,
+bezeichnet man als Dienstg&uuml;te (engl.: Quality of Service, QoS).
+Qualit&auml;tsparameter sind hier:
+<UL>
+<LI>Latenzzeit [s]<BR>
+Dies ist die Zeit, die eine leere Nachricht, d.h. eine Nachricht
+ohne Nutzinformation, vom Sendeprozeß durch die Kommunikationsschichten
+und das Netzwerk bis zum Empfangsprozeß braucht.
+<LI>Datentransferrate [bit/s]<BR>
+Darunter versteht man die Anzahl der Bits, die maximal zwischen
+zwei Prozessen pro Sekunde &uuml;bertragen werden kann.
+<LI>Nachrichtentransferzeit [s]<BR>
+Die Nachrichtentransferzeit errechnet sich aus
+(Latenzzeit + Nachrichtenl&auml;nge/Datentransferrate).
+<LI>Durchsatz [bit/s]<BR>
+Anzahl &uuml;bertragener Bits pro Sekunde &uuml;ber eine gewisse zeitliche
+Dauer. Hier werden alle Prozeßkommunikationen zusammengefaßt
+betrachtet.
+<LI>Bandbreite [bit/s]<BR>
+Die physikalische obere Schranke des Durchsatzes, d.h. das
+Gesamtvolumen, das durch ein Netzwerk potentiell &uuml;bertragen
+werden kann.
+</UL>
+<P>
+
+Bei der &Uuml;bertragung kontinuierlicher Medien sind noch weitere spezielle
+Qualit&auml;tsparameter relevant:
+<UL>
+<LI>Verz&ouml;gerung [s]<BR>
+Das ist die Zeit, die zwischen dem Abschicken und der Ankunft
+einer Nachricht verstreicht.
+<LI>Jitter [s]<BR>
+Variiert die Verz&ouml;gerung einer &Uuml;bertragung, so nennt man die
+Varianz der Verz&ouml;gerung das Jitter.
+</UL>
+Netze kann man nach ihrer Ausdehnung in drei Kategorien einteilen.
+Je weiter ein Netz reicht, desto geringer wird in der Regel dessen
+Datentransferrate. Dagegen nimmt die Fehlerh&auml;ufigkeit und Latenzzeit zu.
+<P>
+<CENTER><IMG SRC="durchsatz1.jpg"></CENTER>
+<P>
+
+
+<H2>Verzögerungszeit in paketvermittelten Netzwerken</H2>
+
+Ein Paket erfährt eine Verzögerung auf dem Weg von einem Ende zum anderen.
+Es gibt insgesamt vier Quellen für die Verzögerung bei jedem Knoten:
+<P>
+<H4>Verarbeitungsverzögerung [einige Mikrosekunden]:</H4>
+<UL>
+<LI>Überprüfen von Bitfehlern
+<LI>Bestimmen der Übertragungsverbindung
+<LI>Weiterleiten zur Warteschlange im Router
+</UL>
+
+<H4>Warteschlangenverzögerung [Mikrosekunden ... einige Millisekunden]:</H4>
+<UL>
+<LI>Wartezeit bei der Ausgangverbindung auf die Übertragungsleitung
+<LI>Abhängig von der "Verstopfung" beim Router, d. h. wieviele Pakete bereits
+in der Warteschlange stehen
+<LI>Die W. von einem Paket zum nächsten kann stark variieren
+</UL>
+
+<H4>Übertragungsverzögerung [&lt; einige Mikrosekunden]:</H4>
+<UL>
+<LI>Auch als "Store-and-Forward-Verzögerung" bezeichnet
+<LI>Übliches Verfahren: "first come - first served"
+<LI>R = Verbindungsbandbreite [bit/s]
+<LI>L = Paketlänge [bit]
+<LI>Benötigte Zeit für die Übertragung auf die Verbindung = L/R
+</UL>
+
+<H4>Ausbreitungsverzögerung [ms]:</H4>
+<UL>
+<LI>d = Länge der physikalischen Verbindung zwischen zwei Knoten
+<LI>s = Ausbreitungsgeschwindigkeit im Medium 
+    (2*10<SUP>8</SUP> ... 3*10<SUP>8</SUP> m/s)
+<LI>Ausbreitungsverzögerung = d/s
+</UL>
+<P>
+<CENTER><IMG SRC="durchsatz2.jpg"></CENTER>
+<P>
+
+<H3>Unterschied zwischen Übertragungs- und Ausbreitungsverzögerung</H3>
+Die Übertragungsverzögerung ist die Zeit, die ein Router benötigt, um ein 
+Paket abzuschicken. Sie hängt ab von Paketlänge und Übertragungsrate der
+Verbindungsleitung - hat aber nichts mit der Länge der Leitung zu tun.
+Die Ausbreitungsverzögerung ist die Zeit, die ein Bit von einem Router
+zum nächsten braucht.
+<P>
+Die Gesamtverzögerung eines Knotens kann dann definiert wwerden als:
+<P>
+d<SUB>nodal</SUB> = d<SUB>proc</SUB> + d<SUB>queue</SUB> + 
+d<SUB>trans</SUB> + d<SUB>prop</SUB>
+<P>
+Wobei<BR>
+d<SUB>proc</SUB> die Verarbeitungssverzögerung,<BR>
+d<SUB>queue</SUB> die Warteschlangenverzögerung,<BR>
+d<SUB>trans</SUB> die Übertragungsverzögerung und<BR>
+d<SUB>prop</SUB> die Ausbreitungsverzögerung<BR>
+darstellt. Der Anteil dieser Verzögerungskomponenten schwankt 
+beträchstlich. So kann d<SUB>prop</SUB> innerhalb eines Campus
+wenige Mikrosekunden betragen, bei einem Satellitenlink dagegen
+einige huntert Millisekunden. Ebenso kann d<SUB>trans</SUB> bei
+einem 100-MBit-Netz minimal sein, aber bei einer Modemverbindung
+durchaus heftig zu Buche schlagen.
+<P>
+
+<H3>Warteschlangenverzögerung</H3>
+Die interessanteste, aber auch komplizierteste Komponente der 
+Knotenverzögerung ist die Warteschlangenverzögerung. Sie ist bei 
+Computernetzen so wichtig, da&szlig; es hunderte von Artikeln und 
+zahlreiche Bücher darüber gibt. Hier wird das Thema nur gestreift.
+Im Gegensatz zu den restlichen drei Verzögerungen kann diese 
+Verzögerung von Paket zu Paket schwanken. Kommen beispielsweise
+gleichzeitig 10 Pakete an einer leeren Warteschlange an, hat das
+erste Paket überhaupt keine Wartezeit, wogegen das letzte relativ 
+lange warten mu&szlig;. Für die Charakterisierung der 
+Warteschleifenverzögerung muß man deshalb statistische Maßzahlen 
+verwenden, z. B. 
+<UL>
+<LI>die durchschnittliche Warteschlangenverzögerung
+<LI>die Abweichung von der durchschnittlichen Warteschlangenverzögerung
+<LI>die Wahrscheinlichkeit, dass die Verzögerung einen vorgegebenen 
+    Grenzwert übersteigt
+</UL>
+Oft ist der Verkehr auf der Verbindung auch nicht kontinuierlich, sondern
+die Datenpakete kommen periodisch oder in Bursts. Wir definieren für die
+folgenden Betrachtungen die Werte
+<UL>
+<LI>R: Verbindungsbandbreite [bit/s]
+<LI>L: Paketlänge [bit]
+<LI>a: durchschnittliche Paketempfangsrate [Pakete/s]
+</UL>
+Die durchschnittliche Rate, in der die Bits an der Warteschlange ankommen,
+beträgt demnach <B>L*a</B> Bit/s. Weiter nehmen wir an, die Warteschlange 
+könne eine beliebige Anzahl von Bits speichern. Der Quotient <B>(L*a)/R</B> 
+wird dann oft als "<B>Verkehrsintensität</B>" bezeichnet. Sie spielt bei
+der Abschätzung der Warteschlangenverzögerung eine wichtige Rolle. Wenn
+nämlich L*a/R &gt; 1 ist, übersteigt die durchschnittliche Rate der ankommenden
+Bits die durchschnittliche Rate der abgehenden Bits und die Warteschlange
+wächst über alle Grenzen. Die Warteschlangenverzögerung geht gegen unendlich.
+<P>
+<IMG SRC="durchsatz3.jpg" ALIGN=RIGHT VSPACE=5 HSPACE=15>
+<BR>
+<UL>
+<LI>La/R ~&nbsp; 0: mittlere Verzögerung durch Warteschlange klein
+<LI>La/R <IMG SRC="pfeil.gif" border=0> 1: Verzögerungen werden größer
+<LI>La/R &gt;&nbsp; 1: mehr Daten kommen an, als verarbeitet werden
+können, mittlere Verzögerung wird unendlich!
+</UL>
+Daher gilt:
+<UL><I>Das Übertragungssystem ist so zu entwerfen, da&szlig; die
+       Verkehrsintensität immer kleiner als 1 ist.</I></UL>
+<BR CLEAR=ALL><P>
+Betrachten wir nun den anderen Fall L*a/R &lt;= 1: Hier wirkt sich die Art
+des ankommenden Verkehrs auf die Verzögerung aus. Kommen die Pakete periodisch,
+z. B. ein Paket alle L/R Sekunden, trifft jedes Paket auf eine leere Warteschlange
+und es entsteht keine Wartezeit. Kommen N Pakete gleichzeitig (z. B. alle
+(L/R)*N Sekunden), entsteht für das erste Paket keine Verzögerung, das zweite
+muß  L/R Sekunden warten und das <I>n</I>-te Paket hat eine Wartezeit von
+(<I>n</I> - 1)*(L/R) Sekunden.
+<P>
+Normalerweise kommen die Pakete aber nicht periodisch, sondern zufällig an
+einer Warteschlange an. Meist reicht der einfache Ansatz der Größe L*a/R
+nicht aus, um die reale Situation zu beschreiben. Sie liefert aber nach wie
+vor einen groben Ansatz. Es git auch weiterhin der oben abgebildete Ansatz,
+daß bei einer Verkehrsintensität nahe 0 keine Warteschalngenverzögerung entsteht.
+Geht dagegen ihr Wert gegen 1 wächst die Wartezeit rasch stark an. Bei einer
+Verkehrsintensität nahe 1 führen Bursts zum starken Füllen der Warteschlange.
+<P>
+
+<H3>Paketverlust</H3>
+Natürlich ist eine Warteschlange mit unendlich vielen Plätzen nicht realisisch.
+In Wirklichkeit ist die Kapazität einer Warteschlange begrenzt. Steigt die 
+durchschnittliche Gesamtlast, laufen die in ihrer Größe begrenzten Warteschlangen 
+über. Dies führt dann zu Paketverlusten, denn bei voller Warteschlange verwirft der
+Router das Paket. Geht man davon aus, daß die Pakete so zuverlässig über die 
+Leitungen transportiert werden, daß sie praktisch nie durch fehlerhafte Übertragung 
+verloren gehen, so kann man einen Paketverlust als Überlauf einer Warteschlange im 
+Netz interpretieren. Häufig geht bei einer solchen Überlast nicht nur ein 
+einzelnes Paket verloren, sondern eine ganze Reihe von Paketen. Der Anteil verlorener
+Pakete erhöht sich mit zunehmender Verkehrsintensität. Deshalb mißt man
+die Performance eines Knotens oft nicht in Bezug auf die Verzögerung, sondern
+in Bezug auf die Wahrscheinlichkeit von Paketverlusten.
+<P>
+
+<H3>Ende-zu-Ende-Verzögerung</H3>
+Die oben besprochenen Verzögerungen eines Knotens addieren sich auf dem Weg vom Absender 
+eines Pakets zum Empfänger. Daher soll abschließend die gesamte Verzögerung zwischen zwei
+Punkten im Netz betrachtet werden. Stellen Sie sich vor, daß zwischen beiden Endknoten
+Q - 1 Router liegen. Wir nehmen weiter an, daß das Netz nicht überlastet ist, also keine
+Warteschlangenverzögerung auftritt. Weiterhin gelte im Quellhost und in jedem Router
+eine Verarbeitungsverzögerung von d<SUB>proc</SUB> und eine Übertragungsrate von R bit/s.
+Die Ausbreitungsverzögerung zwischen Quellhost und erstem Router sowie zwischen den Routern 
+ist d<SUB>prop</SUB>. Dann ergibt sich einen Ende-zu-Ende-Verzögerung von
+<P>
+d<SUB>end-end</SUB> = Q*(d<SUB>proc</SUB> + d<SUB>trans</SUB> + d<SUB>prop</SUB>)
+<P>
+d<SUB>trans</SUB> ist wiederum L/R mit der Paketgröße L. Das ist natürlich eine sehr
+idealisierte Annahme. Eine (komplexere) Formel für heterogene Verzögerungen an den
+Knoten läßt sich daraus leicht ableiten.
+<P>
+
+<A NAME="7.2"></A>
+<H2>7.2 Serverstatistik</H2>
+
+<H3>Unix-Tools</H3>
+<UL>
+<LI> <b>http-analyze</b>:
+Das Programm von Stefan Stapelberg vereint viele Funktionen anderer
+Statistikprogramme -- und ist freie Software.<BR>
+<A HREF="http://www.netstore.de/Supply/http-analyze/">http://www.netstore.de/Supply/http-analyze/</A>
+<P><LI> <b>Sawmill</b>:
+(fr&uuml;her <i>Chartreuse Cartouche</i>) kann beliebige Logdate-Formate
+lesen und detaillierte grafische Statistiken liefern. Es kann als 
+CGI-Programm die Statistik auch "on-the-fly" liefern. Konfiguration
+&uuml;ber ein WWW-Interface.<BR>
+<A HREF="http://www.flowerfire.com/sawmill/">http://www.flowerfire.com/sawmill/</A>
+<P><LI> <b>The Webalizer</b>:
+schnelles, freies Analyseprogramm, das die Statistiken im HTML-Format ablegt.
+F&uuml;r verschiedene Logformate. Detaillierte Statistiken. <BR>
+<A HREF="http://www.webalizer.org/">http://www.webalizer.org/ <BR></A>
+<P><LI> <b>Checklog</b>:
+ist ein einfaches Perl-Skript zum Generieren von Reports. Das Programm
+versucht zu ermitteln, wie viele Personen den Server besuchen und wie
+tief sie in die Seiten gehen.<BR>
+<A HREF="http://www.rpg.net/help/checklog">http://www.rpg.net/help/checklog</A>
+<P><LI> <b>wusage</b>:
+ist ein C-Programm zum Generieren von grafischen Logfile-Statistiken.
+L&auml;uft auf verschiedenen Plattformen.<BR>
+<A HREF="http://www.boutell.com/wusage/">http://www.boutell.com/wusage/</A>
+<P><LI> <b>getstats</b>:
+ist ein C-Programm zum Generieren von detaillierten Statistiken (st&uuml;ndlich,
+t&auml;glich, w&ouml;chentlich, monatlich, nach Domain etc.).
+Getgraph produziert dann grafische Darstellungen der Reports. <BR>
+<A HREF="http://www.uu.se/Software/Getstats/">http://www.uu.se/Software/Getstats/</A>
+<P><LI> <b>Analog</b>:
+arbeitet &auml;hnlich wie getstats, ist jedoch schneller und hat ein etwas 
+unterschiedliches Ausgabeformat. Konfigurierbar und mehrsprachig.<BR>
+<A HREF="http://www.analog.cx/">http://www.analog.cx/</A>
+<P><LI> <b>W3Perl</b>:
+ist ein grafisches Statistikpaket, das in Perl geschrieben wurde.
+Es erhebt den Anspruch, das umfassendste und umfangreichste Server-Statistik-Tool
+zu sein.<BR>
+<A HREF="http://www.w3perl.com/">http://www.w3perl.com/</A>
+<P><LI> <b>WWWStat</b>:
+erzeugt die Serverstatistiken im HTML-Format. Dateinamen m&uuml;ssen im 
+Quelltext (Perl) angepa&szlig;t werden. Verschiedene M&ouml;glichkeiten der Statistik-Ausgabe.<BR>
+<A HREF="http://www.ics.uci.edu/WebSoft/wwwstat/">http://www.ics.uci.edu/WebSoft/wwwstat/</A>
+<P><LI> <b>BrowserCounter</b>:
+ist ein Agent Log Analyzer. Das Programm listet alle Browser auf, die den 
+Server besucht haben.<BR>
+<A HREF="http://www.nihongo.org/snowhare/utilities/browsercounter.html">http://www.nihongo.org/snowhare/utilities/browsercounter.html</A>
+<P><LI> <b>Summary</b>:
+erlaubt in der Profi-Version Sub-Reports f&uuml;r virtuelle Domains, liefert
+umfangreiche Reports (auch f&uuml;r Referrer) und erlaubt den Export der Daten.<BR>
+<A HREF="http://www.summary.net/summary.html">http://www.summary.net/summary.html</A>
+</UL>
+<P>
+
+<H3>Plattformunabh&auml;ngige Tools</H3>
+<UL> 
+<LI> <b>Bazaar Analyzer</b>
+Ein Logfile-Analysator, der mit jedem Java-f&auml;higen Browser funktioniert.
+Viele Features und Grafikausgabe. Die Standardversion ist kostenlos.
+<LI> <b>3D UWwebmon</b>
+ist ein Java-Applet das mit jedem Java-f&auml;higen Browser funktioniert.
+Grafikausgabe, konfigurierbar.
+<LI> <b>WatchWise</b>
+erlaubt Echtzeit-Analyse und -statistik, verwendet eine eigene Datenbank.
+<LI> <b>Webtrax</b>
+ist ein freies Perl-5-Programm f&uuml;r das NCSA Combined log format.
+</UL>
+<P>
+
+<H3>Einfache Statistik-Tools</H3>
+Wenn es nur um eine &uuml;bersicht geht oder wenn nur ganz bestimmte Dateien statistisch 
+untersucht werden sollen, dann geht es sogar mit "Bordmittteln". Um nur
+die Anzahl von Abrufen zu ermitteln, gen&uuml;gt ein Shellskript. Das folgende
+Mini-Script soll Ihnen zeigen, wie einfach das ist. Voraussetzung f&uuml;r das
+Gelingen ist die Verwendung der GNU-Versionen der Programme. Das Script mu&szlig;
+zudem am ersten Tag des Monats aufgerufen werden. Es liefert dann die Statistik
+f&uuml;r den vergangenen Monat. Die Ergebnisse werden in eine Datei geschrieben, deren
+Name durch die Variable <tt>DATEI</tt> vorgegeben ist. Die Variable <tt>SUCH</tt>
+gibt ein Suchmuster f&uuml;r die Dokumentennamen vor. Dies kann ein Namensteil einer
+Datei oder ein Pfadname sein, z.B. <tt>index</tt> -- definiert als regul&auml;rer Ausdruck.
+Der <tt>sed</tt>-Aufruf entfernt Dateipfade und andere unn&ouml;tige Dinge aus der
+Eingabe. Gegebenenfalls m&uuml;ssen Sie das Skript Ihren W&uuml;nschen anpassen.
+<pre>
+#!/bin/sh
+# Zugriffsstatistik
+#
+DATEI=/home/httpd/stat/stat.txt
+{
+cd /home/httpd/stat
+echo ""
+echo "abgerufene Dokumente `date --date '1 days ago' '
+echo "-----------------------------"
+echo ""
+echo "     Anz.  Datei"
+echo ""
+grep "$SUCH" /var/log/httpd.access_log | \
+  grep "$AKT" | \
+  sed -e 's?^/.*/??' -e 's?^/??' -e 's? HTTP.*$??' | \
+  grep ".html" | \
+  sort | \
+  uniq -c
+} > $DATEI
+</pre>
+
+Etwas komfortabler ist die Statistik, die das folgende Perl-Programm liefert.
+Die umfangreicheren Statistikprogramme liefern oft nur Zusammenfassungen
+und die am h&auml;ufigsten abgerufenen Seiten. Aus dem Skript unten kann man
+sich auch durch ein paar kleine &Auml;nderungen eine ma&szlig;geschneiderte Statistik 
+f&uuml;r ganz bestimmte Seiten anfertigen. Dazu kann man die Variablen 
+<tt>\$include</tt> und <tt>\$exclude</tt> mit geeingeten regul&auml;ren Ausdr&uuml;cken
+belegen. Die Balkengrafiken werden durch kleine Tabellen erzeugt, deren Ma&szlig;e
+vom Programm entsprechend der Statistik berechnet werden.
+<pre>
+#!/usr/bin/perl
+
+# Die folgenden Variablen muessen an die lokale Konfiguration 
+# angepasst werden.
+# Zeichenkette(n), die in der Protokollzeile auftauchen muessen.
+#
+# Sie koennen auch mehrere Strings angeben, z.B. 
+# $include="laber/eins|laber/zwei";
+#
+# $include = "ALL"; nimmt alle Protokollzeilen, mit Ausnahme der
+# durch $exclude ausgeschlossenen.
+
+$include="ALL";            
+
+# Protokollzeilen, die diese Strings enthalten, werden 
+# bei der Berechnung der Statistik ausgeschlossen
+# (hier: Graphiken und Aufrufe von CGI Programmen).
+#
+# Mehrere Strings wieder durch "|" trennen.
+
+$exclude = "gif|jpg|png|cgi";
+
+# Name und Pfad der Webserver-Logdatei
+
+$LOGDATEI = "/var/log/any-access_log"; 
+
+# Farbe der Balken fuer die Stundenstatistik
+$scolor = "#FFFF00";
+
+# Farbe der Balken fuer die Tagesstatistik
+$wcolor = "#FF00FF";
+
+# Das wars! Ab hier muss nichts mehr geaendert werden!
+###################################################
+
+&amp;datum;
+&amp;open_logfile;
+&amp;calc_access;
+&amp;kopf;
+&amp;general;
+&amp;by_hour;
+&amp;by_date;
+&amp;by_html;
+&amp;fuss;
+
+sub open_logfile 
+  # Server-Logdatei oeffnen
+  {
+  open (LOG,"$LOGDATEI") || die "Kann $LOGDATEI nicht oeffnen!\n";
+  while ($line = &lt;LOG&gt;) 
+    { 
+    chomp($line);
+    if ((($line =  /$include/) || ($include eq "ALL")) 
+        &amp;&amp; ($line !  /$exclude/i))
+          { push(@lines,$line); } 
+    }
+  close(LOG);
+  }
+
+sub calc_access 
+  # Daten aus der Logdatei extrahieren
+  {
+  $i = 0; 
+  $currentdate = "";
+   foreach (@lines) 
+     {
+     ($site,$j1,$j2,$when,$j3,$j4,$page,$j5,$number,$bytes) = split;
+     $page=  s/     ($date,$hour,$minute,$second)=split(':',$when);
+     $hour=  s/^0//;
+     # Wenn Datum gleichbleibt, inkrementiere Counter fuer dieses Datum
+     if ($date eq $currentdate)
+        { $counter[$i]++; }
+      # Naechster Tag (Tageszaehler ist die Variable $i)
+     else 
+       { 
+       $i++;
+       $currentdate=$date;
+       $counter[$i]++;
+       }
+     ($firstdate) || ($firstdate=$date);
+     ($day,$month,$year) = split('/',$date);
+     $date = "$year/$month/$day";
+     $date=  s/\[//;
+     $dates{$date}++;   # Anzahl Zugriffe pro Tag
+     $hours{$hour}++;   # Anzahl Zugriffe pro Stunde 
+     $pages{$page}++;   # Anzahl Zugriffe pro FILE
+     $totalbytes = $totalbytes + $bytes;
+     }
+   if ($totalbytes &lt; 10)
+     {
+     print "&lt;html&gt;&lt;head&gt;\n";
+     print "&lt;title&gt;Keine Abrufe f&uuml;r $include.&lt;/title&gt;\n";
+     print "&lt;/head&gt;&lt;body&gt;\n";
+     print "&lt;h1 align=center&gt;Keine Abrufe f&uuml;r $include.&lt;/h2&gt;\n";
+     print "F&uuml;r das Verzeichnis (die Verzeichnisse) &lt;b&gt;$include&lt;/b&gt;\n",
+     print "wurden im letzten Monat keine Abrufe verzeichnet.\n";
+     print "&lt;/body&gt;&lt;/html&gt;\n";
+     exit;
+     }
+  }
+   
+sub kopf 
+  # Seitenkopf, kann erweitert/angepasst werden
+  {
+  print "&lt;HTML&gt;\n";
+  print "&lt;head&gt;&lt;title&gt;Zugriffs-Statistik&lt;/title&gt;&lt;/head&gt;\n";
+  print "&lt;body bgcolor=\"#ffffff\" text=\"#000000\"\n";
+  print "link=\"#0000ff\" vlink=\"#cc00cc\"&gt;\n";
+  if ($include eq "ALL")
+    { print "&lt;H2 ALIGN=CENTER&gt;Zugriffstatistik&lt;/H2&gt;\n"; }
+  else
+    { print "&lt;H2 ALIGN=CENTER&gt;Zugriffstatistik f&uuml;r $include&lt;/H2&gt;\n"; }
+  print "&lt;H4 ALIGN=CENTER&gt;$long_date&lt;/H4&gt;\n";
+  }
+
+sub general 
+  # allgemeine Statistikwerte
+  {
+  $firstdate=  s/\[//;
+  $firstdate =  s/^0//;
+  print "&lt;H2&gt;Allgemeine Daten&lt;/H2&gt;\n";
+  print "&lt;B&gt;Auswertungszeitraum:&lt;/B&gt; $firstdate bis $date_2&lt;BR&gt;\n";
+  print "&lt;B&gt;Gesamtzahl aller Zugriffe:&lt;/B&gt; $#lines &lt;BR&gt;\n";
+  print "&lt;B&gt;Gesamtvolumen (in Bytes):&lt;/B&gt; $totalbytes &lt;BR&gt;\n";
+  }
+
+sub by_hour 
+  # Stunden-Statistik berechnen
+  {
+  print "&lt;H2 ALIGN=CENTER&gt;Zugriffsstatistik nach Tageszeit&lt;/H2&gt;\n";
+  print "&lt;TABLE BORDER=1 CELLPADDING=3 ALIGN=CENTER&gt;&lt;TR&gt;&lt;TD&gt;\n";
+  print "&lt;TABLE BORDER=0 CELLPADDING=3 ALIGN=CENTER&gt;\n&lt;TR&gt;";
+  $highest=0;
+  # ermittle maximale Anzahl von Zugriffen zu einer Stunde
+  foreach $key (keys     {
+    if ($hours{$key} &gt; $highest) 
+      { $highest=$hours{$key}; }
+    }
+  foreach $key (keys     {
+    $barsize{$key} = int(($hours{$key} * 250) / $highest);
+    }
+  foreach $key (0..23) 
+    {
+    if ($barsize{$key} &lt; 2)
+      { $barsize{$key} = 2; }
+    print "&lt;TD ALIGN=CENTER VALIGN=BOTTOM&gt;\n";
+    print "&lt;I&gt;$hours{$key}&lt;/I&gt;&lt;BR&gt;\n";
+    # als einspaltige Tabelle mit variabler Hoehe realisiert
+    print "&lt;TABLE BORDER=0 BGCOLOR=\"$scolor\"\n";
+    print " HEIGHT=$barsize{$key} WIDTH=10&gt;\n";
+    print "&lt;TR&gt;&lt;TD&gt;&amp;amp;nbsp;&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;\n";
+    print "&lt;/TD&gt;\n";
+    }
+  print "&lt;/TR&gt;\n&lt;TR&gt;\n";
+  foreach $key (0..23) 
+    {
+    print "&lt;TH ALIGN=CENTER&gt;$key&lt;/TH&gt;\n"; 
+    }
+  print "&lt;/TR&gt;\n&lt;TR&gt;\n";
+  print "&lt;TH ALIGN=CENTER colspan=24&gt;Uhrzeit&lt;/TH&gt;\n"; 
+  print "&lt;/TR&gt;\n";
+  print "&lt;/TABLE&gt;\n";
+  print "&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;\n\n";
+  }
+   
+sub by_date 
+  # Tages-Statistik berechnen
+  {
+  $highest=0;
+  undef   foreach $key (keys     {
+    if ($dates{$key} &gt; $highest)
+      { $highest=$dates{$key}; }    
+    }
+  foreach $key (keys     {
+    $barsize{$key} = int(($dates{$key} * 350) / $highest);
+    }
+  print "&lt;H2 ALIGN=CENTER&gt;Abrufstatistik der letzten 30 Tage&lt;/H2&gt;\n";
+  print "&lt;TABLE BORDER=1 CELLPADDING=3 ALIGN=CENTER&gt;&lt;TR&gt;&lt;TD&gt;\n";
+  print "&lt;TABLE ALIGN=CENTER BORDER=0 CELLPADDING=3&gt;\n";
+  foreach $tag (sort {$a cmp $b} (keys     {
+    print "&lt;TR&gt;&lt;TD ALIGN=RIGHT VALIGN=MIDDLE&gt;&lt;TT&gt;$tag&lt;/TT&gt;&lt;/TD&gt;\n";
+    print "&lt;TD&gt;&lt;B&gt;$dates{$tag}&lt;/B&gt;&lt;/TD&gt;\n";
+    print "&lt;TD ALIGN=LEFT VALIGN=MIDDLE&gt;\n";
+    # Balken wird als einzeilige Tabelle mit variabler Breite realisiert
+    print "&lt;TABLE BORDER=0 BGCOLOR=\"$wcolor\"\n";
+    print " HEIGHT=20 WIDTH=$barsize{$tag}&gt;\n";
+    print "&lt;TR&gt;&lt;TD&gt;&amp;amp;nbsp;&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;&lt;/TD&gt;\n";
+    print "&lt;/TR&gt;\n";
+    }
+  print "&lt;/TABLE&gt;\n";
+  print "&lt;/TD&gt;&lt;/TR&gt;&lt;/TABLE&gt;\n\n";
+  }
+
+sub by_html 
+  # Zugriffs-Statistik aller Seiten
+  {
+  print "&lt;H2 ALIGN=CENTER&gt;Zugriffe pro HTML-Seite&lt;/H2&gt;\n"; 
+  print "&lt;TABLE BORDER=1 CELLPADDING=3&gt;\n";
+  # sortiere die WWW-Seiten vor der Augabe
+  foreach $page (sort(keys     {
+    $page=  s/[&amp;lt;&amp;gt;]//g;
+    print "&lt;TR&gt;&lt;TD&gt;&amp;nbsp;&lt;a href=$page&gt;$page&lt;/a&gt;&amp;nbsp;&lt;/TD&gt;";
+    print "&lt;TD&gt;&lt;B&gt;&amp;nbsp;$pages{$page}&amp;nbsp;&lt;/B&gt;&lt;/TD&gt;&lt;/TR&gt;\n";
+    }
+  print "&lt;/TABLE&gt;\n\n";
+  }
+
+sub fuss 
+  # Seitenende, kann erweitert/angepasst werden
+  {
+  print "&lt;/body&gt;\n";
+  print "&lt;/html&gt;\n";
+  }
+
+sub datum 
+  # Datum in brauchbaren Formaten erzeugen
+  {
+  ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) 
+    = localtime(time);
+  if ($sec &lt; 10) { $sec = "0$sec"; }
+  if ($min &lt; 10) { $min = "0$min"; }
+  if ($hour &lt; 10) { $hour = "0$hour"; }
+  if ($mon &lt; 10) { $mon = "0$mon"; }
+  if ($mday &lt; 10) { $mday = "0$mday"; }
+  $month = $mon + 1;
+  $year = $year + 1900;
+  @months1 = ("Januar","Februar","Maerz","April","Mai",
+              "Juni","Juli","August","September","Oktober",
+              "November","Dezember");
+  @months2 = ("Jan","Feb","Mar","Apr","May","Jun","Jul",
+              "Aug","Sep","Oct","Nov","Dec");
+  $date_1 = "$mday.$month $year";
+  $date_2 = "$mday/$months2[$mon]/$year";
+  $long_date = "$mday\. $months1[$mon] $year ($hour\.$min Uhr)";
+  }
+</pre>
+<P>
+
+<H3>Zugriffe auswerten mit Webalizer</H3>
+Es gibt diverse Programme zum Aufbereiten von
+Server-Logdateien. Wie so oft ist die einfachste L&ouml;sung meist die beste.
+Der Webalizer ist ein Opensource-Programm zur Darstellung der Zugriffsstatistiken 
+f&uuml;r eine Homepage. Er ist auf die unterschiedlichsten Plattformen portiert, z.B. 
+Linux auf PC, Alpha und PPC, Solaris auf Sparc oder Windows. Die
+Auswertungsm&ouml;glichkeiten sind recht umfangreich und h&auml;ngen davon ab, 
+wie die Konfigurationsdatei des Webalizers und die Konfigurationsdatei des 
+Webservers eingerichtet sind. Er kann zudem nicht nur f&uuml;r WWW-Logs, sondern 
+auch f&uuml;r die Squid- und FTP-Logdateien verwendet werden.<P>
+
+Das Programm liefert eine Webstatistik der letzten 12 Monate. In der &Uuml;bersicht
+sehen Sie die monatlichen Daten im Vergleich:
+<UL> 
+<LI> Zusammenfassung des Monats,
+<LI> Tages-Statistik,
+<LI> Statistik nach Uhrzeiten,
+<LI> Auswertung nach abgerufenen Seiten,
+<LI> Liste der Rechner, die auf die Webseiten zugegriffen haben,
+<LI> Browsertypen
+<LI> und vieles mehr
+</UL>
+
+In den meisten Distributionen ist der Webalizer enthalten. Im Netz 
+ist er &uuml;ber 
+<A HREF="http://www.webalizer.org/">http://www.webalizer.org/</A>
+erh&auml;ltlich. 
+Dort stehen die Quellen und fertige Binaries f&uuml;r alle Plattformen zur 
+Verf&uuml;gung, die nur entpackt werden m&uuml;ssen.<P>
+
+Die Unterst&uuml;tzung verschiedener Sprachen ist leider etwas archaisch, denn
+es m&uuml;ssen die passenden Headerdateien einkompiliert werden -- es ist also
+auch das komplette Quellpaket erforderlich. F&uuml;r eine Installation in Deutsch 
+(und in anderen Sprachen) stellen z.B. die DLR  oder 
+die schwedische Firma Chalmers die Quellen zum Download bereit.<P>
+<A HREF="http://www.go.dlr.de/fresh/unix/src/www/.warix/webalizer-2.01-06-src.tgz.html">http://www.go.dlr.de/fresh/unix/src/www/.warix/webalizer-2.01-06-src.tgz.html</A><P>
+<A HREF="http://swamp.chl.chalmers.se/pub/www/tools/webalizer/">http://swamp.chl.chalmers.se/pub/www/tools/webalizer/</A><P>
+
+Im Folgenden wird eine relativ einfache Konfiguration beschrieben. Webalizer 
+bietet dar&uuml;ber hinaus weitere Features, die in der beiliegenden 
+Dokumentation beschrieben sind. <P>
+Wer die Installation mittels der Quell-Dateien vornimmt, mu&szlig; diese auf 
+normalem Wege mit der &uuml;blichen Befehlsfolge kompilieren. Die genaue Anleitung 
+mit den Optionen, die bei <tt>./configure</tt> m&ouml;glich sind, kann man in der 
+einfachen Installationsanleitung der Webalizer-Homepage nachlesen.
+<P>
+
+<h3>Konfiguration</h3>
+Nach Installation des Webalizers enth&auml;lt das Verzeichnis eine 
+Standard-Konfigurationsdatei, in der viele Optionen voreingestellt sind. 
+Andere sind auskommentiert, so da&szlig; man sie bei Bedarf nur aktivieren mu&szlig;.
+F&uuml;r den gr&ouml;&szlig;ten Teil der Optionen existiert eine Default-Einstellung, so 
+da&szlig; prinzipiell kein Eintrag in der <tt>.conf</tt>-Datei n&ouml;tig ist.<P>
+
+Es werden hier nur die wichtigsten Optionen der Konfigurationsdatei besprochen. 
+Die Datei hei&szlig;t standardm&auml;&szlig;ig <tt>webalizer.conf</tt> und sollte, damit sie 
+beim Start des Webalizers ohne Pfadangabe gefunden wird, am besten in <tt>/etc/</tt> 
+stehen. Um sie zu benutzen, wird der Durchlauf dann einfach mit <tt>webalizer</tt> 
+gestartet. Benutzt man verschiedene Konfigurationsdateien f&uuml;r verschiedene 
+Aufgaben, so mu&szlig; au&szlig;er bei Benutzung von <tt>/etc/webalizer.conf</tt> als 
+Konfigurationsdatei dem Programm stets der Pfad mit der Option <tt>-c</tt> 
+mitgegeben werden. So lassen sich beispielsweise f&uuml;r jeden virtuellen
+Server getrennte Statistiken erstellen.<P>
+
+Nun wird die Konfigurationsdatei mit dem Editor bearbeitet. Suchen Sie die Zeile:
+<PRE>#LogFile /var/lib/httpd/logs/access\_log</PRE>
+Entfernen Sie das Kommentarzeichen (#) und ersetzen Sie die Pfadangabe mit 
+dem Pfad zu Ihrem Apache-Logfile. In der Konfigurationsdatei mu&szlig; angegeben werden, 
+welche Logdatei benutzt werden soll, d.h. es gibt hier keine Voreinstellung.
+<PRE>LogFile   /var/log/httpd/access\_log</PRE>
+Es gibt mehrere Logfile-Formate, die benutzt werden k&ouml;nnen, das Standardformat 
+hei&szlig;t <tt>clf</tt>. Ebenso funktioniert der Durchlauf mit gezippten Logfiles 
+im <tt>gz</tt>-Format, was man vielleicht nutzen m&ouml;chte, weil man ab und zu 
+gro&szlig;e Logfiles packen will, um Plattenplatz zu sparen.<P>
+
+Dann sollten Sie das Verzeichnis angeben, in dem die Ergebnisse gespeichert werden 
+sollen. Suchen Sie nun die Zeile:
+<PRE>#OutputDir /var/lib/httpd/htdocs/usage</PRE>
+Entfernen Sie das Kommentarzeichen und ersetzen Sie die Pfadangabe mit der 
+zu dem Verzeichnis, in dem Sie die Berichte ablegen m&ouml;chten. Dieses 
+sollte sich in Ihrem Webverzeichnis befinden. Zum Beispiel:
+<PRE>OutputDir  /opt/www/htdocs/webalizer</PRE>
+Es empfiehlt sich nat&uuml;rlich, eigene Verzeichnisse f&uuml;r die Ausgabe zu erstellen. Falls 
+man mit verschiedenen Konfigurationsdateien verschiedene Jobs erledigt, sollte man 
+nat&uuml;rlich auch in der jeweiligen <tt>.conf</tt>-Datei das jeweilige Ausgabeverzeichnis 
+angeben, da sonst Daten &uuml;berschrieben werden oder, je nach Einstellung, neue Daten
+an solche angeh&auml;ngt werden, die &uuml;berhaupt nicht dazu passen. 
+Suchen Sie dann die Zeile: 
+<PRE>#Incremental no</PRE>
+Entfernen Sie das Kommentarzeichen und ersetzen Sie "no" durch "yes". 
+Hiermit weisen Sie Webalizer an, den Stand des Logfiles zu speichern 
+und beim n&auml;chsten Aufruf an dieser Stelle fortzusetzen. 
+Suchen Sie die Zeile 
+<PRE>#ReportTitle Usage Statistics</PRE>
+Entfernen Sie das Kommentarzeichen und ersetzen Sie den Eintrag durch einen 
+Titel Ihrer Wahl. Suchen Sie dann die Zeile 
+<PRE>#HostName localhost</PRE>
+Entfernen Sie das Kommentarzeichen und tragen Sie Ihren Hostnamen ein.<P>
+
+Danach folgen viele eher unwichtige bzw. defaultm&auml;&szlig;ig richtig oder 
+sinnvoll eingestellte Parameter (siehe Holzmann/Plate). Speichern Sie 
+die Datei <tt>webalizer.conf</tt>.<P>
+
+<h3>Ausf&uuml;hren</h3>
+Die einfachste Methode ist der Start von Hand. Damit wird die Logdatei
+ausgelesen und die HTML-Dateien mit der Serverstatistik in dem von Ihnen 
+angegeben Verzeichnis erstellt. Webalizer sucht seine Konfigurationsdatei 
+zuerst im aktuellen Verzeichnis und dann in <tt>/etc</tt>. Der Aufruf zum Test
+k&ouml;nnte dann lauten:
+<PRE>webalizer -c /etc/webalizer.conf</PRE>
+Der manuelle Aufruf ist auf Dauer nat&uuml;rlich nicht besonders praktisch. 
+Besser ist da ein Eintrag f&uuml;r den Cron-Mechanismus. Man kann z.B. in die
+Datei <tt>/etc/crontab</tt> folgenden Eintrag aufnehmen:
+<PRE>30 4 * * *   root /opt/www/bin/webalizer > /dev/null 2>&amp;1</PRE>
+Gegebenenfalls sind noch die Parameter <tt>-p</tt> f&uuml;r den inkrementellen 
+Modus oder <tt>-c file</tt> zur Angabe der Konfigurationsdatei n&ouml;tig. Weitere 
+Parameter listet die Manualpage auf. Die Statistik rufen Sie mit Hilfe der Datei 
+<tt>index.html</tt> im durch <tt>OutputDir</tt> 
+spezifizierten Verzeichnis ab.<P>
+
+<h3>FTP-Statistik mit Webalizer</h3>
+Der Webalizer ist auch in der Lage, die Informationen aus der Datei <tt>/var/log/transferlog</tt>
+auszuwerten. Die Schritte dazu sind relativ einfach. Zuerst richten Sie analog dem
+Verzeichnis f&uuml;r die Webstatistiken ein weiteres Verzeichnis ein, z.B.
+<PRE>/opt/www/htdocs/ftpstats</PRE>
+Nun wird eine zweite Konfigurationsdatei erzeugt, die f&uuml;r die Analyse der FTP-Daten
+angepa&szlig;t ist. Dazu kopieren Sie einfach die originale Datei <tt>/etc/webalizer.conf</tt>
+auf <tt>/etc/ftpstats.conf</tt> und &auml;ndern diese Datei ab. Dabei sind nur drei Zeilen
+zu modifizieren:
+<pre>
+LogFile   /var/log/xferlog
+LogType   ftp
+OutputDir /opt/www/htdocs/ftpstats
+</pre>
+Wichtig ist dabei besonders der <tt>LogType</tt>, damit Webalizer auch alles richtig
+macht. Das Programm kennt zwei Typen "web" und "ftp", wobei "web" die 
+Voreinstellung ist. Mit dem Aufruf
+<PRE>webalizer -c /etc/ftpstats.conf</PRE>
+kann dann die FTP-Statistik abgerufen werden.<P>
+
+<h3>Proxy-Statistik mit Webalizer</h3>
+Wenn Sie auch noch die Logdatei des Squid analysieren wollen, geht auch dies nach
+dem gleichen Schema wie f&uuml;r FTP. Zuerst richten Sie analog dem Verzeichnis 
+f&uuml;r die Web- und FTP-Statistiken noch ein weiteres Verzeichnis ein, z.B.
+<PRE>/opt/www/htdocs/squidstats</PRE>
+Nun wird eine weitere Konfigurationsdatei erzeugt, die f&uuml;r die Analyse der Squid-Daten
+angepa&szlig;t ist. Dazu kopieren Sie einfach die originale Datei <tt>/etc/webalizer.conf</tt>
+auf <tt>/etc/squidstats.conf</tt> und &auml;ndern diese Datei ab. Dabei sind auch wieder nur 
+drei Zeilen zu modifizieren:
+<pre>
+LogFile   /var/squid/logs/access.log
+LogType   web
+OutputDir /opt/www/htdocs/squidstats
+</pre>
+Diesmal wird wieder der LogType "web" verwendet. Die Auswertung funktioniert aber
+nur, wenn die Logdatei des Squid das richtige Format besitzt. Statt des Standardformats
+der Squid-Logs mu&szlig; der Squid seine Logdateien im "Apache-Stil" abliefern. Das
+erreichen Sie durch die Einstellung <tt>emulate\_httpd\_log  on</tt> in der 
+Datei <tt>squid.conf</tt>. Mit dem folgenden Aufruf kann dann die Proxy-Statistik 
+abgerufen werden:
+<PRE>webalizer -c /etc/squidstats.conf</PRE>
+<P>
+
+<A NAME="7.3"></A>
+<H2>7.3 Lastmessung (Benchmarks)</H2>
+Ein Benchmark (englisch: Bezugswert, Ma&szlig;stab) ist ein Verfahren, um die Leistung eines 
+Systems beurteilen zu k&ouml;nnen. Ein Benchmarkprogramm ermittelt Vergleichswerte, mit 
+deren Hilfe verschiedene Systeme auf ihre Geschwindigkeit, Zuverl&auml;ssigkeit und 
+Stabilit&auml;t gepr&uuml;ft und untereinander verglichen werden k&ouml;nnen. Benchmarkprogramme 
+sind im allgemeinen speziell auf bestimmte Hardware bzw. Softwarekomponenten
+zugeschnitten. Die Ergebnisse sind jedoch immer vom verwendeten Benchmarkprogramm 
+abh&auml;ngig. Ein Vergleich von Ergebnissen unterschiedlicher Benchmarks ist 
+daher nur bedingt aussagekr&auml;ftig. Ein Benchmarkprogramm simuliert i. A. eine 
+hohe Beanspruchung der zu testenden Hardware/Software. Dabei werden die 
+verschiedenen Funktionen des zu testenden Objektes aufgerufen und die Geschwindigkeit 
+der Reaktionen gemessen und aufgezeichnet. Au&szlig;erdem kann ein l&auml;ngerdauernder Benchmark 
+auch Hinweise &uuml;ber die Stabilit&auml;t der zu testenden Hard- oder Software geben. 
+<P>
+Die Ergebnisse des Benchmarks k&ouml;nnen als Anhaltspunkt f&uuml;r das Verhalten und die 
+Geschwindigkeit der getesteten Hardware oder Software im realen Einsatz geben. 
+Wie nahe diese Ergebnisse jedoch wirklich mit der Realit&auml;t &uuml;bereinstimmen, h&auml;ngt vom 
+verwendeten Benchmarkprogramm und seiner Abbildung des realen Betriebs ab.
+Bei der Auswertung der Ergebnisse muss deshalb immer beachtet werden, dass die 
+Ergebnisse nur als Ann&auml;herung an die tats&auml;chliche Leistung gesehen werden k&ouml;nnen. 
+Dennoch k&ouml;nnen Benchmarks Anregungen f&uuml;r Optimierungen liefern.
+<P>
+
+<H3>Besonderheiten des Webserverbenchmarking</H3>
+Bei einem Webserverbenchmark werden unter anderem die Anfragen pro Sekunde gemessen, 
+die der Webserver verarbeiten kann. Weiter misst der Bechmark die Geschwindigkeit, 
+mit der auf Anfragen reagiert wird. Dies betrifft zum Beispiel die Abarbeitung von 
+CGI-Scripten und die Generierung dynamischer Webseiten.
+Um den Benchmark optimal an die jeweiligen Bed&uuml;rfnisse anzupassen bieten die 
+meisten Webserverbenchmarkprogramme diverse Einstellungsm&ouml;glichkeiten. Diese 
+erlauben es, unter anderem, die Testroutinen des Programmes so einzustellen, 
+dass der Benchmark eine m&ouml;glichst hohe Übereinstimmung mit realen Bedingungen hat, 
+um m&ouml;glichst aussagekr&auml;ftige Ergebnisse zu erhalten.
+Zum Beispiel kann man einen Webserver lediglich auf den Zugriff statischer beziehungsweise
+dynamischer HTML-Seiten testen oder man verwendet Einstellungen, die den Zugriff auf 
+beide Arten simuliert. 
+Ein Faktor, der die Ergebnisse stark verf&auml;lschen kann, ist der Ort, an dem der 
+Benchmark durchgef&uuml;hrt wird. In der Regel befindet sich der Client mit dem 
+Benchmarkprogramm an einem Switch mit dem Server, so dass nur minimale 
+Übertragungszeiten zwischen Server und Client entstehen. In der Realit&auml;t sind 
+die Verz&ouml;gerungen durch die Anbindung des Clienten an das Netz wesentlich h&ouml;her
+(z. B.: Anbindung durch Modem, ISDN, xDSL und hohe Netzlast).
+<P>
+Bei real existierenden Webservern spielt im Allgemeinen die Stabilit&auml;t und Sicherheit 
+eine h&ouml;here Rolle als die Performance des Systems. Die Stabilit&auml;t l&auml;&szlig;t sich nur schwer 
+messen, jedoch zeigt eine c't-Analyse zur Verf&uuml;gbarkeit von Web-Servern, dass NT-Server 
+deutlich mehr und auch l&auml;ngere Ausfallzeiten aufwiesen als Unix-Systeme.i
+<P>
+Die Website <a href="http://www.attrition.org" target="_blank">www.attrition.org</a> 
+f&uuml;hrt zu Dokumentationszwecken alle durch Hacker verunstalteten Webseiten, die den 
+Betreibern bekannt werden. Au&szlig;erdem f&uuml;hren sie eine Statistik &uuml;ber die betroffenen 
+Betriebssysteme. In dieser nimmt Windows NT mit rund zwei Dritteln aller Vorf&auml;lle 
+einen Spitzenplatz ein. 
+<P>
+Tests diverser Computerzeitschriften haben ergeben, da&szlig; Linux unabh&auml;ngig 
+von der Art der Systemlast mindestens so gut wie Windows 2000, bei Datenbankabfragen 
+teilweise sogar besser skaliert. Bei der Erstellung dynamischer Webseiten skalieren 
+beide Systeme mit der Zahl der CPUs. Bei bis zu vier CPUs w&auml;chst 
+die Systemleistung linear an, allerdings nur, solange nicht andere Faktoren, wie 
+die Bandbreite der Netzanbindung die Grenze f&uuml;r die Leistung bilden. 
+Bei beiden Betriebssystemen zeigt sich jedoch dann auch, dass bei einer Erweiterung 
+auf mehr als vier CPUs die Ergebnisse nicht mehr linear anwachsen. 
+<P>
+Artikel dazu:
+<UL>
+<LI>J&uuml;rgen Schmidt: Gemischtes Doppel; Linux und NT als Web-Server im Test; 
+     c't 13/99, S. 186
+<LI>J&uuml;rgen Schmidt: Dasein oder Nicht-Dasein, Analyse der Ausfallzeiten von 
+     Web-Servern, c't 8/00, S. 174
+<LI>J&uuml;rgen Schmidt: Server im Wettstreit; Windows 2000 und Linux 2.4
+     im Test als Web-Server, c't 17/00, Seite 174 
+</UL>
+<P>
+
+<H3>Hardwareoptimierung</H3>
+Die Geschwindigkeit von Webservern ist stark von der Hardwareausstattung des Computers
+abh&auml;ngig, auf der das Programm l&auml;uft. Somit kann man durch Optimierung der 
+Hardware bereits erhebliche Geschwindigkeitssteigerungen erreichen. Besonders wichtig ist 
+hierbei der Arbeitsspeicher des Systems sowie die Geschwindigkeit der Festplatten.
+Au&szlig;erdem kann auch der Einbau zus&auml;tzlicher Prozessoren die Geschwindigkeit steigern, 
+wobei hier auch das verwendete Betriebssystem eine Rolle spielt. Je besser dieses 
+die anfallende Systemlast auf die Prozessoren verteilt, desto h&ouml;her der 
+Geschwindigkeitsgewinn f&uuml;r die Anwendungen. Auch eine Vergr&ouml;&szlig;erung der Bandbreite 
+des Netzes kann die Geschwindigkeit des Webservers erh&ouml;hen.
+<P>
+
+<H3>Webserver-(Apache-) Tuning-Tipps</H3>
+Nicht nur Hardware und Betriebssystem spielen eine Rolle beim "Tunen" eines Server-Rechners.
+Auch bei der Software kann einiges den Durchsatz beschleunigen. Zuerst werden alle
+Prozesse entfernt, die nicht unbedingt notwendig sind. Insbesondere braucht ein
+Serversystem keine speicherfressende grafische Benutzeroberfl&auml;che und keine
+"normalen" Useraccounts. Es versteht sich auch von selbst, da&szlig; immer die neueste 
+Version des Servrprogramms verwendet wird - nicht nur wegen der Performance, sondern 
+auch aus Sicherheitsgr&uuml;nden.
+<P>
+Der Apache-Webserver ist wenig anf&auml;llig gegen Betriebsst&ouml;rungen 
+gleich welcher Art. Er Server besteht aus einem Managerproze&szlig;, der 
+eine Reihe von Bearbeiterprozessen startet (preforking). 
+Eingehende Requests werden vom Master registriert und an einen 
+freien Bearbeiter weitergereicht. Wenn der Bearbeiter mit der Ausf&uuml;hrung 
+des Requests fertig ist, beendet er sich nicht, sondern meldet
+sich beim Manager zur&uuml;ck, und dieser teilt dem Bearbeiter den
+n&auml;chsten Request zu.
+<p>
+Ein Bearbeitungsproze&szlig; ist oftmals nicht in der Lage, einen
+Prozessor voll auszulasten: Er mu&szlig; auf das Eintreffen von Daten
+von der Festplatte warten, oder er mu&szlig; auf den Client auf der
+anderen Seite des Netzes warten und sich mit der Abarbeitung des
+Requests nach der Übertragungsgeschwindigkeit des Netzes
+richten. Damit w&auml;hrend dieser Zeit andere Requests bearbeitet
+werden k&ouml;nnen, ist es sinnvoll, mehrere Bearbeiterprozesse zu
+haben. 
+<p>
+Wie viele Bearbeiterprozesse sinnvoll sind, h&auml;ngt von einer
+ganzen Reihe von Parametern ab. Zun&auml;chst einmal w&auml;re es
+sicherlich sch&ouml;n, wenn immer genau so viele Bearbeiter vorhanden
+sind, wie gleichzeitige Requests bei der Maschine ankommen. Nun
+kann ein Rechner aber nicht beliebig viele Prozesse starten, und
+speziell im Fall von Apache ist es so, da&szlig; der Webserver in
+genau dem Moment sehr viel langsamer wird, in dem die Maschine
+anfangen mu&szlig;, Webserverprozesse mangels RAM in den Swapbereich
+auszulagern. Das ist ein sehr unangenehmer Moment, denn bei
+gleichbleibender Anzahl von Requests pro Sekunde ("Last bleibt
+gleich") dauert die Abarbeitung eines einzelnen Requests nun
+viel l&auml;nger ("Durchsatz sinkt"), und damit steigt die Anzahl der
+ausstehenden Requests ("Ressourcenverbrauch steigt"). Das
+Gesamtsystem versucht darauf mit einer weiteren Erh&ouml;hung der
+Serverproze&szlig;zahl zu antworten und treibt die Maschine nur noch
+weiter in den Swap - die Requests werden noch langsamer
+bearbeitet und als Antwort werden nur um so mehr
+Serverprozesse erzeugt.<BR>
+In dieser Situation bricht die Systemleistung zusammen, oder das
+System kommt im Extremfall vollst&auml;ndig zum Halt. Mit Hilfe des
+Parameters "MaxClients" kann man in der httpd.conf die Anzahl
+der Serverprozesse nach oben begrenzen und so verhindern, da&szlig;
+die Maschine in diesen fatalen Zustand ger&auml;t - die Zahl mu&szlig; so
+gew&auml;hlt werden, da&szlig; die Maschine sicher nicht ins Swappen ger&auml;t.
+Als hilfreich hat sich hier die Analyse der Zahlen in
+/proc/&lt;pid&gt;/statm erwiesen, wobei als &lt;pid&gt; die Proze&szlig;nummern
+der httpd-Prozesse einzusetzen sind:
+<p>
+
+<pre>
+plate@atlas:~ > server=`grep -l httpd /proc/*/cmdline`
+plate@atlas:~ > echo $server
+/proc/12366/cmdline /proc/16768/cmdline /proc/16769/cmdline /proc/16892/cmdline
+/proc/23378/cmdline /proc/24373/cmdline /proc/3474/cmdline /proc/self/cmdline
+
+plate@atlas:~ > for i in $server; do cat `dirname $i`/statm; done
+1090 1005 951 40 0 965 576
+1327 1242 919 49 0 1193 777
+1330 1245 919 49 0 1196 780
+1117 1032 968 48 0 984 575
+1341 1256 918 49 0 1207 791
+1117 1032 968 48 0 984 575
+</pre>
+Die ausgegebenen Zahlen sind in
+<TT>/usr/src/linux/Documentation/proc.txt</TT> genauer erl&auml;utert. Sie
+bedeuten von links nach rechts:
+<pre>
+size       total program size
+resident   size of in memory portions
+shared     number of the pages that are shared
+trs        number of pages that are 'code'
+drs        number of pages of data/stack
+lrs        number of pages of library
+dt         number of dirty pages
+</pre>
+Der Gesamtspeicherverbrauch eines Serverprozesses
+ergibt sich aus seinen resident (im RAM befindlichen) Unshared
+Pages (Page-Gr&ouml;&szlig;e 4 KB in Intel-Rechnern). Also ist die
+Differenz zwischen der zweiten und der dritten Zahl einer jeden
+Zeile zu bilden und mit vier zu multiplizieren, um den
+RAM-Verbrauch eines einzelnen httpd in KByte zu ermitteln. 
+Bei obiger Tabelle ergibt sich (auf ganze KByte gerundet):
+<PRE>
+(1005 - 951)/4 = 14
+(1242 - 919)/4 = 80
+(1245 - 919)/4 = 80
+(1032 - 968)/4 = 16
+(1256 - 918)/4 = 85
+(1032 - 968)/4 = 16
+</PRE>
+Bei einem geeigneten Wert f&uuml;r MaxClients erzielt der
+Apache-Webserver bei zunehmender Last ("ramp-up") linear mehr
+Durchsatz, bis der S&auml;ttigungspunkt erreicht ist. Danach bleibt
+die Leistung auf einem stabilen Plateau, wenn nicht ein anderer
+leistungsbegrenzender Faktor wirksam wird (Netzbandbreite,
+DNS-Lookups, Plattenbandbreite, CPU-Leistung).
+<p>
+Bei nachlassender Last reduziert der Managerproze&szlig; die Anzahl der
+Serverprozesse bis auf "MaxSpareServers". Bei steigender Last 
+wird der Manager diese Zahl dann wieder steigern. Da das Starten von
+neuen Serverprozessen einige Zeit dauert, bleiben immer "MinSpareServers" 
+aktiv. Je st&auml;rker und je schneller die Last auf einem Webserver
+springt, um so gr&ouml;&szlig;er sollte man den Abstand zwischen beiden
+Werten w&auml;hlen. Je langsamer die Maschine beim Starten von neuen
+Serverprozessen ist und je ruckartiger die Last auf dem Server
+ansteigen kann, um so h&ouml;her mu&szlig; man MinSpareServers w&auml;hlen,
+damit im Falle einer Spitzenlast schon ausreichend viele Server
+vorhanden sind.<BR>
+<I>(Nach einem Aufsatz von Kristian K&ouml;hntopp)</I>
+<P>
+Dann kann noch die Konfiguration und das Umfeld optimieren:
+<UL>
+<LI>In der Datei <TT>httpd.conf</TT> den Wert <TT>HostNameLookups</TT> auf "off"
+setzen, um die Zahl unn&ouml;tiger DNS-Abfragen zu reduzieren. 
+<LI>Setzen Sie f&uuml;r die Grafiken auf den Webseiten einen zweiten Server
+ein. Dann liefert der eine nur die Texte und der andere die Grafiken und die
+Gesamtperformance steigt ohne administrativen Aufwand.
+<LI>Bauen Sie sich einen "schlanken" Server, der nur die n&ouml;tigsten Module
+enth&auml;lt. Dazu mu&szlig; der Apache neu compiliert werden, nachdem in
+<TT>.../src/Configuration</TT> die nicht ben&ouml;tigten Module auskommentiert 
+wurden.
+<LI>Wenn Sie keine Logdateien brauchen, leiten sie die Logs nach <TT>/dev/null</TT>
+um (in <TT>httpd.conf</TT>).
+<LI>Wenn keine gesch&uuml;tzten Verzeichnisse ben&ouml;tigt werden, setzen Sie
+global <TT>AllowOverride None</TT>. Dann k&uuml;mmert sich der Apache nicht mehr
+um die <TT>.htaccess</TT>-Dateien.
+<LI>Es versteht sich von selbst, da&szlig; die Web-Daten und Logdateine auf einer 
+lokalen Platte liegen und nicht etwa per NFS geliefert werden.
+<LI>Apache sollte auch immer "standalone" laufen und nicht &uuml;ber <TT>inetd</TT>
+oder einen TCP-Wrapper gestartet werden.
+<LI>Vermeiden Sie Server Side Includes (SSI).
+<LI>Bei CGI-Skripten:
+  <UL>
+  <LI>So wenig Dateioperationen wie m&ouml;glich. Dateien sauber &ouml;ffnen
+  und schlie&szlig;en.
+  <LI>Fest geblockte Daten mit <TT>read/write</TT> lesen/schreiben geht schneller als
+  zeichenweise Operationen und erlauben wahlfreien Zugriff.
+  <LI>Vermeiden Sie Aufrufe von fremden Programmen (Shellprozesse). Wenn unbedingt
+  n&ouml;tig, nur mit vollem Pfad aufrufen.
+  <LI>Verwenden Sie <TT>mod_perl</TT> anstelle des Standard-Perl-Interpreters.
+  </UL>
+<LI>Stukturieren Sie das Webangebot in Unterverzeichnisse, um den Zugriff auf die 
+Dateien zu beschleunigen.
+</UL>
+<P>
+
+<H3>Stress-Tests</H3>
+<UL>
+<LI>Beachten Sie auch das Programm <I>SWbench</I>, das im 
+     <A HREF="uebungen.html">Praktikum</A> behandelt wird.<BR>
+     (<A HREF="swbench.html">Beschreibung</A>, 
+     <A HREF="swbench-0.1.1.tar">Programmdatei als Tarball</A>)
+<LI>Zum Testen von Netzwerkverbindungen eignet sich das kleine Tool
+     <I>tcpblast</I>, das als <A HREF="tcpblast.c">Quelle</A> vorliegt.
+</UL>
+<P>
+Da <I>SWbench</I> ein recht schlichtes Programm ist, eignet es sich nur f&uuml;r sehr
+grobe Tests. Eine <A HREF="swbench.html">Beschreibung von SWbench</A> erl&auml;utert die
+Aufrufparameter. 
+<P>
+Interessanter ist hier <I>Hammerhead 2</I>, das unter 
+<A HREF="http://hammerhead.sourceforge.net/">http://hammerhead.sourceforge.net/</A>
+heruntergeladen werden kann. Dieses Tool ist einfach konfigurierbar (Datei 
+<TT>/etc/hammerhead/hh.conf</TT> bearbeiten). <I>Hammerhead 2</I> kann mehrere Verbindungen
+gleichzeitig &ouml;ffnen und dabei auch Anfragen von verschiedenen IP-Aliasen und bis zu
+256 verschiedenen Usern generieren. Nach der voreingestellten Testzeit liefert das Tool
+einen aussagekr&auml;ftigen Report. Neben Anzahl der Threads, Timeout-Schwellen, Test-Zeit,
+Usern lassen sich noch viele weitere Parameter einstellen. Man kann sogar Erwartungswerte
+f&uuml;r Ergebnisse eingeben, die dann mit den realen Resultaten verglichen werden.
+<I>Hammerhead 2</I> wartet bei jedem Request auf Antwort vom Server. Ist der Server 
+schlecht angebunden, kann es vorkommen, da&szlig; die voreingestellte Request-Rate
+unterschritten wird. Auch kann das Programm nur so schnell arbeiten, wie der Computer
+auf dem es L&auml;uft die Netzwerkanforderungen bedient.
+<P>
+Hier - wie auch bei all den anderen Testprogrammen - sollte man die Tests auf lokale 
+Server loslassen, sonst kann es &auml;rger mit dem Provider geben (der vielleicht 
+eine Denial-of-Service-Attacke vermutet) oder teuer werden (wenn nach Volumen bezahlt wird).
+<P>
+Aber oft soll nicht nur eine Netzverbindung getestet werden (&uuml;berlegen Sie mal,
+wie man einen Mailserver per POP3-Anfrage testen k&ouml;nnte), sondern der Server selbst.
+Laufen alle Prozesse fl&uuml;ssig, sind CPU- oder Plattenlast im gr&uuml;nen Bereich?
+F&uuml;r diesen Zweck eignet sich <I>stress</I> 
+(<A HREF="http://weather.ou.edu/~apw/projects/stress/">http://weather.ou.edu/~apw/projects/stress/</A>),
+das gezielt den Rechner stressen kann. So sorgt der Aufruf 
+<PRE>
+stress --loadavg 20
+</PRE>
+f&uuml;r eine entsprechende CPU-Last (+/- 20%). Mit 
+<PRE>
+stress --hogdisk 1000m test
+</PRE>
+werden 1 GByte Daten in die Datei "test" geschrieben. Ansonsten ist das Programm sehr
+schlicht zu bedienen, die Hilfe-Ausgabe liefert weitere Optionen:
+<PRE>
+stress 1.16
+
+   usage: stress [flag [arguments]]
+   flags: --hogio [n]       (make n sync(2) calls)
+          --loadavg [n]     (bring load avg up to n)
+          --hogcpu [n]      (make n sqrt(3) calls)
+          --hogmemory [n s] (malloc(3) n pages of s bytes)
+          --hogdisk [n f]   (fputs(3) n bytes to file f)
+   valid number suffixes: k, m, g (i.e. 4k => 4096)
+</PRE>
+<P>
+
+<A NAME="7.4"></A>
+<H2>7.4 Monitoring</H2>
+Monitoring, die st&auml;ndige &Uuml;berwachung der Server, ist f&uuml;r viele 
+Dienstanbieter (z.B. ISPs, E-Commerce) "mission critical". Monitorimg umfa&szlig;t:
+<ul>
+<LI> Voraussetzung bieten f&uuml;r zuverl&auml;ssigen Dienst 
+<LI> Gew&auml;hrleistung der Service Levels
+<LI> z&uuml;gige Entdeckung von Problemen und deren L&ouml;sung 
+<LI> Ursache von Problemen bestimmen 
+<LI> Fr&uuml;herkennung zuk&uuml;nftiger Probleme und deren Vermeidung 
+<LI> beinhaltet oft auch Leistungsmessungen 
+</ul>
+Die Bedeutung des Monitoring w&auml;chst mit dem Ausbau eines Dienstes. Daher sollte man
+das Monitoring schon bei Planung der Dienste ber&uuml;cksichtigen. Das Monitoring 
+verbraucht selbst auch Ressourcen (Bandbreite  &lt;= 1% ist akzeptabel).
+<P>
+
+<h4>Verfahren</h4>
+<ul>
+<LI> Historisches Monitoring<BR>
+Automatische Erzeugung von (Langzeit-)Statistiken zur Verf&uuml;gbarkeit und 
+Auslastung von Diensten.
+<LI>Real-Time Monitoring
+ <ul>
+ <LI> laufende Überwachung der Funktionalit&auml;t von Diensten 
+ <LI> Registrierung von Diensteausf&auml;llen 
+ <LI> sofortige Benachrichtigung des/der Verantwortlichen 
+ </ul>
+</ul>
+<P>
+
+<h4>Welche Aspekte k&ouml;nnen/sollten &uuml;berwacht werden?</h4>
+<ul>
+<LI> Ausnutzung von Plattenspeicher, CPU, Speicher, Bandbreite, etc.
+<LI> System-Aktivit&auml;ten, z. B. Betriebszeit (uptime), Last, Prozesse,
+E/A-Aktivit&auml;ten, Systemfehler, etc. 
+<LI> Verf&uuml;gbarkeit von Diensten, Rechnern, Ger&auml;ten, etc. 
+<LI> Netzwerk-Konnektivit&auml;t, Netzwerk-Verbindungen, Warteschlangen 
+(Drucker, Mail, ...) 
+<LI> Accounts (Session-, Prozess-Accounting) 
+<LI> Log-Files 
+<LI> Anwendungssoftware und SW-Lizenzen 
+<LI> spezielle HW-Komponenten (L&uuml;fter, USV, Prozessor, Board (Temperatur), etc. 
+<LI> Environment (Serverraum-&Uuml;berwachung, Klimawerte, etc.) 
+<LI> Dienste, Ressourcen, Protokolle 
+</UL>
+Das Monitoring steht in enger Beziehung zur REchner-Konfiguration (statisch),
+Netzwerkadministration, Nutzerverwaltung und Accounting. 
+<P>
+
+<h4>Wo findet Monitoring statt?</h4>
+<ul>
+<LI> Lokales Monitoring<BR>
+Der zu &uuml;berwachende Rechner f&uuml;hrt selbst Monitoring durch. Typische Verfahren sind
+dabei Shell-Skripte, crontab-Eintr&auml;ge, das Aufzeichnen gew&ouml;hnlicher Ergebnisse 
+in Log-Files oder Versenden von Alarm-Mails. M&ouml;glicherweise kann Monitoring-Skript 
+ein erkanntes Problem sofort beseitigen.
+<LI> Remote Monitoring<BR>
+Die zu &uuml;berwachenden Rechner/Ger&auml;te werden zentral durch einen Rechner (Network 
+Management Station) &uuml;berwacht. Eine Probe wird an die Rechner/Ger&auml;te gesendet, die 
+Ergebnisse zur&uuml;ckliefern. Ein einfacher "Anwesenheitstest" kann beispielsweise
+mit "ping" realisiert werden. Rechner oder Ger&auml;te k&ouml;nnen auch Alarmsignale 
+(alerts) senden. Die Management Station zeichnet die Daten auf und/oder zeigt sie an.
+</ul>
+<P>
+
+<h4>Kommunikations-Mechanismen</h4>
+<ul>
+<LI>Simple Network Management Protocol (SNMP), eine Methode, um Netzwerk-Ger&auml;te 
+abzufragen und zu steuern. Ein sogennanter "Manager" (auf dem Management-REchner) 
+fragt die "Agenten" (auf den Netzwerk-Ger&auml;ten) nach Informationen ab, die auf 
+Eintr&auml;gen in der "Management Information Base" (MIB) basieren. 
+<LI>ICMP-Ping, ein einfacher Test der Netzwerk-Konnektivit&auml;t, der jedoch
+keine gesicherten Aussagen liefern kann.
+<LI>Port-Tests, also eine Untersuchung, ob Netzwerk-Dienst verf&uuml;gbar ist und arbeitet.
+<LI>remote Execution, bei der ein Kommando auf entferntem System ausgef&uuml;hrt wird und 
+dennen Ergebnisse auf der Managemen Station ausgewertet werden.
+<LI>remote Alerts, die bei anormalen Ereignissen auf lokalen Ger&auml;ten oder System 
+generiert und an die Managment Station gesendet werden.
+</ul>
+<P>
+
+<H3>Monitoring mit MRTG</H3>
+Die Auslastung eines Netzwerks messen und die Ergebnisse grafisch aufbereiten ist 
+das Spezialgebiet vom Multi Router Traffic Grapher (MRTG) von Tobias Oetiker
+(<A HREF="http://www.mrtg.org/">http://www.mrtg.org/</A>).
+Er &uuml;berwacht die Auslastung des Netzwerks, fragt Router und Switches ab und 
+erzeugt aus den gewonnenen Daten &uuml;bersichtliche Grafiken, die sich in eine 
+Webseite einbinden lassen. MRTG kann aber noch mehr, etwa Fehlermeldungen von Netzwerkschnittstellen abfragen oder die Auslastung einer Festplatte &uuml;berwachen.
+Ein Beispiel findet sich unter:
+<A HREF="http://www.stat.ee.ethz.ch/mrtg/">http://www.stat.ee.ethz.ch/mrtg/</A>.
+<P>
+Viele Linux-Distributionen enthalten MRTG und die zus&auml;tzlich ben&ouml;tigten Programme 
+und Bibliotheken bereits. Ist das ausnahmsweise nicht der Fall, ist auch das manuelle 
+Installieren kein Problem. Voraussetzungen sind Perl, ein C-Compiler sowie die 
+GD-Bibliothek von Thomas Boutell. Letztere verlangt ihrerseits die Bibliotheken 
+<TT>libpng</TT> und <TT>zlib</TT>. Alle Komponenten laufen unter Linux, Unix und 
+sogar Windows.
+<UL>
+<LI><TT>gcc:</TT>
+<A HREF="http://gcc.gnu.org/">http://gcc.gnu.org/</A>
+<LI><TT>perl:</TT>
+<A HREF="http://www.perl.com/">http://www.perl.com/</A>
+<LI><TT>gd:</TT>
+<A HREF="http://www.boutell.com/gd/">http://www.boutell.com/gd/</A>
+<LI><TT>libpng:</TT>
+<A HREF="http://www.libpng.org/pub/png/">http://www.libpng.org/pub/png/</A>
+<LI><TT>zlib:</TT>
+<A HREF="http://www.info-zip.org/pub/infozip/zlib/">http://www.info-zip.org/pub/infozip/zlib/</A>
+<LI><TT>mrtg:</TT>
+<A HREF="http://ee-staff.ethz.ch/~oetiker/webtools/mrtg/pub">http://ee-staff.ethz.ch/~oetiker/webtools/mrtg/pub</A>
+</UL>
+<P>
+
+<H4>Konfiguration</H4>
+F&uuml;r jedes &uuml;berwachte Ger&auml;t erh&auml;lt MRTG je eine Konfigurationsdatei 
+(braucht man nur eine, nimmt man <TT>/etc/mrtg.cf</TT>. Sind mehrere Dateien geplant,
+legt man am Besten ein Verzeichnis an und erzeugt darin weitere Dateien, wenn man
+sie braucht). Die Konfigurationsdatei l&auml;&szlig;t sich auch automatisch generieren: 
+Das Programm <TT>cfgmaker</TT> aus dem MRTG-Paket schreibt eine Konfigurationsdatei, 
+mit der MRTG die Netzwerklast beobachtet.  Das Programm <TT>indexmaker</TT> erzeugt 
+eine HTML-Startseite, in der alle &uuml;berwachten Ger&auml;te verzeichnet sind.<BR>
+Mit der standardisierten Konfigurationsdatei &uuml;berwacht MRTG die Netzwerkschnittstellen 
+eines Ger&auml;ts &uuml;ber SNMP. Ob es sich dabei um einen Server mit einem einzelnen 
+Netz-Interface handelt oder um einen Router oder Switch mit vielen Schnittstellen, 
+ist nicht wichtig. Das zu &uuml;berwachende Ger&auml;t mu&szlig; seine Daten &uuml;ber 
+SNMP zur Verf&uuml;gung stellen und MRTG mu&szlig; das Leserecht f&uuml;r SNMP auf dem 
+Ger&auml;t haben. In den Kommandozeilen-Parametern von <TT>cfgmaker</TT> sind 
+folgende Informationen anzugeben:
+<P>
+<UL>
+<LI>IP-Adresse oder DNS-Name des zu &uuml;berwachenden Ger&auml;ts, im folgenden 
+Beispiel <TT>10.1.3.1</TT>,
+<LI>Community-String: <TT>Geheim</TT>,
+<LI>Name der zu erstellenden Konfig- Datei: <TT>/etc/mrtg/eins.cfg</TT>,
+<LI>Speicherort f&uuml;r die HTML-Seiten: <TT>/opt/www/htdocs/mrtg</TT>
+<LI>die zus&auml;tzlichen Optionen: <TT>growright</TT>.
+</UL>
+<P>
+Im Verzeichnis f&uuml;r die HTML-Seiten legt MRTG auch die Grafiken sowie alle gesammelten 
+Daten ab. In der Grundeinstellung sind die neuesten Werte in der grafischen Darstellung 
+auf der linken Seite enthalten, die Option <TT>growright</TT> legt die neuesten Daten 
+nach rechts. Als beschreibender Text dient der Name der Schnittstelle, etwa <TT>eth0</TT>, 
+nicht die laufende Nummer, wie es die Default-Einstellung ist:
+<PRE>
+cfgmaker \
+--output=/etc/mrtg/mrtgtest.cfg \
+--global "workdir:/opt/www/htdocs/mrtg/" \
+--global "Language:german" \
+--global "options[_]: growright" \
+--ifdesc=descr geheim@10.1.3.1
+</PRE>
+Das Ergebnis des Aufrufs ist in der Datei <TT>/etc/mrtg/mrtgtest.cfg</TT> zu finden. Der 
+Name dieser Datei wird als erster Parameter an MRTG &uuml;bergeben: 
+<TT>mrtg /etc/mrtg/mrtgtest.cfg</TT>. Im Verzeichnis <TT>/opt/www/htdocs/mrtg/</TT> entstehen 
+mit diesem Aufruf eine HTML-Seite f&uuml;r jedes Interface, die Logfiles mit den Werten, 
+au&szlig;erdem die Grafiken. Das Verzeichnis mu&szlig; allerdings vorher schon existieren. 
+Alte Dateien l&ouml;scht MRTG automatisch - beim ersten Aufruf f&uuml;hrt das zwar zu 
+Fehlermeldungen, die man ignoriert. Der Aufruf mu&szlig; nun alle f&uuml;nf Minuten
+wiederholt werden. Das das nicht von Hand geht, mu&szlig; ein Cron-Job das erledigen.
+Der Zeitabstand ist entscheidend, damit MRTG die Durchschnittswerte korrekt berechnet. 
+Wie gro&szlig; das Intervall ist, l&auml;&szlig;t sich in der Konfiguration &auml;ndern.
+
+
+<P>
+<H4>Manuelle Konfiguration</H4>
+Sind andere SNMP-Variablen als das &uuml;bertragene Datenvolumen gew&uuml;nscht, 
+mu&szlig; man eine Konfigurationsdatei von Hand erstellen. Das folgende Beispiel fragt die 
+Fehler ab, die auf einem Netzwerk-Interface auftreten. Die globalen Optionen entsprechen 
+denen f&uuml;r den Datentransfer, die weiteren Felder erkl&auml;rt die Tabelle weiter 
+unten. Der Aufruf per crontab sollte alle f&uuml;nf Minuten erfolgen.
+<PRE>
+WorkDir: /opt/www/htdocs/mrtg/
+Language: german
+ 
+Target[interfaceerrors_2]:1.3.6.1.2.1.2.2.1.14.2& 1.3.6.1.2.1.2.2.1.20.2:geheim@10.1.3.1
+Options[interfaceerrors_2]: growright,nopercent
+Title[interfaceerrors_2]: Fehler auf Interface eth0
+MaxBytes[interfaceerrors_2]: 10000
+Ylegend[interfaceerrors_2]: Fehler
+ShortLegend[interfaceerrors_2]: &nbsp;
+Legend1[interfaceerrors_2]: Input Fehler
+Legend2[interfaceerrors_2]: Output Fehler
+LegendI[interfaceerrors_2]: &nbsp;INPUT&nbsp;
+LegendO[interfaceerrors_2]: &nbsp;OUTPUT&nbsp;
+PageTop[interfaceerrors_2]: &lt;H1&gt;Input / Output Errors&lt;/H1&gt;
+ Fehler auf Interface eth0
+
+Target[interfaceerrors_3]:1.3.6.1.2.1.2.2.1.14.3& 1.3.6.1.2.1.2.2.1.20.3:geheim@10.1.3.1
+Options[interfaceerrors_3]: growright,nopercent
+</PRE>
+<P>
+<center><IMG SRC="mrtg1.gif"></center>
+<P>
+<TABLE BORDER=1 CELLPADDING=3 CELLSPACING=0>
+<TR><TH COLSPAN=2>Konfigurations-Optionen</TH></TR>
+<TR><TH>Option</TH><TH>Bedeutung</TH></TR>
+<TR>
+<TD>Target</TD><TD>Die vollst&auml;ndigen Object-IDs der darzustellenden SNMP-Variablen
+getrennt durch "&amp;".</TD>
+</TR>
+<TR>
+<TD>Options</TD><TD>Optionen, "growright": (s.o.), "nopercent": keine Prozentangaben,
+die nur sinnvoll w&auml;ren, wenn ein Maximum bekannt ist.</TD>
+</TR>
+<TR>
+<TD>Title</TD><TD>Titel der erzeugten Webseite</TD>
+</TR>
+<TR>
+<TD>MaxBytes</TD><TD>Obergrenze der Werte (n&ouml;tig f&uuml;r Achsenskalierung)</TD>
+</TR>
+<TR>
+<TD>Ylegend</TD><TD>Legende der Y-Achse</TD>
+</TR>
+<TR>
+<TD>ShortLegend</TD><TD>Angabe der Ma&szlig;zahl</TD>
+</TR>
+<TR>
+<TD>LegendI</TD><TD>Beschriftung der X-Achse f&uuml;r Incoming-Daten.</TD>
+</TR>
+<TR>
+<TD>LegendO</TD><TD>Beschriftung der X-Achse f&uuml;r Outgoing-Daten.</TD>
+</TR>
+<TR>
+<TD>Legend1,Legend2</TD><TD>Legenden f&uuml;r die beiden Kurven am Seitenfu&szlig;.</TD>
+</TR>
+<TR>
+<TD>PageTop</TD><TD>HTML-Kopf der Seite, welche die MRTG-Grafiken einbindet. 
+Folgezeilen m&uuml;seen mit einem Leerzeichen beginnen.</TD>
+</TR>
+</TABLE>
+<P>
+MRTG h&auml;ndisch zu starten, ist weder besonders elegant, noch sinnvoll, da
+so ein regelm&auml;&szlig;iges Abfragen der Daten des Netzknotens nicht
+gew&auml;hrleistet ist. MRTG sollte alle f&uuml;nf Minuten mittels <TT>crontab</TT>
+aufgerufen werden:
+<P>
+<pre>
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/bin/mrtg /etc/mrtg/mrtgtest.cfg
+</pre>
+Unter Linux geht es noch k&uuml;rzer:
+<pre>
+*/5 * * * *  /usr/bin/mrtg /etc/mrtg/mrtgtest.cfg
+</pre>
+Es geht auch als ein Eintrag in die System-Crontab <TT>/etc/crontab</TT>:
+<pre>
+*/5 * * * *  mrtg-user  /usr/bin/mrtg /etc/mrtg/mrtgtest.cfg
+</pre>
+<P>
+Sofern eine ganze Reihe von Netzkonten mit MRTG &uuml;berwachen m&ouml;chte,
+sollte man nicht nur eine einzige Konfigurationsdatei benutzen. F&uuml;r jeden 
+Netzknoten, den man &uuml;berwachen m&ouml;chte, wird eine eigene Konfigrationsdatei 
+erstellt. Diese Konfigurationsdateien werden beispielsweise unter <TT>/etc/mrtg/</TT> 
+abgelegt. Als Beispiel wird hier die &Uuml;berwachung von f&uuml;nf Servern 
+wiedergegeben. Mit den Dateien <TT>serverXX-if.cfg</TT> wird der Traffic auf den 
+Netzwerkkarten &uuml;berwacht und mit <TT>serverXX.cfg</TT> erh&auml;lt man
+Server-Parameter wie CPU-Auslastung, Arbeitsspeicher, usw.
+<pre>
+$ ls /etc/mrtg/server*.cfg
+server01-if.cfg
+server01.cfg
+server02-if.cfg
+server02.cfg
+server03-if.cfg
+server03.cfg
+server04-if.cfg
+server04.cfg
+server05-if.cfg
+server05.cfg
+</pre>
+Um nicht alle MRTG-Aufrufe mit den verschiedenen Konfigurationsdateien
+in eine Crontab eintragen zu m&uuml;ssen, erstellen wir uns ein
+Shell-Skript, das die MRTG-Aufrufe zusammenfa&szlig;t:
+<pre>
+#!/bin/sh
+
+MRTG_BIN="/usr/bin/mrtg"
+MRTG_CFG="/etc/mrtg"
+
+$MRTG_BIN $MRTG_CFGrouter01.cfg
+$MRTG_BIN $MRTG_CFGrouter02.cfg
+$MRTG_BIN $MRTG_CFGrouter03.cfg
+
+$MRTG_BIN $MRTG_CFG/server01.cfg
+$MRTG_BIN $MRTG_CFG/server01-if.cfg
+$MRTG_BIN $MRTG_CFG/server02.cfg
+$MRTG_BIN $MRTG_CFG/server02-if.cfg
+$MRTG_BIN $MRTG_CFG/server03.cfg
+$MRTG_BIN $MRTG_CFG/server03-if.cfg
+$MRTG_BIN $MRTG_CFG/server04.cfg
+$MRTG_BIN $MRTG_CFG/server04-if.cfg
+$MRTG_BIN $MRTG_CFG/server05.cfg
+$MRTG_BIN $MRTG_CFG/server05-if.cfg
+
+...
+</pre>
+Das Skript wird nun alle f&uuml;nf Minuten ausgef&uuml;hrt:
+<pre>
+0-55/5 * * * *	root /usr/local/bin/gomrtg
+</pre>
+<P>
+Um die CPU-Auslastung mitsammeln zu lassen, erweitern Sie Ihre Konfigurationsdatei 
+um die folgenden Zeilen (oder Sie erstellen eine eigene Datei).
+<PRE>
+Target[server01]: 
+1.3.6.1.2.1.25.3.3.1.2.1&1.3.6.1.2.1.25.3.3.1.2.1:geheim@10.1.3.2
+MaxBytes[server01]: 100
+ShortLegend[server01]: %
+Unscaled[server01]: dwmy
+YLegend[server01]: Utilisation in percent
+Options[server01]: growright, gauge
+Title[server01]: CPU Load
+PageTop[server01]: CPU Load
+System: Server01 in
+</PRE>
+Voraussetzung hierf&uuml;r ist, da&szlig; auf der Maschine ein erweiterter SNMP-Agent 
+l&auml;uft, der die entsprechende Variablen auch bereith&auml;lt. 
+H&auml;ufig werden auch von Herstellern spezieller Software oder Hardware erweiterte 
+MIB-Dateien und  SNMP-Agenten mitgeliefert, die es erlauben Systemzust&auml;nde 
+dieser Komponenten abzufragen.
+Im Listing sehen Sie eine Reihe von neuen Parametern zur Target-Definition. 
+Der Parameter <I>Unscaled</I> verhindert eine automatische y-Achsen-Skalierung durch 
+MRTG, was bei bestimmten Werten der &Uuml;bersicht dient (regul&auml;r passt 
+RTG die y-Achse dynamisch an die bisherigen maximalen Werte an). Da der
+SNMP-Wert f&uuml;r die CPU-Belastung kein differentieller Wert ist, sondern nur einen 
+momentanen Zustand liefert, ist der Options-Parameter <I>gauge</I> notwendig. 
+MRTG ben&ouml;tigt &uuml;brigens immer zwei Eingabewerte, deswegen ist die gleiche 
+MIB-Variable zweimal eingetragen. Haben Sie eine Mehrprozessormaschine, so k&ouml;nnen 
+Sie nat&uuml;rlich eine MRTG-Graphik f&uuml;r zwei CPUs nutzen.
+<P>
+
+<H4>Externe Datenquellen</H4>
+Zum Abschlu&szlig; m&ouml;chte ich noch zeigen, wie externe Daten eingebunden 
+werden k&ouml;nnen. Extern meint in diesem Fall alle Arten von Daten, die nicht 
+direkt &uuml;ber MRTG oder eines seiner Module abgefragt werden k&ouml;nnen. 
+Im <i>contrib</i>-Verzeichnis der MRTG-Distribution finden Sie viele fertige 
+Module, die zum einen die Leistungsf&auml;higkeit von MRTG in seinen Erweiterungen 
+unter Beweis stellen und zum anderen vielleicht auch direkt von Ihnen einsetzbar 
+sind. Statt SNMP direkt zu benutzen, lassen sich auch eigene Skripte und Programme 
+in MRTG einbinden, sie sammeln extern Daten und &uuml;bergeben sie an MRTG. So kann man
+Messdaten grafisch anzeigen, ohne einen SNMP-Agenten einsetzen zu m&uuml;ssen. Oft 
+ist es einfacher, einen vorhandenen SSH-Zugang zu einer Maschine zu nutzen, als dort 
+einen SNMP-Agenten einzurichten. 
+<P>
+Ein Skript kann auch Me&szlig;werte aus mehreren Quellen verkn&uuml;pfen oder die 
+Me&szlig;daten anderweitig aufbereiten. Im folgenden Beispiel soll ein Perl-Skript 
+ermitteln, wie viel Platz auf der ersten Partition der Festplatte belegt ist. 
+Um das Perl-Skript aufzurufen, mu&szlig; der Target-Eintrag in der MRTG-Konfiguration 
+den Namen des Skripts und seine Parameter in Backticks <B>`</B> einschlie&szlig;en. 
+Es werden genau vier Daten in vier Zeilen an MRTG geliefert:
+<UL>
+<LI>Erster Wert (belegter Plattenplatz in KByte)
+<LI>Zweiter Wert (wird nicht angezeigt)
+<LI>uptime des Rechners
+<LI>Name des Rechners
+</UL>
+Die Konfigurationsdatei sieht dan etwa so aus:
+<PRE>
+WorkDir: /opt/www/htdocs/mrtg/
+Language: german
+
+Target[Festplatte]: `/usr/local(bin/platte.pl`
+Options[Festplatte]: growright,noo,gauge
+Title[Festplatte]: Auslastung Festplatte
+MaxBytes[Festplatte]: 3138
+Ylegend[Festplatte]: MB
+ShortLegend[Festplatte]: &nbsp;
+Legend1[Festplatte]: Belegung Festplatte in MB
+Legend2[Festplatte]: nicht gebraucht
+LegendI[Festplatte]: &nbsp;MB&nbsp;
+LegendO[Festplatte]: &nbsp;nicht gebraucht&nbsp;
+PageTop[Festplatte]: &lt;H1&gt;Belegung Festplatte&lt;/H1&gt;
+ Festplatte "/"
+</PRE>
+<P>
+"noo" (no Output) unterdr&uuml;ckt die Ausgabe des zweiten Wertes;
+"noi" (no Input) w&uuml;rde das beim ersten Wert machen.
+<P>
+MRTG ist ein m&auml;chtiges Werkzeug um langsfristig Entwicklungen in Ihrem 
+Netzwerk erkennen zu k&ouml;nnen. Viele Feinheiten konnten hier nicht geschildert
+werden. Um das Lesen der Dokumentation kommt also keiner herum.
+<P>
+
+
+<H3>NTop</H3>
+NTop bekommen Sie unter <A HREF="http://www.NTop.org/NTop.html">
+http://www.NTop.org/NTop.html</A>. Es benötigt die <TT>ncurses</TT>-Bibliothek 
+(inklusive Header-Files) und die <TT>libpcap</TT>.
+Das Kompilieren und Installieren erfolgt mit:
+<PRE>
+tar xzf libpcap-0.6.2.tar.gz
+cd libpcap-0.6.2
+./configure --prefix=../libpcap
+make
+make install
+cd ..
+tar xzf NTop-1.1-src.tgz
+cd NTop-1.1
+./configure
+make
+</PRE>
+Als root-User wird das Programm dann noch installiert:
+<PRE>
+cp NTop /usr/local/bin
+cp NTop.8 /usr/local/man/man8
+</PRE>
+<P>
+
+Damit <TT>NTop</TT> direkten Zugriff auf Netzwerkpakete bekommt, muss es
+mit root-Rechten laufen (<TT>chmod 4700 ntop</TT> oder <TT>chmod 4711 ntop</TT>, falls
+auch andere User als root das Programm verwenden sollen.
+<P>
+Wird <TT>NTop</TT> in einem Text-Terminal gestartet, so verhält es sich ähnlich
+wie der Unix-Klassiker <TT>top</TT>. Nur zeigt <TT>NTop</TT> nicht die
+Prozessorauslastung durch diverse Prozesse an, sondern den durch
+verschiedene Rechner verursachten Netzwerkverkehr. In der folgenden Abbildung
+findet gerade ein größerer Datentransfer von <TT>thorin</TT> nach
+<TT>balin</TT> statt. Der aktuelle Durchsatz ("Throughput") ist oben
+rechts ablesbar. Das Programm wurde mit <TT>NTop -i eth0</TT> gestartet,
+also angewiesen, Pakete auf der ersten Ethernet-Karte abzugreifen.
+<P>
+<CENTER>
+<IMG SRC="ntop1.gif">
+</CENTER>
+<P>
+Im Text-Interface reagiert <TT>NTop</TT> auf verschiedene Tasten. Am
+interessantesten ist die Leertaste, die weitere Informationen in die
+Spalten der angezeigten Tabelle holt, etwa zu Anwendungsprotokollen wie
+FTP, HTTP oder DNS. 
+<P>
+
+Startet man das Programm mit <TT>NTop -i eth0 -w 888</TT> erneut, ist im Terminal
+keine Ausgabe mehr sichtbar, dafür können Sie sich mit einem Frame-fähigen Web Browser 
+auf Port 888 mit <TT>NTop</TT> verbinden. Dies geschieht, indem Sie im Browser
+<TT>http://localhost:888/</TT> als Seitenadresse eingeben.
+<P>
+<CENTER>
+<IMG SRC="ntop2.gif">
+</CENTER>
+<P>
+Über das Web-Interface stellt <TT>NTop</TT> wesentlich mehr Informationen zur 
+Verfügung. Die Abbildung zeigt nur eine kleine Auswahl der umfangreichen Statistiken 
+über die Anteile der Protokolle am Gesamtdurchsatz, die Bandbreitennutzung,
+Netzwerkkartenhersteller, aktuell laufende Netzwerkverbindungen und
+vieles mehr. In der folgenden Tabelle sind alle Links von der 
+<TT>NTop</TT>-Hauptseite und deren Funktionen beschrieben.
+<P>
+<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=3 WIDTH="90%">
+<TR><TH> Nr. </TH><TH> Bezeichnung </TH><TH> Bedeutung</TH></TR>
+<TR><TD> 1. </TD><TD>What's NTop? </TD><TD>
+Allgemeine Informationen über <TT>NTop</TT>.</TD></TR>
+<TR><TD> 2. </TD><TD>Data Rcvd </TD><TD>
+Übersicht über empfangene Daten, aufgeschlüsselt in Daten, die auf IP oder 
+alle Protokolle entfallen, sowie den Durchsatz.</TD></TR>
+<TR><TD> 3. </TD><TD>Data Sent </TD><TD>
+Übersicht über gesendete Daten, aufgeschlüsselt in IP, alle Protokolle und den Durchsatz.</TD></TR>
+<TR><TD> 4. </TD><TD>Multicast Stats </TD><TD>
+Pakete, die gleichzeitig an mehrere Rechner verschickt werden.</TD></TR>
+<TR><TD> 5. </TD><TD>Traffic Stats </TD><TD>
+Information über Paketgrößen und Anteile der Protokolle am Gesamtdurchsatz.</TD></TR>
+<TR><TD> 6. </TD><TD>Thpt Stats </TD><TD>
+Der Durchsatz der letzten 60 Minuten als Balkengrafik.</TD></TR>
+<TR><TD> 7. </TD><TD>Hosts Info </TD><TD>
+Information zu Rechnern, aufgeschlüsselt nach Rechnern.</TD></TR>
+<TR><TD> 8. </TD><TD>R-&gt;L IP Traffic </TD><TD>
+Netzverkehr von außen ins lokale Netz.</TD></TR>
+<TR><TD> 9. </TD><TD>L-&gt;R IP Traffic </TD><TD>
+Netzverkehr aus dem lokalen Netz nach außen.</TD></TR>
+<TR><TD>10. </TD><TD>L&lt;-&gt;L IP Traffic </TD><TD>
+Netzverkehr innerhalb des lokalen Netzes.</TD></TR>
+<TR><TD>11. </TD><TD>Active TCP Sessions </TD><TD>
+Momentan aufgebaute TCP-Verbindungen.</TD></TR>
+<TR><TD>12. </TD><TD>IP Protocol Distribution </TD><TD>
+Anteile der über IP transportierten Protokolle.</TD></TR>
+<TR><TD>13. </TD><TD>IP Protocol Usage </TD><TD>
+Zwischen welchen Rechnern werden welche Protokolle benutzt?</TD></TR>
+<TR><TD>14. </TD><TD>IP Traffic Matrix </TD><TD>
+Zwischen welchen Rechner wurde wieviel übertragen?</TD></TR>
+<TR><TD>15. </TD><TD>Credits </TD><TD>
+Danksagung des Autors.</TD></TR>
+<TR><TD>16. </TD><TD>Man Page </TD><TD>
+Die Manualseite zu <TT>NTop</TT>.</TD></TR>
+</TABLE>
+<P>
+Der Zugriff auf das Web-Interface lässt sich mit einem Passwort
+sperren. Dazu muss der Benutzer, der <TT>NTop</TT> startet, in seinem
+<B>Home-Verzeichnis</B> eine Datei <TT>.NTop</TT> mit einem
+Benutzername-/Passwort-Paar anlegen. Der Inhalt dieser Datei könnte etwa
+so aussehen:
+<PRE>
+# NTop Passwortdatei
+bla     fasel
+</PRE>
+Benutzername und Passwort dürfen durch beliebig viele Leer- oder
+Tabulatorzeichen getrennt sein. Im Beispiel ist <TT>bla</TT> der Benutzername 
+und <TT>fasel</TT> das Passwort.
+Groß- und Kleinschreibung werden beim Anmelden unterschieden. 
+<P>
+
+
+<H3>vnStat</H3>
+Wem die beiden vorgenannten Tools zu kompliziert sind, der kann einen
+kleinen, konsolenbasierten Traffic-Monitor einsetzen, der sich "vnStat" nennt.
+Er ben&ouml;tigt auch keine Root-Berechtigung, denn es werden die Daten des
+<tt>/proc</tt>-Verzeichnisses ausgewertet. Au&szlig; er der <tt>glibc</TT>
+wird nichts ben&ouml;tigt. Zu bekommen ist das Programm unter 
+<A HREF="http://humdi.net/vnstat">http://humdi.net/vnstat</A>. Die Quellen
+werden mit dem &uuml;blichen "<tt>make &amp;&amp; make install</tt>" 
+&uuml;bersetzt und installiert und mit <tt>vnstat -u -i eth0</tt> initialisiert.
+Per Cronjob kann dann regelm&auml;&szlig;ig mit <tt>vnstat -u</tt> die Datenbasis
+aktualisiert werden. An Kommandos gibt es:
+<PRE>
+   Update:
+         -u, --update            update database
+         -r, --reset             reset interface counters
+         --enable                enable interface
+         --disable               disable interface
+         --nick                  set a nickname for interface
+         --cleartop              clear the top10
+         --rebuildtotal          rebuild total transfers from months
+   Query:
+         -q, --query             query database
+         -h, --hours             show hours
+         -d, --days              show days
+         -m, --months            show months
+         -w, --weeks             show weeks
+         -t, --top10             show top10
+         -s, --short             use short output
+         --dumpdb                show database in parseable format
+   Misc:
+         -i, --iface             change interface (default: eth0)
+         -?, --help              short help
+         -D, --debug             show some additional debug information
+         -v, --version           show version
+         -tr, --traffic          calculate traffic
+         --testkernel            check if the kernel is broken
+         --longhelp              display this help
+</PRE>
+Nun folgen noch ein paar Output-Beispiele:
+<PRE>
+vnstat -t
+
+        eth0
+
+           #       day          rx      |     tx      |  total
+        --------------------------------+-------------+-------------
+           1    02.07.04     165.12 MB  |    4465 MB  |    4631 MB
+           2    30.06.04     273.99 MB  |    2587 MB  |    2861 MB
+           3    29.06.04     147.88 MB  |    2576 MB  |    2724 MB
+           4    01.07.04     122.99 MB  |    2313 MB  |    2436 MB
+           5    05.07.04     126.92 MB  |    1960 MB  |    2087 MB
+           6    28.06.04      94.47 MB  |    1412 MB  |    1506 MB
+           7    04.07.04     157.25 MB  |    1184 MB  |    1341 MB
+           8    03.07.04      72.64 MB  |    1004 MB  |    1077 MB
+        --------------------------------+-------------+-------------
+
+vnstat -d
+
+        eth0
+
+            day         rx      |     tx      |  total
+        ------------------------+-------------+--------------
+           28.06.     94.47 MB  |    1412 MB  |    1506 MB
+           29.06.    147.88 MB  |    2576 MB  |    2724 MB
+           30.06.    273.99 MB  |    2587 MB  |    2861 MB
+           01.07.    122.99 MB  |    2313 MB  |    2436 MB
+           02.07.    165.12 MB  |    4465 MB  |    4631 MB
+           03.07.     72.64 MB  |    1004 MB  |    1077 MB
+           04.07.    157.25 MB  |    1184 MB  |    1341 MB
+           05.07.    126.92 MB  |    1960 MB  |    2087 MB
+           06.07.     61.11 MB  |  800.95 MB  |  862.06 MB
+        ------------------------+-------------+--------------
+         estimated      102 MB  |    1342 MB  |    1444 MB
+
+vnstat -h
+
+ eth0                                                                     14:15
+  ^   t
+  |   t                                                           t
+  |   t                                                           t  t
+  |   t  t                                                        t  t  t
+  |   t  t              t                                      t  t  t  t
+  |   t  t           t  t                                      t  t  t  t
+  |   t  t           t  t                                      t  t  t  t
+  |   t  t  t     t  t  t                             t  t     t  t  t  t
+  |   t  t  t  t  t  t  t  t  t                       t  t  t  t  t  t  t
+  |   t  t  t  t  t  t  t  t  t  t        t           t  t  t  t  t  t  t  t
+ -+--------------------------------------------------------------------------->
+  |  15 16 17 18 19 20 21 22 23 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
+
+ h   rx (kB)    tx (kB)      h   rx (kB)    tx (kB)      h   rx (kB)    tx (kB)
+15      10246     174865    23       3529      46895    07       3710      54205
+16       8534     128352    00       2396      21712    08       4718      53318
+17       5079      65982    01       1613       9631    09       4025      49177
+18       4305      43534    02       1663      15690    10       7819     104977
+19       5638      67930    03       1719      18777    11      11571     159724
+20       5744     102914    04       1345      10376    12       8787     153695
+21       5506     111092    05       1410       8711    13       8280     124599
+22       4342      49030    06       1628      14197    14       1902      21384
+</PRE>
+<P>
+
+
+<A NAME="7.5"></A>
+<H2>7.5 Hochverf&uuml;gbarkeit</H2>
+Bereits ein unvorhergesehener Ausfall f&uuml;r von wenigen Minuten kann
+den Betreiber eines Dienstes in gro&szlig;e finanzielle Schwierigkeiten
+bringen. Hinzu kommt ein nicht n&auml;her zu beziffernder Imageverlust. 
+Ein Unternehmen im Zeitalter des <i>e</i>-Business kann es sich nicht
+leisten, f&uuml;r einen sp&uuml;rbaren Zeitraum vom Netz zu sein.
+Jeder Verantwortliche mu&szlig; sich nun &uuml;berlegen, ob die
+Vorteile eines hochverf&uuml;gbaren Systems nicht bei weitem gegen&uuml;ber 
+seinen Nachteilen (Kosten) &uuml;berwiegen. 
+<P>
+Was bedeutet "hochverf&uuml;gbar" eigentlich?
+Die Gr&ouml;&szlig;e, von der in diesem Zusammenhang am meisten die
+Rede ist, ist die der prozentualen Verf&uuml;gbarkeit eines Dienstes
+(Wartungsfenster f&uuml;r die betroffenen Server sind hierbei
+ausgenommen). Die folgende Tabelle vermittelt ein Gef&uuml;hl f&uuml;r
+die tats&auml;chlichen Ausfallzeiten, die hinter den prozentualen
+Verf&uuml;gbarkeitsangaben stecken.
+<P>
+<UL>	
+<table border=0 cellpadding=3 cellspacing=0 width="50%">
+<tr>
+<td><b>Verf&uuml;gbarkeit (%)</b></td>
+<td><b>Ausfallzeit</b></td>
+</tr>
+<tr>
+<td>99%</td><td>3,6 Tage</td></tr>
+<tr><td>99,9%</td><td>8,76 Stunden</td></tr>
+<tr><td>99,99%</td><td>52 Minuten</td></tr>
+<tr><td>99,999%</td><td>5 Minuten</td></tr>
+<tr><td>99,9999%</td><td>30 Sekunden</td></tr>
+<tr><td>99,99999%</td><td>3 Sekunden</td></tr>
+</table>
+</UL>
+<p>
+
+Wie erreicht man Hochverf&uuml;gbarkeit?
+<UL>
+<LI>Fehlervermeidung, d.h. geeignete Ma&szlig;nahmen beim Entwurf, bei
+der Spezifikation und bei der Implementierung des Systems zur Vermeidung
+von Fehlern. Das ist i.d.R. unm&ouml;glich, da Fehler in der Hardware
+oder in der Software meist nicht vohersehbar sind
+<LI>Fehlertoleranz, d.h. Sicherung der Funktionalit&auml;t des Systems
+beim Auftreten von Problemen und Fehlern im laufenden Betrieb
+</UL>
+Damit werden notwendig:
+<OL>
+<LI>Fehlerbehebungstechniken, z.B. Festlegen von Zeitpunkten (Checkpoints),
+an denen im Fehlerfall ein System wieder neu aufsetzen kann, soda&szlig; 
+eine Operation nicht erneut von Anfang an laufen mu&szlig;
+<LI>Fehlerkompensierungstechniken, d.h. Erkennen von Fehlern und ihre
+Kompensation durch:
+<OL>
+<LI>Fehlerkorrektur, z.B. ECC bei RAM-Speicher
+<LI>Fehlermaskierung, z.B. durch Vergleich mit Duplikat etwa bei Plattenspiegelung,
+d.h. Anlegen einer Kopie, Abgleich von Original und Kopie, Erkennen eines
+Fehlers im Original und Lieferung eines korrekten Results von der Kopie
+</OL>
+</OL>
+<P>
+Zum einen m&uuml;ssen SPOFs (Single Points of Failure) korrekt
+indentifiziert und anschlie&szlig;end eliminiert werden. SPOFs sind
+diejenigen Komponenten, deren Ausfall den Komplettausfall des gesamten
+Dienstes bedeuten w&uuml;rde. Zum anderen mu&szlig; die
+Dienstverf&uuml;gbarkeit bei Ausfall eines einzelnen Systems
+sichergestellt werden. Ob der konkrete Rechner in diesem Fall
+erreichbar ist oder nicht, spielt keine Rolle. Wichtig ist in diesem
+Fall, da&szlig; ein anderer Rechner nahtlos dort weiterarbeiten kann, 
+wo sein "Kollege" aufgeben mu&szlig;te.<BR>
+Das Zauberwort im Falle der SPOFs hei&szlig;t <b>Redundanz</b>, einfach
+gesagt: Jede Komponente, ob Netzteil, Festplatte oder Netzwerkkarte
+sollte mit einem "Stellvertreter" abgesichert sein, der die
+Funktion der ausgefallenen Komponente wenn n&ouml;tig &uuml;bernimmt.
+Damit ist der Redundanzen aber noch nicht genug, auch der Server als
+Ganzes sollte abgesichert sein. Konsequent im SPOF-Schema
+gedacht, stellt der Raum, das Geb&auml;ude oder sogar die Gegend, in
+der der oder die Server stehen, wieder einen Single Point of Failure
+dar. Um Ausf&auml;lle des gesamten Dienstes durch Geb&auml;udebrand
+etc. auszuschlie&szlig;en, sollte der Backupserver r&auml;umlich
+getrennt vom Hauptserver betrieben werden.
+<p>
+
+<H3>Methoden der Fehlertoleranz</H3>
+Murphys Gesetze kennen die meisten. Werden diese auf den Betrieb von lokalen Netzen 
+&uuml;bertragen, ist es denkbar, da&szlig; sie lauten: "<I>Falls eine Komponente 
+ausfallen kann, so wird sie fr&uuml;her oder sp&auml;ter ausfallen. Hat eine 
+Komponente eine garantierte Funktionsf&auml;higkeit f&uuml;r N Tage, wird sie nach 
+N+1 Tagen ausfallen. Sicherheitsinitiativen schieben die Katastrophe nur hinaus.</I>
+<P>
+Die Fehlertoleranz nimmt zum Ausgangspunkt, da&szlig; Komponenten fr&uuml;her oder 
+sp&auml;ter unweigerlich ausfallen, aber der Ausfall von Komponenten nicht zu 
+gr&ouml;&szlig;eren Betriebsst&ouml;rungen f&uuml;hren darf. Wenn man sich bewu&szlig;t 
+ist, da&szlig; Betriebsunterbrechungen auftreten k&ouml;nnen, ist die Anschaffung von 
+fehlertoleranten Komponenten nur der erste Schritt. &Uuml;bergeordnet betrachtet sind 
+es nicht nur die Komponenten, sondern ein zusammenh&auml;ngendes System, dessen 
+fortgesetzter Betrieb vom schw&auml;chsten Glied abh&auml;ngig ist. Ein fortschrittliches 
+Backup-System nutzt nur dann etwas, wenn es regelm&auml;&szlig;ig benutzt wird, an eine 
+stabile Stromversorgung angeschlossen ist, und die Sicherheitskopien in sicheren 
+physischen Umgebungen plaziert werden. 
+<UL>
+<P><LI>Unterbrechungsfreie Stromversorgung (USV, UPS)<BR>
+&Uuml;berwachung der Stromversorgung des Systems, Ausgleich von Spannungsschwankungen 
+durch Pufferbatterien und &Uuml;bernahme der Stromversorgung bei Stromausfall zum 
+sicheren Herunterfahren des Systems (n&auml;heres siehe unten).
+<P><LI>Hot-Fix-Mechanismus<BR>
+Auf der Festplatte wird ein kleiner Bereich als Hot-Fix-Bereich reserviert. Wird beim
+Schreiben ein defekter Sektor festgestellt, wird dieser Sektor in der Bad-Sector-Table 
+als fehlerhaft eingetragen. Als Ersatz wird ein Sektor aus dem Hot-Fix-Bereich genommen, 
+in den die Daten dann geschrieben werden. Das Verfahren kann nicht vor sp&auml;terer 
+Zerst&ouml;rung korrekter Sektoren sch&uuml;tzen.
+<P><LI>Read-After-Write-Verification (Kontrollesen)<BR>
+Ein Datenblock wird aus dem Cache auf die Platte geschrieben und anschlie&szlig;end 
+sofort wieder eingelesen. Die Daten aus dem Cache werden also mit den gerade gelesenen 
+Block verglichen und bei Differenz eine Korrekturma&szlig;nahme (z.B. Hot-Fix) 
+angeworfen.
+<P><LI>Redundante Dateisysteme<BR>
+Die Bereiche der Platten mit den Informationen &uuml;ber die Organisation der 
+Datenblocks und die Zuordnung von Datenbl&ouml;cken zu Dateien und Verzeichnissen 
+(Superblocks, File Allocation Table usw.) werden mindestens doppelt gehalten.
+<P><LI>Festplattenstriping (ohne Parit&auml;t; RAID Level 0)<BR>
+Es erfolgt eine Verteilung der Daten auf mehrere Festplatten (eigene Subsysteme,
+RAID-System, Disk Arrays). Zum Beispiel werden bei 4 Platten von jedem Byte die 
+Bits 1,2 auf Disk A, 3,4 auf Disk B, 5, 6 auf Disk C und 7,8 auf Disk D geschrieben.
+Dies ergibt jedoch keine Erh&ouml;hung der Datensicherheit, da keine Redundanz
+vorhanden ist. Bei Ausfall einer Platte sind alle betroffenen Daten verloren
+<P><LI>Redundantes Festplattenstriping (ohne Parit&auml;t)<BR>
+Dies ergibt eine Erh&ouml;gung der Sicherheit, da Daten redundant auf mehrere Platten
+gespeichert werden. Zum Beispiel werden bei 4 Platten von jedem Byte die Bits 
+1,2,3,4 auf Disk A, 5,6,7,8 auf Disk B, 3,4,5,6 auf Disk C und 7,8,1,2 auf Disk D 
+geschrieben. Bei Ausfall einer Platte erfolgt Zugriff auf die redundanten Informationen.
+<P><LI>Plattenspiegelung (Disk Mirroring, RAID Level 1)<BR>
+Einsatz von zwei identischen Platten, wobei die Daten der ersten Platte immer auch 
+auf die zweite Platte gespiegelt werden. Bei Ausfall der ersten Platte kann auf 
+die identischen Daten der zweiten Platte zugegriffen werden. Es gibt jedoch einen
+Performanceverlust beim Schreiben, da auf zwei Platten geschrieben werden mu&szlig.
+<P><LI>Kanalspiegelung (Disk Duplexing)<BR>
+Es handelt sich um den Einsatz von zwei identischen Platten an zwei Kontrollern.
+Damit ist auch ein Schutz bei Ausfall eines Plattenkontrollers gegeben. Es gibt kaum 
+Einbu&szlig;en beim Schreiben und eine deutliche Verbesserung beim Lesen, da ein 
+paralleler Zugriff auf beide Platten m&ouml;glich ist.
+<P><LI>Disk-Striping mit Parit&auml;t auf eigener Platte (RAID Level 4)<BR>
+Die Daten werden auf mehrere Platten verteilt und die Parit&auml;tsinformationen 
+auf eigene Platte geschrieben. Bei Ausfall einer Datenplatte sind Daten durch 
+Parit&auml;tsinformationen rekonstruierbar. Ein Verlust von Daten tritt erst 
+bei Ausfall einer Datenplatte und der Parit&auml;tsplatte ein. Der Schreibvorgang 
+wird verlangsamt, da Berechnung und Schreiben der Parit&auml;tsinformationen notwendig
+ist.
+<P><LI>Disk-Striping mit Parit&auml;t auf mehreren Platten (RAID Level 6)<BR>
+Die Daten werden auf mehrere Platten verteilt; die Parit&auml;tsinformationen werden 
+ebenfalls auf mehrere Platten verteilt. Es ergibt sich eine Verbesserung des 
+Schreibvorgangs durch Verteilung der Parit&auml;tsinformationen.
+<P><LI>Transaction Tracking System (TTS)<BR>
+Ein TTS dient dem Schutz vor Inkonsistenzen insbesondere bei Datenbanken durch
+unvollst&auml;ndige Transaktionen. Die Originaldateien werden unmittelbar vor 
+dem &Ouml;ffnen in einen f&uuml;r das TTS reservierten Bereich kopiert. Bbei 
+korrekten Abschlu&szlig; der Transaktion kann Kopie gel&ouml;scht werden.
+Bei einem Fehler kann mit der Kopie und ihren konsistenten Daten weitergearbeitet 
+werden. Man unterscheidet:
+  <UL>
+  <P><LI>implizites TTS: Festlegung durch Datenbanksystem z.B. mit entsprechenden 
+  Dateiattributen (problematisch bei gro&szlig;en DB-Dateien, da ganze DB-Datei 
+  kopiert wird).
+  <P><LI>explizites TTS: Festlegung durch Programm bzw. Programmierer, welche
+  Dateien oder Teile von Dateien von Transaktion betroffen sind (schneller
+  und g&uuml;nstiger, da nicht die ganze DB-Datei kopiert werden braucht).
+  </UL>
+<P><LI>Server-Duplexing (RAID Level 10)<BR>
+Die Vorg&auml;nge innerhalb eines 2-Node-Clusters beim Ausfall eines
+Knotens und die verschiedenen Arten des Standby-Systems, das bei Bedarf
+&uuml;bernimmt, werden in Folgenden skizziert.
+<p>
+<center><img src="ha.jpg"></center> 
+<p>
+Die beiden Server (Primary und Backup) stehen beide &uuml,ber ein SAN
+(Storage Area Network) in Verbindung. Je nach Betriebsart greift nur
+der jeweils aktive Knoten hierauf auch zu. Untereinander kommunizieren
+beide, indem sie sich regelm&auml;&szlig;ig "Lebenszeichen"(Heartbeat) 
+senden. Sterben die Lebenszeichen des Hauptsystems ab, wird das Standby-System 
+aktiviert, &uuml;bernimmt die Dienste des ausgefallenen Partners und unterbricht 
+dessen Verbindung zum SAN. <BR>
+F&auml;llt in einem 2-Node-Cluster die interne Kommunikation aus, glauben beide
+Knoten, der jeweils andere w&auml;re nicht mehr aktiv. Sie versuchen dann beide 
+gleichzeitig, f&uuml;r den jeweils anderen einzuspringen und sich vom SAN 
+abzuschneiden. Eine solche Situation wird vermieden, indem ein bestimmtes 
+&Uuml;bernahme-Verhalten beim Einrichten des Systems vordefiniert wird. 
+</UL>
+<P>
+Hat die Dienstverf&uuml;gbarkeit des Clusters h&ouml;chste
+Priorit&auml;t, ist der Einsatz eines <b>Load Balancers</b> zu
+&uuml;berlegen. Ein Load Balancer nimmt eine Anfrage von einem Client
+(z.B. eine http-Verbindung, um eine Website herunterzuladen) an und
+verteilt diese dann an einen verf&uuml;gbaren Server. Dies bietet sich
+insbesondere bei WWW- und Mail-Diensten, Proxy-Servern, Firewalls und
+&auml;hnlichem an. 
+<p>
+
+<H3>Standby-Strategien</H3>
+Die bisherigen Betrachtungen bezogen sich auf die Eingenschaften einzelner
+Rechner- und Betriebssysteme. Sie helfen, einen akuten Defekt nach
+au&szlig;en hin zu verbergen. Deshalb d&uuml;rfen die Reparaturzeiten
+aber nicht l&auml;nger werden. Es mu&szlig; also auch redundante Hardware 
+bereitgestellt werden. Daf&uuml;r gibt es drei grundlegende Methoden:
+<UL>
+<LI>Cold-Standby<BR>
+Die Ersatzhardware steht "kalt" bereit. Die &Uuml;bernahme
+mu&szlig; manuell erfolgen, so da&szlig; der Ausfall dementsprechend
+auch deutlich sp&uuml;rbar ist.
+<LI>Warm-Standby<BR>
+Ein Backupsystem l&auml;uft im Hintergrund mit, so da&szlig; die
+&Uuml;bernahme automatisch erfolgen kann. In regelm&auml;&szlig;igen
+Zeitabst&auml;nden werden die Daten auf beiden Systemen
+synchronisiert. Der Ausfall ist nur kurz f&uuml;r den Benutzer
+sp&uuml;rbar, allerdings kann die aktuelle Transaktion
+m&ouml;glicherweise verloren gehen, da die Daten vor dem Ausfall
+nicht mehr synchronisiert werden konnten.
+<LI>Hot-Standby<BR>
+Beide Systeme laufen st&auml;ndig parallel, die Daten auf beiden
+Systemen sind hundertprozentig synchron. Der Benutzer sp&uuml;rt
+nichts von eventuellen Ausf&auml;llen. Meist ist diese Stufe nicht
+ohne eine entsprechende Modifikation des Clients zu erreichen. Um
+beide Systeme 100% synchron zu betreiben, m&uuml;ssen auch die
+Verbindungen zum Client 100% gespiegelt werden. Daf&uuml;r braucht
+man "normalerweise" Clients, die Verbindungen zu zwei oder
+mehr Servern gleichzeitig halten und mit allen reden. Das kann
+beispielsweise ein normaler Webbrowser nicht.
+</UL>
+<P>
+Nimmt man die USV hinzu, lassen sich die Standby-Stufen folgenderma&szlig;en einteilen:
+<TABLE BORDER=0 CELLPADDING=5>
+<TR><TD VALIGN=TOP>Stufe 1:</TD><TD VALIGN=TOP>
+USV-Sicherung der Stromversorgung
+<BR>Sicherheitskopie (Band)
+</TD></TR>
+<TR><TD VALIGN=TOP>Stufe 2:</TD><TD VALIGN=TOP>
+USV-Sicherung der Stromversorgung
+<BR>Sicherheitskopie (Band)
+<BR>Plattenspiegelung (RAID 1)
+</TD></TR>
+<TR><TD VALIGN=TOP>Stufe 3:</TD><TD VALIGN=TOP>
+USV-Sicherung der Stromversorgung
+<BR>Sicherheitskopie (Band)
+<BR>Plattenduplizierung (Plattenspiegelung + doppelter Controller)
+</TD></TR>
+<TR><TD VALIGN=TOP>Stufe 4:</TD><TD VALIGN=TOP>
+USV-Sicherung der Stromversorgung
+<BR>Sicherheitskopie (Band)
+<BR>Plattenduplizierung (Plattenspiegelung + doppelter Controller)
+<BR>Ersatzserver (cold Stand-by)
+</TD></TR>
+<TR><TD VALIGN=TOP>Stufe 5:</TD><TD VALIGN=TOP>
+USV-Sicherung der Stromversorgung
+<BR>Sicherheitskopie (Band)
+<BR>Plattenduplizierung (Plattenspiegelung + doppelter Controller)
+<BR>Serverduplizierung (hot Stand-by)
+</TD></TR></TABLE>
+<P>
+
+<H3>USV - Unterbrechungsfreie Stromversorgung</H3>
+Unterbrechungsfreie Stromversorgungen (USV) sorgen f&uuml;r eine konstante 
+Spannungsversorgung. Sie sichern vor allem IT- und TK-Systeme
+ab. Spannungsschwankungen beziehungsweise Frequenz&auml;nderungen k&ouml;nnen
+auftreten durch:
+<ul>
+<li>Anlauf von elektrischen Gro&szlig;verbrauchern, zum Beispiel Aufzugsmotoren,
+<li>Blitzeinschl&auml;ge,
+<li>St&uuml;rme und Naturkatastrophen,
+<li>Oberwellen von Schaltnetzteilen.
+</ul>
+Zudem schwankt der Spannungspegel unserer Netzversorgung normalerweise
+zwischen 207 und 240 Volt, so da&szlig; es nicht verwunderlich ist, da&szlig;
+elektrische Systeme mit Fehlfunktionen reagieren k&ouml;nnen. &Uuml;berspannungen
+(Surge) von &uuml;ber 15 Prozent kommen in der Netzversorgung genau wie
+Unterspannungen sehr h&auml;ufig vor. Spannungsspitzen, auch Spikes genannt,
+sind &Uuml;berspannungen von mehr als 100 bis 200 Prozent und einer Dauer 
+von Mikrosekunden bis mehreren Millisekunden, die durch andere gro&szlig;e
+Verbraucher beim Ein- oder Ausschalten in der Netzversorgung erzeugt
+werden. Spannungsst&ouml;&szlig;e von 0,5 bis 200 Mikrosekunden Dauer,
+auch Transienten genannt, k&ouml;nnen ein Mehrfaches der Nennspannung
+erreichen. St&ouml;rungen durch Blitzeinwirkungen haben nicht selten die
+Netzteile von ganzen Telefonanlagen, Fernsehern oder Computersystemen
+buchst&auml;blich weggeschmolzen. St&ouml;rungen der besonderen Art sind immer
+dann gegeben, wenn sich Frequenzschwankungen, Verzerrungen
+der Sinusform oder Spannungsoberschwingungen (400 Hz bis 50 kHz)
+durch harmonische Vielfache der 50-Hz-Grundfrequenz einstellen.
+Alle beschriebenen Arten von Netzst&ouml;rungen werden durch eine USV 
+mehr oder weniger abgedeckt.
+<P>
+Da bei einer USV eine Ausgangsspannung erzeugt werden mu&szlig;, denkt der
+Nutzer nat&uuml;rlich erst an eine normale Sinusform. Diese ist aber schwer
+k&uuml;nstlich zu erzeugen, deswegen wird versucht, sich der Sinusform m&ouml;glichst
+anzun&auml;hern. Die billigste Art, eine Ausgangsspannung k&uuml;nstlich zu
+erzeugen, ist die Erzeugung einer Rechteckform. Diese ist aber f&uuml;r die
+meisten Netzteile der angeschlossenen Verbraucher nicht ideal.
+Die meisten USV-Systeme n&auml;hern sich der sinusf&ouml;rmigen Ausgangsspannung an,
+indem sie eine trapezf&ouml;rmige Ausgangsspannung erzeugen. Diese ist
+f&uuml;r DV-Systeme meist ausreichend, nicht aber f&uuml;r manche anderen Verbraucher.
+<P>
+Eine <B>Off-Line USV</B> stellt die einfachste Ausf&uuml;hrung einer USV-Anlage
+dar. Die angeschlossenen Ger&auml;te werden im Normalfall direkt durch die
+normale Netzspannung versorgt, die auch &uuml;ber die Gleichrichtereinheit den
+Akkumulator l&auml;dt. Die Off-Line USV geht erst dann in Funktion, wenn die normale
+Netzspannung ausf&auml;llt. Die Akkumulatoren der USV speisen dann nach einer 
+Reaktionszeit im Millisekundenbereich die angeschlossenen Verbraucher. Da
+Akkumulatoren Gleichstrom liefern, wird dieser erst in Wechselstrom 
+(DC/AC-Wandler) konvertiert. Die Reaktionszeit fangen die
+Speicherkondensatoren der Netzteile innerhalb der Verbraucher auf. 
+<P>
+Bei <B>Line-Interactive-USV</B>-Systemen besteht im Normalfall &uuml;ber einen 
+AC/AC-Wandler eine direkte Verbindung vom Eingang zum Ausgang der USV. Der 
+Ausgang wird im Normalfall &uuml;ber den AC/AC-Wandler gespeist.gespeist.
+Line-Interactive USVs werden wegen nur einer Wandlung &uuml;ber den AC/AC-Wandler
+auch Single-Conversion-USVs genannt. Wenn die Netzeingangsspannung wegbleibt,
+schaltet das System auf Akkumulatorbetrieb um. Der gelieferte Gleichstrom des 
+Akkumulators wird mit Hilfe des DC/AC-Wandlers in einen Wechselstrom
+umgewandelt. Zus&auml;tzliche Netzfilterd&auml;mpfen hochfrequente St&ouml;rfrequenzen.
+Line-Interactive USVs kompensieren auch eine Unterspannung am EIngang innerhalb
+des AC/AC-Wandlers. Durch diese „Boosting“-Funktion wird nicht so h&auml;ufig auf 
+die Akkumulatoren zur&uuml;ckgegriffen, was deren Lebensdauer erh&ouml;ht. 
+<P>
+<CENTER><IMG SRC="online-usv.gif"></CENTER>
+<P>
+Haupteigenschaft einer <B>Online-USV</B> ist, da&szlig; den angeschlossenen Verbrauchern
+ein zweifach gewandelter Strom (Double Conversion) zur Verf&uuml;gung gestellt wird, 
+egal ob ein Fehlerfall oder der normale Betrieb vorliegt. Eine Gleichrichtereinheit 
+wandelt die eingangsseitige Wechselspannung in eine Gleichspannung um. Diese l&auml;dt
+den angeschlossenen Akkumulator und speist gleichzeitig eine Wechselrichtereinheit, die 
+wieder Wechselspannung erzeugt. Der Eingang und der Ausgang einer Online-USV sind 
+dadurch galvanisch getrennt, wodurch auch Netzst&ouml;rungen ausgeglichen werden. Im 
+Fehlerfall &uuml;bernimmt der angeschlossene Akkumulator die Speisung der an der
+USV angeschlossenen Verbraucher.
+<P>
+USV-Systeme werden entweder den entsprechenden DV-Systemen einzeln zugeordnet 
+beziehungsweise wie bei den gro&szlig;en Rechenzentren zentralisiert eingesetzt. Da 
+die Preise f&uuml;r USV-Systeme im keinem Verh&auml;ltnis zu einem zu erwartenden Schaden
+eines DV-Verfahrens stehen, dem der Strom ausgeht, liegt es nahe, sein Rechenzentrum
+mit einer zentralen USV auszustatten und doch f&uuml;r wesentliche Elemente wie zum 
+Beispiel den Datenbank-Server mit einer kleinen USV zus&auml;tzlich abzusichern.
+Die zentrale USV sollte zus&auml;tzlich noch mit einem Notstromgenerator
+gespeist werden k&ouml;nnen. Heutige USV-Anlagen sind f&uuml;r jeden Einsatzzweck in den
+verschiedensten Leistungsklassen und f&uuml;r jeden Geldbeutel erh&auml;ltlich.
+Angefangen von 700 VA bis 6 kVA, 10 bis 50 kVA oder 100 bis 600 kVA sind
+diese USV-Systeme, die meistens auf unterschiedlichen Basistechnologien
+basieren, zu erhalten. Standby-USVs sind gut im unteren Leistungsbereich
+bis zwei kVA einsetzbar. Der typische Leistungsbereich einer 
+Line-Interactive-USV liegt bei zwei bis zehn kVA. Online-USVs werden meistens im
+oberen Leistungsbereich &uuml;ber 10 kVA eingesetzt. 
+<P>
+Die Leistung einer USV-Anlage wird in VA (Voltampere) angegeben.
+Auf dem Markt sind viele USV-Anlagen im 19-Zoll-Format, die sich gut innerhalb
+von 19-Zoll-Geh&auml;usen zusammen mit Server- und RAID-Systemen
+integrieren lassen. Das hat den Vorteil, da&szlig; lange Verkabelungen entfallen.
+Zur USV geh&ouml;ren auch noch:
+<ul>
+<li>Shutdown-Software f&uuml;r verschiedene Betriebssystemplattformen,
+<li>Benachrichtigung per E-Mail, Fax, SMS, Pager,
+<li>Management der USV &uuml;ber serielle- oder Netzwerk-Schnittstelle,
+<li>Batteriepufferzeit zwischen zehn bis 30 Minuten,
+<li>Meldung von schwachen Akkumulatoren,
+<li>Meldung von &Uuml;bertemperaturen.
+</ul>
+Die Lebensdauer eines Akkus oder einer Batterie einer USV-Anlage betr&auml;gt
+durchschnittlich drei bis f&uuml;nf Jahre. Sie ist stark von den Umgebungsverh&auml;ltnissen 
+abh&auml;ngig - im Besonderen von der Umgebungstemperatur. Auch die Anzahl der
+Ladevorg&auml;nge beeinflusst die Lebensdauer.
+<P>
+<Table border=1 cellpadding=3 cellspacing=0>
+<tr>
+<td bgcolor="#DDDDDD">abzusichernder Verbraucher</td><td bgcolor="#DDDDDD">Scheinleistung</td>
+</tr><tr>
+<td>PC, Workstation</td><td>300 VA</td>
+</tr><tr>
+<td>Multiprozessor-Server</td><td>900 VA</td>
+</tr><tr>
+<td>RAID-System</td><td>500 - 700 VA</td>
+</tr><tr>
+<td>19-Zoll-Monitor</td><td>180 VA</td>
+</tr><tr>
+<td>Etagen-Switch</td><td>200 VA</td>
+</tr></table>
+<P>
+Um ungeplante lange Ausfallzeiten zu minimieren, sind redundante
+USV-Systeme notwendig. Erst eine redundante USV erm&ouml;glichtdie Wartung
+oder Instandsetzung. Auch bei sogenannten wartungsfreien USVs m&uuml;ssen 
+die Akkus nach ein paar Jahren aus Gr&uuml;nden der Funktionssicherheit 
+ausgetauscht werden. Es sind grunds&auml;tzlich solche USVs w&auml;hrend der 
+Planung von neuen DV-Verfahren zu bevorzugen, die einen Batteriewechsel 
+oder eine Erweiterung w&auml;hrend des Betriebes zulassen.
+<P>
+Da die meisten Bereiche, in denen USV-Systeme eingesetzt werden, auch
+im Katastrophenfall &uuml;ber l&auml;ngere Zeit mit Strom zu versorgen sind, werden
+neben den USV-Systemen auch SSV-Systeme (Sonderstromversorgungen)
+gebraucht. Das sind beispielsweise Notstromversorgungen auf 
+Dieselgeneratorbasis, welche die wichtigsten Verbraucher mit Energie
+versorgen. Die Anlaufzeiten der Dieselgeneratoren m&uuml;ssen durch eine USV
+&uuml;berbr&uuml;ckt werden. In manchen F&auml;llen werden die Dieselgeneratoren
+st&auml;ndig auf Betriebstemperatur gehalten, um innerhalb einer Reaktionszeit
+von 20 bis 30 Sekunden die Stromversorgung &uuml;bernehmen zu k&ouml;nnen.
+Regelm&auml;&szlig;ige Funktionstests der &uuml;ber einen gr&ouml;&szlig;eren Zeitraum inaktiven
+Notstromgeneratoren sind vorzusehen. Nicht selten stellen solche
+Anlauf&uuml;bungen auch ein Gefahrenpotential dar - wie alle T&auml;tigkeiten,
+die nur selten durchgef&uuml;hrt werden.
+<P>
+
+<H3>RAID - fehlertolerante Festplatten</H3>
+RAID (Redundant Array of Inexpensive Disks) ist eine Alternative zu traditionellen 
+Speichersystemen, die aus einzelnen gro&szlig;en Festplatten bestehen. RAID-Systeme 
+bestehen aus einer Koppelung mehrerer kleiner und identischer Festplatten.
+Aus dem Blickwinkel des Anwenders betrachtet, tritt ein RAID-Laufwerk wie ein 
+Laufwerk auf, im Gegensatz zu mehreren separaten Laufwerken, wie man es von Rechnern mit 
+mehreren Festplatten oder Partitions kennt. Entscheidender ist der Unterschied, da&szlig; 
+der Inhalt einer gegebenen Datei niemals auf einer einzelnen Festplatte plaziert ist, 
+sondern auf mehrere Platten im RAID-System verteilt ist, was zusammen mit der Datenredundanz 
+und Pr&uuml;finformationen bewirkt, da&szlig; keine Daten verloren werden, auch wenn eine 
+der Festplatten fehlerhaft ist. Sind die Platten des RAID-Laufwerks w&auml;hrend des 
+Betriebs auswechselbar (hot-swapable), wird der Zugang zu Daten im RAID-Laufwerk 
+aufrechterhalten, auch wenn eine Festplatte im RAID-Laufwerk ausf&auml;llt und ausgewechselt 
+werden mu&szlig;. Die RAID-Technik hat auch Konsequenzen f&uuml;r die Leistung des 
+Plattensystems. Manche RAID-Laufwerke k&ouml;nnen Daten parallel lesen und schreiben, 
+d. h. Information zwischen den Laufwerken auf Bit-, Byte- oder Blockebene &uuml;ber 
+data striping aufteilen. Fortschrittliche Festplattencontroller k&ouml;nnen au&szlig;erdem
+mehrere Positionieranforderungen f&uuml;r den Schreib-Lesekopf gleichzeitig handhaben, 
+eine Suchtechnik, die die Zugriffszeit wesentlich verk&uuml;rzt. W&auml;hrend eines der 
+Laufwerke positioniert, wird von den &uuml;brigen gelesen.
+<P>
+Es gibt bei RAID verschiedene Kategorien, die unterschiedliche St&auml;rken und 
+Schw&auml;chen haben. Die optimale RAID-Installation h&auml;ngt vom Aufbau des Netzes 
+und den Sicherheitsanforderungen ab.
+<P>
+Der <B>RAID-Level 0</B> bezeichnet ein Verfahren, bei dem die Daten auf mehrere
+"Stripes" verteilt werden. Dies kann sowohl auf einem einzigen Datentr&auml;ger
+als auch auf verteilten Platten geschehen. Letzteres beschleunigt die
+Zugriffszeiten und steigert die Kapazit&auml;t des Speichers erheblich. Allerdings
+wird bei RAID 0 keinerlei Redundanz vorgesehen. Im Falle des Defektes
+eines einzigen Datentr&auml;gers des RAID-0-Systems ist mit einem totalen Datenverlust 
+zu rechnen. Der Vorzug dieses Verfahrens liegt also in der Geschwindigkeit
+durch den parallelen Plattenzugriff und in der erh&ouml;hten Kapazit&auml;t durch die Summe 
+aller Einzelplatten, nicht jedoch in der Sicherheit.
+<P>
+<img src="raid_0.gif">
+<P>
+Im Beispiel unten wird das Datum "ABCDEF" in einzelne Bl&ouml;cke zerlegt, 
+die abwechselnd auf beiden Festplatten geschrieben werden. Die Verwaltung des 
+Striping-Verbandes geschieht vollst&auml;ndig auf Controllerebene, belastet also nicht 
+die CPU. RAID-0 bei allen vom Computer unterst&uuml;tzten Betriebsystemen sofort 
+leistungssteigernd eingesetzt werden und der Host wird durch die Organisation des 
+Striping-Verbandes nicht zus&auml;tzlich belastet. Die Verbundenen Laufwerke bilden
+ein einziges logisches Laufwerk.
+<P>
+
+Beim <B>RAID-Level 1</B> werden zwei Laufwerke parallel betrieben und die Daten 
+vollst&auml;ndig gespiegelt. Ein Gewinn an Geschwindigkeit wird mit diesem Verfahren
+nicht erzielt, und die Kapazit&auml;t des RAID-1-Systems entspricht lediglich
+der einer einzigen Platte. Allerdings ist die Ausfallsicherheit der Daten maximal,
+denn selbst bei einem Totalausfall eines Laufwerkes stehen die Daten nach wie vor 
+vollst&auml;ndig auf der zweiten Platte zur Verf&uuml;gung. F&uuml;r Wartungszwecke 
+kann einer der beiden Datentr&auml;ger gegebenenfalls auch w&auml;hrend des laufenden 
+Betriebes entnommen werden ("hot swap"). 
+<P>
+<img src="raid_1.gif">
+<P>
+Das hei&szlig;t auch, da&szlig; der Anwender ohne Unterbrechung mit dem 
+Mirroring/Duplexing-Laufwerk weiterarbeiten kann. Sind die Festplatten an einen 
+Kanal angeschlossen, so nennt man dies "Mirroring". Werden die Laufwerke 
+an zwei verschiedenen SCSI Kan&auml;len betrieben, so ist dies "Duplexing". 
+Hierbei erh&auml;lt man auch eine Leistungssteigerung. Das Schreiben der Daten kann
+zeitgleich erfolgen und beim Lesen der Daten kommt das SCSI-Laufwerk zum Zug, das 
+als erstes und damit am schnellsten die Daten liefern kann.
+<P>
+Der <B>RAID-Level 2</B> brachte einen gro&szlig;en Fortschritt, denn dieses Verfahren
+ist ein wirtschaftlicher Kompromi&szlig; aus den beiden ersten Leveln. Die Daten werden 
+auf die einzelnen Laufwerke des Arrays aufgeteilt, wodurch die Geschwindigkeit und die
+Performance des gesamten Speichers optimiert wird. Dar&uuml;ber hinaus wird ein Error 
+Correction Code (ECC) generiert und ebenfalls gespeichert. Das Verfahren ist heute 
+jedoch kaum noch anzutreffen, weil die Festplatten inzwischen Sicherungsfunktionen 
+implementiert haben.
+<P>
+Bei den <B>RAID-Leveln 3 und 4</B> werden zwei bis vier Laufwerke verwendet, auf
+denen die Nutzdaten gleichm&auml;&szlig;ig verteilt abgelegt werden. Dar&uuml;ber 
+hinaus ist ein weiteres Laufwerk vorgesehen, auf dem eine Parit&auml;tsinformation 
+gespeichert wird. Die Parit&auml;tsinformation der RAID-Level 3 und 4 werden auf 
+einem eigenen Datentr&auml;ger gespeichert. Der Unterschied beider Level liegt in 
+der Gr&ouml;&szlig;e der Nutzdatenbl&ouml;cke. W&auml;hrend beim RAID-Level 3 die 
+Nutzdaten Byteweise gespeichert werden, werden im Level 4 gr&ouml;&szlig;ere 
+Bl&ouml;cke verwendet. 
+<P>
+<img src="raid_3.gif">
+<P>
+Bei jedem schreibenden Zugriff mu&szlig; immer die Sicherheitsinformation f&uuml;r 
+die entsprechende Zeile berechnet und auf das Parity Laufwerk geschrieben werden. 
+Hierdurch wird das Parity-Laufwerk zum Flaschenhals des gesamten RAID Verbandes. 
+Die Datenlaufwerke sind bei schreibenden Zugriffen kleiner Datenbl&ouml;cke entsprechend 
+schwach ausgelastet, wo hingegen auf das Parity-Laufwerk stets zugegriffen wird.
+<P>
+
+Der <B>RAID-Level 5</B> geh&ouml;rt zu den am weitesten verbreiteten Varianten eines 
+RAID-Konzeptes. In diesem Fall werden die Vorz&uuml;ge des RAID-Levels 4 weiterhin genutzt 
+und die Daten neben zus&auml;tzlichen Parit&auml;tsinformationen gespeichert. Der Vorteil 
+gegen&uuml;ber dem Level 4 besteht jedoch in einem Verzicht auf einen eigenen 
+Datentr&auml;ger f&uuml;r die Ablage der Checksummen.
+Diese werden mit den eigentlichen Nutzdaten auf alle Platten des Arrays verteilt. Dabei 
+wird jeweils ein Block auf eine Platte und der n&auml;chste Datenblock auf das folgende
+Laufwerk geschrieben. Aus der Sicht der Platten stellen sich die Parit&auml;tsdaten
+wie eine Erweiterung der Nutzdaten dar. Kleine RAID-Systeme k&ouml;nnen so platzsparend 
+gebaut werden. 
+<P>
+<img src="raid.gif">
+<P>
+Der sehr weit verbreitete RAID-Level 5 zeichnet sich durch hohe 
+Fehlertoleranz und gute Performance aus. Allerdings wird die Integration der Parit&auml;tsdaten 
+in die Nutzdatenstruktur wieder mit einem gewissen Verzicht Sicherheit erkauft. Ist
+beispielsweise in einem RAID-4-System eine Platte gest&ouml;rt, so k&ouml;nnen die Daten anhand 
+der Parit&auml;tsinformationen, die sich auf einer eigenen Platte befinden, wieder sauber 
+regeneriert werden. F&auml;llt die Parit&auml;tsplatte selbst aus, dann ist dies unkritisch,
+weil die originalen Informationen nach wie vor in unver&auml;nderter Form erhalten sind. 
+Anders beim RAID-Level 5. Hier kann es (wenn auch sehr unwahrscheinlich) vorkommen, 
+da&szlig; einzelne Daten im St&ouml;rungsfall nicht mehr regenerierbar sind.
+<P>
+<img src="raid_5.gif">
+<P>
+Auch bei diesem Level werden die Daten (ABCDEF...) &uuml;ber mehrere Platten verteilt und 
+pro Zeile (A,B,C) wird jeweils die Sicherheitsinformation (P1) mit Hilfe der 
+Exklusiv-Oder-Verkn&uuml;pfung berechnet. Diese Information wird nun allerdings nicht mehr 
+auf eine bestimmte Festplatte geschrieben, sondern abwechselnd auf alle Platten verteilt 
+wie beim Data-Striping. Bei parallel schreibendem Zugriff auf kleine Datenbl&ouml;cke werden 
+in einem RAID-5-Verband alle Festplatten gleichm&auml;&szlig;ig belastet. Hierdurch kann die Gesamt-Performance des Systems gesteigert werden. 
+<P>
+
+Der <B>RAID-Level 6</B> ber&uuml;cksichtigt dieses Problem und l&ouml;st es durch eine
+Kombination aus dem Level 5 und einem kleinen R&uuml;ckschritt auf die Level
+3 und 4. Neben den Nutz- und Parit&auml;tsdaten des Level 5 wird nun wieder
+wieder ein eigener Datentr&auml;ger f&uuml;r eine zus&auml;tzliche Parit&auml;tsinformation 
+eingesetzt. Damit wird erreicht, da&szlig; selbst bei Totalausfall einer Platte die Daten
+zur&uuml;ckgewonnen werden k&ouml;nnen.
+<P>
+
+Ähnlich wie RAID-5 schreibt <B>RAID-7</B> in Datenblöcken. Hier läuft auf dem Controller ein 
+zus&auml;tzliches lokales Betriebssystem in Echtzeit. ES werden mehrere Swap-Partitionen 
+auf den Laufwerken sowie schnelle Datenbusse verwendet, die von der Daten&uuml;bertragung
+entkoppelt sind. Damit beschleunigt RAID-7 den Datentransfer erheblich. Die 
+Parit&auml;tsinformationen werden wie bei RAID-6 zusätzlich auf separate Datenträger
+geschrieben. 
+<P>
+
+Bei <B>RAID-10 (auch RAID-0+1)</B> handelt es sich um eine Kombination der Vorteile 
+von RAID-0 und RAID-1. Bei RAID-10 werden mehrere RAID-1-Spiegelverb&auml;nde
+zusammengefasst (STRIPING). Die Performance ist erheblich, da keine 
+Parit&auml;tsinformationen errechnet werden m&uuml;ssen und so die volle 
+Daten&uuml;bertragungsrate von Laufwerken und Bus zur Verf&uuml;gung stehen. 
+RAID-10 wird daher oft zum Speichern sehr gro&szlig;en Dateien mit hohen 
+Anforderungen an Performance und Redundanz verwendet. Durch den Einsatz von 
+mindestens vier Festplatten entstehen allerdings recht hohe Kosten.
+<P>
+
+<B>RAID-51 (auch RAID-15)</B> ist die n&auml;chste Kombination. Sie besteht aus RAID-5 
+und RAID-1. Dabei werden RAID-5-Verb&auml;nde zus&auml;tzlich gespiegelt. Die Performance 
+sinkt gegen&uuml;ber RAID-5 nicht, es wird aber h&ouml;here Datensicherheit geboten. 
+Ein RAID-Level für hochkritische Sicherheitserfordernisse.
+<P>
+
+Die Abh&auml;ngigkeiten zwischen RAID-Level, Performance und Ausfallsicherheit fa&szlig;t 
+die folgende Tabelle noch einmal zusammen. Wie sich deutlich erkennen l&auml;&szlig;t, 
+bringt jedes der RAID-Verfahren spezifische Vor- und Nachteile. 
+<P>
+<TABLE BORDER="2" WIDTH="90%" cellspacing="1" >
+<TR>
+<TD BGCOLOR="#DDDDDD" COLSPAN=9>RAID-Level im Vergleich
+</TD></TR>
+<TR>
+<TD>&nbsp;</TD>
+<TD>RAID 0</TD>
+<TD>RAID 1</TD>
+<TD>RAID 10</TD>
+<TD>RAID 2</TD>
+<TD>RAID 3</TD>
+<TD>RAID 4</TD>
+<TD>RAID 5</TD>
+</TR>
+<TR>
+<TD>Anzahl Laufwerke</TD>
+<TD>n > 1</TD>
+<TD>n = 2</TD>
+<TD>n > 3</TD>
+<TD>N = 10</TD>
+<TD>n > 2</TD>
+<TD>n > 2</TD>
+<TD>n > 2</TD>
+</TR>
+<TR>
+<TD>Redundante Laufwerke</TD>
+<TD>0</TD>
+<TD>1</TD>
+<TD>1(**)</TD>
+<TD>2</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+</TR>
+<TR>
+<TD>Kapazitätsoverhead (Prozent)</TD>
+<TD>0</TD>
+<TD>50</TD>
+<TD>50</TD>
+<TD>20</TD>
+<TD>100/n</TD>
+<TD>100/n</TD>
+<TD>100/n</TD>
+</TR>
+<TR>
+<TD>Parallele Leseoperationen</TD>
+<TD>n</TD>
+<TD>2</TD>
+<TD>n / 2</TD>
+<TD>8</TD>
+<TD>n - 1</TD>
+<TD>n - 1</TD>
+<TD>n - 1</TD>
+</TR>
+<TR>
+<TD>Parallele Schreiboperationen</TD>
+<TD>n</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>n /2</TD>
+</TR>
+<TR>
+<TD>Maximaler Lesedurchsatz (*)</TD>
+<TD>n</TD>
+<TD>2</TD>
+<TD>n / 2</TD>
+<TD>8</TD>
+<TD>n - 1</TD>
+<TD>n - 1</TD>
+<TD>n - 1</TD>
+</TR>
+<TR>
+<TD>Maximaler Schreibdurchsatz (*)</TD>
+<TD>n</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>1</TD>
+<TD>n/2</TD>
+</TR>
+</TABLE>
+<P>
+
+<H3>Zusammenfassung:</H3>
+<UL>
+<LI>Redundanz aufbauen<BR>
+(mehrere Server, redundante Komponenten: Platte, Netzteil, Netzwerkkarte,
+<LI>Server &uuml;berwachen (Antwortzeit, Funktion, Temperatur, etc.)
+<LI>Fehlerquelle Systemadministrator, Webmaster, Putzfrau, Hausmeister
+nicht vergessen
+</UL>
+<P>
+
+<h3>Beispiel: Warm-Standby mit <tt>heartbeat</tt></h3>
+In einer <i>Warm-Standby</i>-Konfiguration wird ein Server durch ein
+zweites System erg&auml;nzt, da&szlig; im Fehlerfall einspringen kann.
+Aktiv ist immer nur einer der beiden Rechner: Im Normalfall der Hauptserver,
+im Fehlerfall der Standby-Rechner. Der jeweils aktive Rechner erh&auml;lt
+die Cluster-IP-Nummer zugewiesen, unter der der hochverf&uuml;gbare 
+Dienst zu Verf&uuml;gung stehen soll.
+<p>
+Dazu ein Beispiel:
+<p>
+Der Webserver <b>www.serverzwerge.de</b> mit der Adresse <b>10.27.210.199</b> 
+soll hochverf&uuml;bar gemacht werden. 
+Diese Adresse bezeichnen wir im Folgenden als <i>Cluster-Adresse</i>.
+Zun&auml;chst einmal ben&ouml;tigen wir einen Server, der den Dienst im
+Normalfall zur Verf&uuml;gung stellt. Im Beispiel ist das der Rechner <b>bashful</b>.
+Die Rolle des Standbysystems &uuml;bernimmt <b>happy</b>. 
+Beide Maschinen werden zun&auml;chst normal installiert und konfiguriert.
+Sie erhalten dazu je eine IP-Adresse, die in unserem Beispiel aus dem Subnetz 
+<b>10.27.210.0</b> stammt.
+Wichtig ist dabei, da&szlig; keiner von beiden die Cluster-IP-Nummer bekommt.
+In der normalen Netzwerkkonfiguration von <b>happy</b> und <b>bashful</b>
+taucht sie nicht auf; sie wird erst innerhalb der Konfigurationsdateien
+von heartbeat festgelegt.  
+<p>
+Damit der Standby-Rechner wei&szlig;, wann der Hauptserver ausgefallen ist,
+mu&szlig; er immer ein "Lebenszeichen" von ihm empfangen. Bleibt dieses
+<i>Heartbeatsignal</i> aus, dann ist von einem Ausfall des Servers auszugehen.
+Der Austausch dieser Heartbeatsignale geschieht auf einer eigenen Leitung. Dazu kann 
+man ein Nullmodemkabel an der seriellen Schnittstelle, oder ein Crosslinkkabel
+und je eine zweite Netzwerkkarte verwenden. In unserem Beispiel verwenden wird die
+letztere M&ouml;glichkeit. Jede dieser Netzwerkkarten braucht nat&uuml;rlich
+auch eine IP-Nummer. Im Beispiel wurden die Adressen <b>129.168.1.1</b> und 
+<b>192.168.1.2</b> verwendet. Da es sich um einen Direktverbindung via 
+Crosslinkkabel handelt brauchen die beiden Rechner auch keinen 
+zwischengeschalten Netzwerkverteiler wie Hub oder Switch.
+<p>
+<center><img src="heartbeat.gif"></center>
+<p>
+Bei einer Debian-Distribution s&auml;he die Netzwerkkonfiguration  von <b>bashful</b>
+&uuml;ber die Datei <tt>/etc/network/interfaces</tt> so aus:
+<pre>
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet static
+address 10.27.210.20
+netmask 255.255.0.0
+broadcast 10.23.255.255
+gateway 10.23.64.1
+auto eth1
+iface eth1 inet static
+address 192.168.1.1
+netmask 255.255.255.0
+broadcast 192.168.1.255
+</pre>
+Bei anderen Distributionen funktiniert das &auml;hnlich. Nun mu&szlig; man das 
+Netzwerk neu starten mit <tt>/etc/init.d/network restart</tt>
+<p>
+Anschliessend kann man mit <tt>ifconfig -a</tt> nachschauen, ob alles 
+ok ist. Die Ausgabe m&uuml;&szlig;te dann etwa wie folgt aussehen:
+<pre>
+eth0      Link encap:Ethernet  HWaddr 00:04:75:89:3A:80
+          inet addr:10.27.210.20  Bcast:10.23.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:11373 errors:0 dropped:0 overruns:1 frame:0
+          TX packets:1822 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:100
+          RX bytes:1447128 (1.3 MiB)  TX bytes:1725729 (1.6 MiB)
+          Interrupt:11 Base address:0xcc00
+ 
+eth1      Link encap:Ethernet  HWaddr 00:D0:B7:80:E0:B1
+          inet addr:192.168.1.1  Bcast:192.168.1.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:10539 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:10539 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:100
+          RX bytes:1639202 (1.5 MiB)  TX bytes:1649556 (1.5 MiB)
+          Interrupt:9 Base address:0xc000
+ 
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:54 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:54 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:3748 (3.6 KiB)  TX bytes:3748 (3.6 KiB)
+</pre>
+Nach der Installation des Heartbeat-Paketes von <a href="http://www.linux-ha.org/">http://www.linux-ha.org/</a> kann es mit der Konfiguration losgehen. Die zugeh&ouml;rigen
+Dateien werden im Verzeichnis <tt>/etc/ha.d</tt> abgelegt.
+<p>
+Als erstes mu&szlig; die Datei <tt>ha.cf</tt> editiert werden. <b>bashful</b>s Datei
+lautet:
+<pre>
+#       File to wirte debug messages to
+debugfile /var/log/ha-debug
+#
+#       File to write other messages to
+#
+logfile /var/log/ha-log
+#
+#       Facility to use for syslog()/logger
+#
+logfacility     local0
+#
+#
+#       keepalive: how many seconds between heartbeats
+keepalive 2
+#
+#       deadtime: seconds-to-declare-host-dead
+deadtime 10
+#
+#
+#       Very first dead time (initdead)
+#
+#       On some machines/OSes, etc. the network takes a while to come up
+#       and start working right after you've been rebooted.  As a result
+#       we have a separate dead time for when things first come up.
+#       It should be at least twice the normal dead time.
+initdead 40
+#
+#       serial  serialportname ...
+#serial /dev/ttyS0
+#
+#       Baud rate for serial ports...
+baud 19200
+#
+#       What UDP port to use for communication?
+udpport 694
+#
+#       What interfaces to heartbeat over?
+#
+udp     eth1
+#
+node bashfull
+node happy
+</pre>
+
+Dabei ist:
+
+<table border=0 cellpadding=3 cellspacing=0>
+<tr><td valign=top><tt>debugfile&nbsp;&nbsp;</tt></td><td valign=top>Datei, in die Debugmeldungen geschrieben werden</td></tr>
+<tr><td valign=top><tt>logfile&nbsp;&nbsp;</tt></td><td valign=top>Logdatei, die den Status des jeweiligen Knotens anzeigt</td></tr>
+<tr><td valign=top><tt>logfacility&nbsp;&nbsp;</tt></td><td valign=top>In welchen Kanal soll syslog schreiben?</td></tr>
+<tr><td valign=top><tt>keepalive &nbsp;&nbsp;</tt></td><td valign=top>Zeit zwischen zwei Heartbeatsignalen in Sekunden</td></tr>
+<tr><td valign=top><tt>deadtime&nbsp;&nbsp;</tt></td><td valign=top>Wenn f&uuml;r diese Zeit kein Heartbeatsignal vom anderen Knoten eintrifft, wird er f&uuml;r tot erkl&auml;rt.</td></tr>
+<tr><td valign=top><tt>initdead &nbsp;&nbsp;</tt></td><td valign=top>Erste Wartezeit nach dem Booten eines Systemes. Damit l&auml;&szlig;t man dem Knoten Zeit, nach dem Booten alle seine Dienste zu starten und 
+sein Netzwerk zu iniialisieren. Ist nach dieser Spanne kein Heartbeat vom System zu h&ouml;ren, wird es als tot eingestuft.</td></tr>
+<tr><td valign=top><tt>serial&nbsp;&nbsp;</tt></td><td valign=top>Bei serieller Heartbeatverbindung: Port, an dem das Kabel angeschlossen ist. Z.B.: <tt>/dev/ttyS0&nbsp;&nbsp;</tt></td></tr>
+<tr><td valign=top><tt>baud&nbsp;&nbsp;</tt></td><td valign=top>Bei serieller Heartbeatverbindung: Baudrate. Z.B.: <tt>19200&nbsp;&nbsp;</tt></td></tr>
+<tr><td valign=top><tt>udpport&nbsp;&nbsp;</tt></td><td valign=top>UDP-Port auf dem die Kommunikation stattfinden soll. Z.B.: <tt>694&nbsp;&nbsp;</tt></td></tr>
+<tr><td valign=top><tt>udp&nbsp;&nbsp;</tt></td><td valign=top>Interface der Heartbeatleitung. Z.B.: <tt>eth1&nbsp;&nbsp;</tt> f&uuml;r die zweite Ethernet-Netzwerkkarte im System </td></tr>
+<tr><td valign=top><tt>node&nbsp;&nbsp;</tt></td><td valign=top>Name eines beteiligten Rechnerknotens. Je eine Zeile pro Rechner.</td></tr>
+</table>
+<p>
+Nachdem <tt>heartbeat</tt> die &Uuml;bertragung der Lebenszeichen nicht 
+nur auf exklusiven, sondern auch auf anderweitig benutzten Leitungen zul&auml;&szlig;t, besitzt es verschiedene Moeglichkeiten, den Heartbeat-Datenstrom zu verschl&uuml;sseln. Welches Verfahren verwendet wird, legt die Datei <tt>/etc/ha.d/authkeys</tt>
+fest. Hier kann man aus drei Verfahren w&auml;hlen: <i>CRC-Checksumme</i>, <i>SHA1-</i> oder <i>MD5-</i> Verschl&uuml;sselung. Verwendet man ein Crosslink oder ein serielles
+Kabel, dann sollte man CRC ausw&auml;hlen. Bei einem, gemeinsam mit anderen Rechnern
+genutzten Ethernetstrang, w&auml;hlt man eines der Verschl&uuml;sslungsverfahren.
+SHA1 ist das rechnenintensivste. Sowohl bei SHA1 als auch bei MD5 mau&szlig; man
+zus&auml;tzlich einen Authentifizierungsschl&uuml;ssel, also so eine Art Pa&szlig;wort,
+angeben. Das Format von <tt>/etc/ha.d/authkeys</tt> ist:
+<p>
+<pre>
+auth <i>Nummer</i>
+<i>Nummer</i> <i>Authentifizierungsmethode</i> <i>Schl&uuml;ssel</i>
+</pre>
+Bei CRC also:
+<pre>
+auth 1
+1 CRC
+</pre>
+Und bei MD5:
+<pre>
+auth 1
+1 MD5 Mein-geheimer-Schluessel
+</pre>
+
+Nun steht fest, wie die beiden Clustermaschinen verbunden sind und &uuml;ber welches Interface sie kommunizieren sollen. 
+Aber es ist noch nicht gekl&auml;rt, welcher der Rechner der Hauptserver 
+und welche Dienste hochverf&uuml;gbar sein sollen. Diese Aufgabe &uuml;bernimmt
+die Datei <tt>/etc/ha.d/haressources</tt>.
+In unserem Beispiel enth&auml;lt sie lediglich die Zeile
+<pre>
+bashful 10.27.210.199 apache
+</pre>
+<p>
+Dabei ist:
+<table border=0 cellpadding=3>
+<tr><td valign=top><tt>bashful&nbsp;&nbsp;</tt></td><td valign=top>Name des Hauptservers&nbsp;&nbsp;</tt></td></tr>
+<tr><td valign=top><tt>10.27.210.199&nbsp;&nbsp;</tt></td><td valign=top>IP-Nummer, unter der der Clusterdienst laufen soll.&nbsp;&nbsp;</tt></td></tr>
+<tr><td valign=top><tt>apache&nbsp;&nbsp;</tt></td><td valign=top>Name des Skriptes in <tt>/etc/init.d/&nbsp;&nbsp;</tt> das auf dem jeweils aktiven Knoten gestartet werden soll.</td></tr>
+</table>
+
+<p>
+Alle beschriebenen Datei werden nun in das Verzeichnis <tt>/etc/ha.d/</tt>
+des anderen Clusterknotens kopiert. Damit ist das Warm-Standy-Cluster startbereit.
+Ein Aufruf von <tt>/etc/init.d/heartbeat start</tt> auf beiden 
+Konoten aktiviert das Cluster. Mit dem Kommando <tt>tail -f /var/log/ha-log</tt>
+l&auml;&szlig:t sich kontrollieren, wie der Status des Systems ist. In 
+unserem Beispielcluster liefert <i>bashful</i> nach dem Start die Ausgabe:
+<small>
+<pre>
+heartbeat: 2003/02/11_09:33:42 info: **************************
+heartbeat: 2003/02/11_09:33:42 info: Configuration validated. Starting heartbeat 0.4.9.0l
+heartbeat: 2003/02/11_09:33:43 info: heartbeat: version 0.4.9.0l
+heartbeat: 2003/02/11_09:33:43 info: Heartbeat generation: 11
+heartbeat: 2003/02/11_09:33:43 info: Creating FIFO /var/run/heartbeat-fifo.
+heartbeat: 2003/02/11_09:33:43 notice: UDP heartbeat started on port 694 interface eth1
+heartbeat: 2003/02/11_09:33:43 info: Local status now set to: 'up'
+heartbeat: 2003/02/11_09:33:45 info: Heartbeat restart on node bashful
+heartbeat: 2003/02/11_09:33:45 info: Link bashful:eth1 up.
+heartbeat: 2003/02/11_09:33:45 info: Local status now set to: 'active'
+heartbeat: 2003/02/11_09:33:45 info: Heartbeat restart on node happy
+heartbeat: 2003/02/11_09:33:45 info: Link happy:eth1 up.
+heartbeat: 2003/02/11_09:33:45 info: Node happy: status active
+heartbeat: 2003/02/11_09:33:45 info: Node bashful: status up
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/ifstat ifstat
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/status status
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/ifstat ifstat
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/status status
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/resource.d/IPaddr 10.27.210.199 status
+heartbeat: 2003/02/11_09:33:45 info: Node bashful: status active
+heartbeat: 2003/02/11_09:33:45 info: Resource acquisition completed.
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/status status
+heartbeat: 2003/02/11_09:33:45 info: Running /etc/ha.d/rc.d/ip-request ip-request
+heartbeat: 2003/02/11_09:33:55 info: Running /etc/ha.d/resource.d/IPaddr 10.27.210.199 status
+heartbeat: 2003/02/11_09:33:55 info: Acquiring resource group: bashful 10.27.210.199 apache
+heartbeat: 2003/02/11_09:33:55 info: Running /etc/ha.d/resource.d/IPaddr 10.27.210.199 start
+heartbeat: 2003/02/11_09:33:56 info: ifconfig eth0:0 10.27.210.199 netmask 255.255.0.0  broadcast 10.23.255.255
+heartbeat: 2003/02/11_09:33:56 info: Sending Gratuitous Arp for 10.27.210.199 on eth0:0 [eth0]
+heartbeat: 2003/02/11_09:33:56 info: Running /etc/init.d/apache  start
+</pre>
+</small>
+Deutlich ist dabei die Funktionsweise von <tt>heartbeat</tt> zu sehen:<br>
+Zun&auml;chst wird die Konifiguration &uuml;berpr&uuml;ft und dann
+die Cluster-IP auf das Netzwerkinterface gebunden. Das geschieht durch erzeugen
+eines virtuellen Devices (z.B. eth0:0). Das Kommando <tt>ifconfig -a</tt>
+liefert nun zus&auml;tzlich den Eintrag, wie im folgenden Beispiel:
+<pre>
+eth0:0    Link encap:Ethernet  HWaddr 00:04:75:89:3A:80
+          inet addr:10.27.210.199  Bcast:10.23.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          Interrupt:11 Base address:0xcc00
+</pre>
+Anschliessend sendet der aktive Knoten eine Broadcastmeldung an alle Rechner
+im Netz und fordert sie auf ihre ARP-Caches zu leeren. Damit stellt er sicher,
+das alle zugreifenden Clients, bei &Uuml;bernahme des Dienstes durch einen 
+enderen Knoten, ihre IP-Nummer/Ethernetzuordnung im ARP-Cache l&ouml;schen
+und mit den Daten des neuen Knotens &uuml;berschreiben.
+<br>
+Zum Schlu&szlig; wird der hochverf&uuml;gbare Dienst gestartet. In unserem Fall ist
+das lediglich das Skript <tt>/etc/init.d/apache</tt>.
+<p>
+Die Aktivierung der Cluster-IP-Nummer kann nun mit einem einfachen <tt>ping</tt>-Kommando
+kontrolliert werden. An einem beliebigen Client gibt man ein:
+<pre>
+ping 10.27.210.199
+</pre>
+Darauf sollte das Cluster antworten. Hat das funktioniert, dann kann man 
+den hochverf&uuml;gbaren Dienst testen. Im Beispiel k&ouml;nnte man also
+im Webbrowser <tt>http://10.27.210.199</tt> eingeben und erh&auml;lt
+die Startseite des Webservers.
+<p>
+Als letztes sollte man nat&uuml;rlich die einwandfreie
+Umschaltung des Dienstes zwischen den Rechnerknoten testen. Dazu 
+f&auml;hrt man den Hauptserver mit dem Kommando
+<tt>reboot</tt> herunter und wieder rauf. Gleichzeitig
+kann man mit <tt>tail -f /var/log/ha-log</tt> am Standbyknoten
+zuschauen, wie die Cluster-IP-Adresse &uuml;bernommen und der Serverdienst
+auf dem bisher inaktiven Knoten aktiviert wird. 
+Ein dauerhaftes <tt>ping</tt> auf die Cluster-IP-Nummer zeigt, das der Cluster
+st&auml;dig erreichbar ist; auch w&auml;hrend der Hauptserver ausf&auml;llt.
+<P>
+
+<h3>Verf&uuml;gbarkeit vernetzter Systeme ermitteln</h3>
+Wie ausfallsicher ist ein Netz aus IT-Systemen? Welche Reservekapazit&auml;ten muss man
+vorhalten, um eine bestimmte Gesamtverf&uuml;gbarkeit zu erzielen? F&uuml;r einfache 
+"geht/geht nicht"-Komponenten wie zentrale Server lie&szlig;en sich solche Fragen 
+relativ leicht beantworten; bei Webservern oder Firewalls braucht man etwas mehr 
+Mathematik, denn heutige IT-Systeme kennen mehr als nur die zwei Zust&auml;nde 
+"geht" und "geht nicht". Wartet beispielsweise ein Kunde auf die Antwort eines 
+Webservers, ist es ideal, wenn sie sofort kommt, aber ein paar Sekunden 
+Wartezeit sind auch in Ordnung. Umgekehrt stellen sich bei der Ressourcenplanung 
+und Einsch&auml;tzung der technischen Zuverl&auml;ssigkeit kompliziertere Fragen 
+als fr&uuml;her: nach Art und Umfang vorzuhaltender Reserven sowie einem sinnvollen 
+Load Balancing.
+<P>
+Heutige IT-Systeme zeichnen sich durch vielf&auml;ltigen Einsatz von aktiven und 
+passiven Netzkomponenten aus. Dabei kennt das Netz keine Stillstandszeiten. Auch 
+nachts und am Wochenende gilt es Datenverkehr zu bedienen. Sei es durch Backups, 
+die vorzugsweise in Zeiten mit niedriger Netzlast laufen, durch Updates von 
+Virenscannern oder einfach bei der Kommunikation mit Kunden und global 
+verteilten Partnern. Um keinen Stillstand im Netz zuzulassen, m&uuml;ssen Ausfall-
+und Umschaltreserven vorgehalten werden. Dabei kommt es darauf an, wie 
+Stillstandszeiten einzelner Netzkomponenten in die Berechnung der Gesamtverf&uuml;gbarkeit 
+eingehen. Bei wahrscheinlichkeitstheoretischen Berechnungen spricht man dann hier 
+auch nicht mehr von der &Uuml;berlebenswahrscheinlichkeit, sondern von der 
+Zeitverf&uuml;gbarkeit. Vor allem stellt sich die Frage, welcher Art die zu schaffenden 
+Reserven zur Absicherung der Netzverf&uuml;gbarkeit sein sollen.
+Allgemein unterscheidet man in:
+<UL>
+<LI>kalte Reserve:<br> 
+    IT-Systemkomponenten werden erst im Bedarfsfall an das Netz angeschlossen
+<LI>warme Reserve:<br>
+    IT-Systemkomponenten sind zwar im Netz integriert, werden aber erst im 
+    Bedarfsfall zugeschaltet
+<LI>hei&szlig;e Reserve:<br>
+    IT-Systemkomponenten laufen st&auml;ndig im Netz mit
+</UL>
+Zun&auml;chst soll als Einf&uuml;hrung anhand eines Praxisbeispiels die
+Berechnung mittels Boole'scher Algebra vorgef&uuml;hrt werden.
+<P>
+Als Beispiel soll dabei ein lokales Netzwerk (LAN) dienen, das &uuml;ber einen einzelnen 
+Knoten mit dem Internet vernetzt ist. Dieser Zugang wurde mit einem Load-Balancer ausgelegt, 
+der die Netzlast auf zwei von drei Firewalls verteilt, die dementsprechend funktionieren 
+m&uuml;ssen, um den Internetzugang zu sichern. Die dritte Firewall bildet eine "warme" 
+Reserve, da im Beispiel zun&auml;chst keine Teillast zugelassen sein soll. Die zu kl&auml;rende 
+Frage ist, wie sich bei einer solchen 2/3-Schaltung der Firewalls die Zeitverf&uuml;gbarkeit 
+v(t) berechnet; f&uuml;r l&auml;ngerfristige Betrachtungszeitr&auml;ume geht man vereinfachend 
+von einer zeitunabh&auml;ngigen (station&auml;ren) konstanten Verf&uuml;gbarkeit v aus.
+<P>
+<CENTER><IMG SRC="lb-23-system.gif"></CENTER>
+<P>
+Der klassische Ansatz mit der Boole'schen Algebra kennt nur zwei Zust&auml;nde: ein Teilsystem 
+funktioniert (Zustand 1) oder es funktioniert nicht (Zustand 0). Um im Beispiel die 
+&Uuml;bereinstimmung der Ergebnisse mittels Boole'scher Algebra zu zeigen, ist der Ausschlu&szlig; 
+von Teillast Voraussetzung: Der ein- und ausgehende Datenstrom w&uuml;rde also immer voll auf zwei 
+der drei Firewallsysteme geleitet (hier unter Vernachl&auml;ssigung der Verf&uuml;gbarkeit und 
+Zuverl&auml;ssigkeit des Umschalters).
+<P>
+n der Boole'schen Algebra kann das System durch die Parallelschaltung von Firewall-Boxen vereinfacht 
+dargestellt werden. Die Vorgabe einer 2/3-Schaltung definiert die m&ouml;glichen Wege, die das 
+Gesamtsystem funktionsf&auml;hig halten:
+<UL>
+<LI>die <B>erste</B> und die <B>zweite</B> Firewall funktionieren oder
+<LI>die <B>erste</B> und die <B>dritte</B> Firewall funktionieren oder
+<LI>die <B>zweite</B> und die <B>dritte</B> Firewall funktionieren.
+</UL>
+Bei einer Reihenschaltung unabh&auml;ngiger Elemente entspricht die Gesamtverf&uuml;gbarkeit 
+dem Produkt der einzelnen Verf&uuml;gbarkeiten, die Parallelschaltung unabh&auml;ngiger
+Elemente berechnet sich aus Eins minus dem Produkt der Ausfallwahrscheinlichkeiten (Eins 
+minus Verf&uuml;gbarkeit) der einzelnen Elemente:
+<P>
+<CENTER><IMG SRC="lb-f1.gif"></CENTER>
+<P>
+Die "parallelgeschalteten" M&ouml;glichkeiten der vorgegebenen 2/3-Schaltung sind
+jedoch nicht unabh&auml;ngig voneinander. F&auml;llt beispielsweise Firewall 1
+aus, sind sowohl der erste als auch der zweite Strang betroffen. Daher muss man 
+die entsprechende Berechnung kombinatorisch aufstellen. Bei Verf&uuml;gbarkeit 
+von Firewall 1 ist die Gesamtverf&uuml;gbarkeit der Parallelschaltung von 
+Firewall 2 und 3 abh&auml;ngig. Bei Ausfall von Firewall 1 m&uuml;ssen sowohl 
+Firewall 2 als auch 3 arbeiten (Serienschaltung):
+<P>
+v<sub>ges</sub> = v<sub>1</sub> (1 - (1 - v<sub>2</sub>)*(1 - v<sub>3</sub>)) + (1 - v<sub>1</sub>)*(v<sub>2</sub>*v<sub>3</sub>)
+<P>
+Falls alle Teilsysterne dieselbe Verf&uuml;gbarkeit aufweisen, also 
+v = v<sub>1</sub> = v<sub>2</sub> = v<sub>3</sub>, so erh&auml;lt man:
+<P>
+v<sub>ges</sub> = 3v<sup>2</sup> - 2v<sup>3</sup>
+<P>
+Nutzt man als Qualit&auml;tsfaktor die so genannte &Uuml;bergangsintensit&auml;t 
+&rho;, die sich aus dem Quotienten der Stillstandszeit (MTTR, T<sub>s</sub>) 
+und der st&ouml;rungsfreien Laufzeit (MTBF, T<sub>o</sub>) berechnet, so ergibt sich:
+<P>
+<CENTER><IMG SRC="lb-f2.gif"></CENTER>
+<P>
+F&uuml;r die Verf&uuml;gbarkeit v<sub>ges</sub> ergibt sich durch Einsetzen und 
+Ausmultiplizieren:
+<P>
+<CENTER><IMG SRC="lb-f3.gif"></CENTER>
+<P>
+
+<A NAME="7.6"></A>
+<H2>7.6 Lastverteilung</H2>
+Wenn auch die Tuning-Tipps nicht mehr helfen, bleibt nur die Verteilung der
+Last auf mehrere Systeme. Eine einfache Methode wurde schon erw&auml;hnt:
+Setzt man f&uuml;r die Grafiken auf den Webseiten einen zweiten Server
+ein, liefert der eine Server nur die Texte und der andere die Grafiken. Die
+Gesamtperformance steigt ohne weiteren administrativen Aufwand.
+<P>
+Einen Schritt weiter geht das Verteilen der Last auf mehrere System nach logischen
+Gesichtspunkten. Am einfachsten l&auml;&szlig;t sich das an einem Beispiel
+zeigen:
+<UL>
+<LI>Verteilung nach Inhalten<BR>
+Aus <TT>shop.netzmafia.de</TT> wird
+  <UL>
+  <LI><TT>cd.shop.netzmafia.de</TT>
+  <LI><TT>video.shop.netzmafia.de</TT>
+  <LI><TT>software.shop.netzmafia.de</TT>
+  <LI><TT>buecher.shop.netzmafia.de</TT>
+  </UL>
+<LI>Verteilung nach Standort<BR>
+Aus <TT>www.netzmafia.org</TT> wird
+  <UL>
+  <LI><TT>www.netzmafia.org</TT>
+  <LI><TT>www.us.netzmafia.org</TT>
+  <LI><TT>www.eu.netzmafia.org</TT>
+  <LI><TT>www.asia.netzmafia.org</TT>
+  </UL>
+</UL>
+Bei der Verteilung nach Standort mu&szlig; f&uuml;r die Replokation der
+Inhalte gesorgt werden. Wenn auch diese Tricks nicht mehr helfen, bleibt nur
+der Weg zu Serverfarmen und Clustern. 
+<P>
+Bei Webfarmen oder Clustern k&ouml;nnen die einzelnen "real existierenden" 
+Server untereinander entweder &uuml;ber LAN oder geographisch getrennt &uuml;ber 
+WAN miteinander verbunden sein. Ihnen vorgeschaltet ist ein Load Balancer, der 
+die Last m&ouml;glichst gleichm&auml;&szlig;ig &uuml;ber die ihm untergeordneten
+realen Server verteilt. Der Parallelbertieb der Server erscheint nach
+au&szlig;erhalb als die Leistung eines einzelnen virtuellen Servers
+unter einer einzigen IP-Adresse. Bei dem Ausfall einzelner Knoten wird
+das System entsprechend rekonfiguriert.
+<P>
+
+<H3>Begriffe</H3>
+Ein <B>Cluster</B> ist allgemein eine Gruppe miteinander vernetzter Rechner, 
+die gemeinsam an einem Problem arbeiten. Von Clustern im engeren Sinn spricht 
+man, wenn die Knotenexklusiv f&uuml;r den Cluster genutzt werden und auf einem 
+gemeinsamen Datenbestand arbeiten.<BR>
+Die einzelnen Rechner eines Clusters bezeichnet man als <B>Knoten</B>. 
+H&auml;ufig verteilt dabei ein besonderer Knoten, der <B>Master</B>, die 
+Teilaufgaben auf die einzelnen Knoten und steuert so die Aktivit&auml;t des 
+ganzen Clusters. Auch die Interaktion mit dem Cluster findet in der Regel nur 
+&uuml;ber den Master statt.
+<p>
+Als <B>Skalierung</B> bezeichnet man den realen Leistungszuwachs eines Systems 
+durch Hinzuf&uuml;gen von Systemkomponenten. Ein Cluster, der bei doppelter 
+Knotenzahl nur noch halb so lange rechnet, skaliert perfekt; wenn das Hinzuf&uuml;gen 
+weiterer Rechner gar keinen Leistungsgewinn bringt, skaliert das System &uuml;berhaupt 
+nicht.
+<p>
+<B>Load-Balancing</B> verteilt einzelne Aufgaben wie Rechenjobs oder 
+Client-Anfragen auf die Knoten in Abh&auml;ngigkeit von ihrer Auslastung und 
+Verf&uuml;gbarkeit.
+<p>
+Als <B>Network of Workstations</B> bezeichnet man vernetzte Rechner, die - 
+anders als die Knoten in einem typischen Cluster - auch als unabh&auml;ngige 
+Workstations genutzt werden. Das kann beispielsweise ein Firmen-LAN sein, 
+dessen PCs "nach Feierabend" gemeinsam an einer Aufgabe rechnen.
+<p>
+<B>Server-Farmen</B> bestehen aus mehreren Rechnern, die sich eine gemeinsame 
+Aufgabe teilen; anders als bei einem typischen Cluster arbeitet dabei jeder 
+Rechner mit seinem eigenen, lokalen Datenbestand, der nur bei Bedarf gespiegelt 
+wird.
+<p>
+
+<H3>Cluster und Load-Balancing</H3>
+Das Konzept des Clusterings greift in der Regel auf die Cluster-Funktionen
+des Betriebssystems zur&uuml;ck. Das hei&szlig;t allerdings auch, da&szlig; der Administrator 
+die Restriktionen der jeweiligen Plattform bei dieser Funktion akzeptieren mu&szlig;. 
+Unabh&auml;ngig vom Betriebssystem arbeitet ein Cluster im Prinzip immer gleich.
+Jedes Mitglied im Cluster kommuniziert mit seinen Partnern, um deren aktuellen
+Status zu erfahren. Die Server erfahren so, wie stark das Gegen&uuml;ber ausgelastet
+ist. Die meisten Cluster greifen auf spezielle Load-Balancing-Algorithmen
+zur&uuml;ck, um den anfallenden Datenverkehr m&ouml;glichst effektiv auf alle Pendants im
+Cluster zu verteilen. Dadurch steigert sich der Durchsatz der gesamten Installation
+erheblich und der Administrator erh&auml;lt h&ouml;here Transferraten. Der potenzielle
+Flaschenhals ist somit beseitigt. Registriert eines der Systeme, da&szlig; ein
+anderes ausgefallen oder aus anderen Gr&uuml;nden nicht mehr verf&uuml;gbar ist, &uuml;bernimmt
+es dessen Aufgaben. 
+<P>
+Bei Serverfarmen unterst&uuml;tzen mehrere Server eine Site. Die Servergruppe besitzt
+identische Ressourcen und spiegeln normalerweise die Daten untereinander. Dadurch
+ergibt sich auch eine Erh&ouml;hung der Ausfallsicherheit. Ein Load-Balancer verteilt
+die Anfragen auf die einzelnen Server. Bei einer <B>Partionierung</B> einer
+Site haben die Server untrschiedliche Datenbest&auml;nde. Die Verteilung der Anfragen
+erfolgt aufgrund der eingehenden URLs.
+<P>
+<IMG SRC="loadbal.gif" vspace=5 hspace=5 align=left>
+Das Load-Balancing-Konzept wurde urspr&uuml;nglich f&uuml;r eine ganz andere Problemstellung
+entwickelt. Es sollte Datenlasten effektiv in einer Serverfarm verteilen und
+untersucht mittels Statuspaketen die Auslastung jedes Servers im Cluster.
+Load-Balancing-Switches k&ouml;nnen beispielsweise Rechner herstellerunabh&auml;ngig
+zu einem Cluster zusammenschlie&szlig;en. Die Server belegen entweder einen (oder aus 
+Redundanzaspekten zwei oder mehrere Ports) auf dem Load-Balancing-Switch. 
+Der nimmt den externen und internen Datenstrom an und entscheidet anhand seiner 
+Algorithmen, an welchen Server er das Datenpaket senden soll. Die Effizienz der 
+Algorithmen h&auml;ngt davon ab, wie tief der Load-Balancing-Switch in die
+IP-Pakete hineinschaut. Sogenannte Layer-4-Load-Balancing-Switches untersuchen - 
+wie der Name schon sagt - IP-Pakete bis hinauf in die Schicht 4, wo sie die UDP-
+und TCP-Portnummern erkennen. Der Administrator kann &uuml;ber diese Portkennung 
+bestimmte Anwendungen aus dem Datenstrom herausgreifen und ihnen eine h&ouml;here 
+Priorit&auml;t zuordnen. Der Load-Balancing-Switch erf&auml;hrt per Policy, da&szlig; 
+dieses Paket Bestandteil einer besonders kritischen Transaktion ist, setzt diese 
+Diensteanforderungen in seiner Load-Balancing-Entscheidung um und leitet es an den 
+am wenigsten ausgelasteten Server weiter.
+<P>
+Eine einfaches Load-Balancing kann mit Hilfe des DNS (RFC 1794) erreicht werden. Tr&auml;gt 
+man mehrere Rechner unter einem Namen ein, liefert der DNS-Server be jeder Anfrage
+eine andere Adresse. Der Nachteil dieser einfachen Methode sei nicht verschwiegen:
+Steht die Zuordnung Name zu IP-Nummer erst einmal im Cache eines anderen DNS-Servers
+ist es aus mit der Last-Verteilung f&uuml;r Rechner dieser Domain. Damit h&auml;tten
+wir aber schon mal eine Strategie f&uuml;r das Load-Balancing, das "Round-Robin".
+Nachteil ist, da&szlig; beim Ausfall eines Servers der DNS die Anforderung "ins Leere"
+schickt und damit das zweite Ziel, n&auml;mlich die h&ouml;here Verf&uuml;gbarkeit,
+verfehlt.Eine &auml;hnliche M&ouml;glichkeit bietet auch NAT (Network Address Translation).
+Hier kann auch Fehlertoleranz ber&uuml;cksichtigt werden.
+<BR CLEAR=ALL>
+Die h&auml;ufigsten Strategien sind:
+<UL>
+<LI><B>Round Robin</B> verteilt die Server nach einer vorgegebenen Reihenfolge
+<LI><B>Least Connection</B> w&auml;hlt den Server mit der geringsten Anzahl
+von Netzwerkverbindungen
+<LI><B>Observed</B>: Auf jedem Server l&auml;uft ein Agent, der &uuml;ber die Last
+auskunft gibt. Der am wenigsten belastete Server wird vergeben.
+<LI>Eine Verteilung nach <B>Priority</B> w&auml;hlt den Server nach Vorrang
+der Anfragen.
+<LI>Bei <B>Ratio</B> werden die Anfragen gewichtet und nach der Bewertung 
+erfolgt die Auswahl des Servers.
+<LI><B>Fastest</B> w&auml;hlt den Server, der am schnellsten reagiert.
+<LI>Am kompliziertesten ist <B>Predictiv</B>. Hier erfolgt die Auswahl nach
+einer Belastungsvoraussage auf Grund statistischer Berechnungen.
+</UL>
+Sind die Server geographisch verteilt, kann beispielsweise der n&auml;chstliegende
+Server oder jener mit der kosteng&uuml;nstigsten Verbindung gew&auml;hlt werden.
+<P>
+Ein Problem ergibt sich, wenn der Zustand einer Web-Verbindung gehalten werden
+soll (vergl. <A HREF="server8.html#8.2">Session-Tracking und CGI-Upload</A>). 
+Wenn die Verteilung beispielsweise per Round-Robin erfolgt, gelangt
+der Client jedesmal an einen anderen Server, der mit der Zustandsinfo
+nichts anfangen kann. Abhilfe schaffen kann man mit einer der folgenden
+M&ouml;glichkeiten:
+<UL>
+<LI>Anfragen eines Clients immer an den gleichen Server bei einer Session
+<LI>Replikation der Zustandsinfo innerhalb des Serververbundes
+<LI>Load-Balancer unterst&uuml;tzt Cookies
+<LI>Auf Zustandsinfo verzichten
+</UL>
+<P>
+
+
+<H3>Load-Balancer <TT>Pen</TT></H3>
+Wie oben erl&auml;tert, hat man bei st&auml;rker werdender Serverlast zwei 
+M&ouml;glichkeiten, um einem Ausfall vorzubeugen:
+Ersetzen des Servers durch einen leistungsf&auml;higeren oder Hinzunehmen weiterer 
+Maschinen. F&uuml;r den zweiten Fall benutzt man einen Loadbalancer, um die
+Last gleichm&auml;&szlig;ig auf alle Rechner zu verteilen. Ein Loadbalancer hat 
+einige weitere Nebeneffekte. Er registriert, wenn einer der Rechner ausf&auml;llt, und 
+verteilt die Last dynamisch auf die verbleibenden. Das stellt sicher, da&szlig; die angebotenen
+Services verf&uuml;gbar bleiben, selbst wenn ein Server wegen eines Defekts offline ist
+(Ziel2: Fehlertoleranz). Auch Hardware- und Software-Upgrades, die mit einer Downtime 
+verbunden sind, m&uuml;ssen nun nicht mehr nachts oder am Wochenende ausgef&uuml;hrt werden.
+Deshalb werden Loadbalancer auch bei Servern eingesetzt, bei denen die Last gar kein 
+Problem darstellt. Nachteil: Der Loadbalancer selbst ben&ouml;tigt auch einen Rechner.
+<P>
+Einen einfach zu konfigurierenden und trotzdem leistungsf&auml;higen Loadbalancer
+stellt Pen (<A HREF="http://siag.nu/pen">http://siag.nu/pen</A>) dar. Das GPL-Programm 
+liegt in der Version 0.95 f&uuml;r Linux, FreeBSD, Solaris, HP-UX und MacOS X als Tarball 
+vor. Das Binary wird mit dem &uuml;blichen "configure; make; make install;" erzeugt. 
+Als Beispiel dienen ein Loadbalancer und zwei Webserver: 
+<UL>
+<LI>Der Hostname des Loadbalancers ist "Happy", 
+<LI>der eine Webserver hei&szlig;t "Bashful" und 
+<LI>der andere Webserver hei&szlig;t "Grumpy".
+</UL>
+Auf "Happy" f&uuml;hrt man das Kommando
+<PRE>
+pen -1 /var/log/pen.log Happy:80 Bashful:80 Grumpy:80
+</PRE>
+aus. Schon das reicht f&uuml;r eine funktionierende Konfiguration! Der Rechner
+"Happy" lauscht ab sofort auf Port 80 und verteilt die dort eingehenden Pakete auf
+die Server "Bashful" und "Grumpy". Dabei folgt er nicht stur einem Round-Robin-Verfahren: 
+Er merkt sich vielmehr, welchen Client er zu welchem Server vermittelt hat, und beh&auml;lt 
+diese Zuteilung bei. Das ist f&uuml;r Web-Angebote wichtig, die mit Sessions arbeiten.
+Mit dem Parameter "-C Port" kann man eine Kontrollverbindung zu Pen erzeugen. Per Telnet 
+auf den angegebenen Port kann man Statusinformationen lesen und einfache Kommandos absetzen. 
+Was aber, wenn der Rechner ausf&auml;llt, auf dem Pen selbst l&auml;uft? Auch daran ist 
+gedacht, denn zwei separate Pens auf zwei Maschinen mit identischer Konfiguration
+sind lauff&auml;hig. Beide &uuml;berwachen sich gegenseitig per VRRP (Virtual Router 
+Redundancy Protocol (RFC 2338)) und vertreten sich gegenseitig. 
+<P>
+
+<H4>Zum Weiterlesen</H4>
+J&uuml;rgen Schmidt: Doppelt h&auml;lt besser, c't 6/1999<BR>
+Stephan Nechwatal: Doppelt h&auml;lt besser, c't 22/2000<BR>
+Dr. Oliver Diedrich: Einigkeit macht stark, c't 22/2000<BR>
+Bruno Nyffeler: Tux hoch n, c't 22/2000<BR>
+
+Matthias Rechenburg: Geteilte Last, Linux Magazin 01/2002<BR>
+
+Andre von Raison: Allzeit bereit, iX 6/2002<BR>
+Kai Dupke: Zauberhaftes Doppel, iX 6/2002<BR>
+<P>
+
+<CENTER><TABLE BORDER=0 WIDTH="100%">
+<TR>
+<TD ALIGN=LEFT VALIGN=BOTTOM><IMG SRC="left.gif" BORDER=0> <A HREF="server6.html">Zum vorhergehenden Abschnitt</A></TD>
+<TD ALIGN=CENTER VALIGN=BOTTOM><IMG SRC="up.gif" BORDER=0> <A HREF="index.html">Zum Inhaltsverzeichnis</A></TD>
+<TD ALIGN=RIGHT VALIGN=BOTTOM><IMG SRC="right.gif" BORDER=0> <A HREF="server8.html">Zum n&auml;chsten Abschnitt</A></TD>
+</TR></TABLE></CENTER>
+<P><HR>
+<H6><I>Copyright &copy; FH M&uuml;nchen, FB 04, Prof. J&uuml;rgen Plate</I></H6>
+<H6><I>Letzte Aktualisierung: 26. Jul 2005</I></H6>
+</BODY>
+</HTML>
+
