@@ -35,8 +35,6 @@ int iInitNetwork(CatSocket *csSocket)
 
 int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
 {
-	printf("iLocal = %d\n", iLocal);
-	printf("iType = %d\n", iType);
 	if(iLocal < 3 && iLocal > 0)
 	{
 		if(iLocal == 1) printf("Loopback device is being used.\n");
