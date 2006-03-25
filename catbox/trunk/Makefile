@@ -2,7 +2,7 @@ PARAMETERS=-g -Wall
 COMPILER=gcc
 OBJECTS=#files.o daemon.o #parser.o
 
-catboxd:	main.c   
+catboxd:	catboxc.c catboxd.c  
 	$(COMPILER) $(PARAMETERS) -o catboxd catboxd.c
 	$(COMPILER) $(PARAMETERS) -o catboxc catboxc.c 
 #daemon.o:	daemon.c daemon.h
