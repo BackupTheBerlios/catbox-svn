@@ -9,93 +9,62 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <sys/wait.h> 
 #define PORT 1234
-#define SIGNALBUFFER 8192
-int iOutputSignal(int iSocket)
-{
-	char cBuffer[SIGNALBUFFER];
-	int iRecvSize;
-	time_t tTime;
-	iRecvSize = recv(iSocket,cBuffer,SIGNALBUFFER,0);
-	if(iRecvSize < 0)
-	{
-		printf("Couldn't receive message correctly!");
-	}
-	cBuffer[iRecvSize] = '\0';
-	time(&tTime);
-	printf("Message: %s \t%s",cBuffer,ctime(&tTime));
-	return(1);
-}
+#define BACKLOG 10
+
+
 int main (int argc, char *argv[])
 {
-	int iSocket,iSocketA;
-	int iSType,iSDomain;
-	if(argc < 3)
-	{
-		iSDomain = AF_UNIX;
-		iSType = SOCK_STREAM;
-	}
-	else
-	{
-	iSDomain = atoi(argv[1]);
-	iSType = atoi(argv[2]);
-	}
-	struct sockaddr_in addr,client;
-	socklen_t client_size;
-	client_size = sizeof(client_size);
-	switch(iSDomain)
-	{
-		case 1:
-		iSDomain = PF_UNIX;
-		break;
-		case 2:
-		iSDomain = PF_INET;
-		break;
-		default:
-		break;
-	}
-	switch(iSType)
-	{
-		case 1:
-		iSType = SOCK_STREAM;
-		case 2:
-		iSType = SOCK_DGRAM;
-		default:
-		break;
-	}
-	//iSocket = socket(iSDomain,iSType,IPPROTO_TCP);
-	iSocket = socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
-	memset( &addr, 0, sizeof (addr));
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(PORT);
-	addr.sin_family = AF_INET; 
+	int sockfd,new_fd;
+	struct sockaddr_in local_addr;
+	struct sockaddr_in remote_addr;
+	int sin_size;
 	
-	if(bind(iSocket,(struct sockaddr*)&addr,sizeof(addr)) == -1)
+	if ((sockfd = socket(AF_INET, SOCK_STREAM,0)) == -1)
 	{
-		printf("Couldn't bind Socket. Errorcode: %d\n",iSocket);
-		exit(-1);
-	}
-	perror ("Socket bound...");
-	if(listen(iSocket,5) == -1	)
-	{
-		fprintf(stderr,"listen() failed\n");
-		exit(-1);
-	
-	}
-	fprintf(stderr,"listening for services...");
-	for(;;)
-	{
-        iSocketA = accept(iSocket,(struct sockaddr*)&client,&client_size);
-	if(iSocketA == -1)
-	{
-		fprintf(stderr,"Accept from Client failed!\n");
+		perror("socket");
 		exit(1);
 	}
-	printf("Processing Client with the address %s, ",inet_ntoa(addr.sin_addr));
-	iOutputSignal(iSocket);
-	close(iSocket);
-	//echo(iSocketA);
-	//printf("telling us: %s",echo(iSocketA));
+	
+	local_addr.sin_family = AF_INET;
+	local_addr.sin_port = htons(PORT);
+	local_addr.sin_addr.s_addr = htonl (INADDR_ANY);
+	bzero(&(local_addr.sin_zero), 8);
+	
+	if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(struct sockaddr)) == -1)
+	{
+		perror("bind");
+		exit(1);
+	}
+        if (listen(sockfd, BACKLOG) == -1) 
+	{
+            perror("listen");
+            exit(1);
+        }
+	while(1)
+	{
+		sin_size = sizeof(struct sockaddr_in);
+		new_fd = accept(sockfd, ( struct sockaddr *)&remote_addr, &sin_size);
+		if(new_fd == -1)
+		{
+			perror("accept");
+			continue;
+		}
+		printf("server: got connection from %s\n",inet_ntoa(remote_addr.sin_addr));
+		int send_err;
+		if (!fork())
+		{
+		send_err = send(new_fd, "CBW", 14, 0);
+		if (send_err == -1)
+		{
+             		perror("send");
+                	close(new_fd);
+                	exit(0);
+		}	
+		close(new_fd);
+		while(waitpid(-1,NULL,WNOHANG) > 0);
+		}
 	}
 	return (1);
 }

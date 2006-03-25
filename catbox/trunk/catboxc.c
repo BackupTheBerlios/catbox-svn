@@ -1,59 +1,55 @@
-#include <stdio.h>
-#include <malloc.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <arpa/inet.h>
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <errno.h> 
+#include <string.h> 
+#include <netdb.h> 
+#include <sys/types.h> 
+#include <netinet/in.h> 
+#include <sys/socket.h> 
 #define PORT 1234
-#define SIGNALBUFFER 8192
-static void error_exit(char *errorMessage)
+#define MAXDATASIZE 100
+int main(int argc, char *argv[])
 {
-    	fprintf(stderr, "%s: %s\n", errorMessage, strerror(errno));
-	exit(EXIT_FAILURE);
-}
-int main(int argc, char **argv)
-{
-	printf("Starting CatBox Bash-Client...");
-	printf("OK\n");
-	int iSocket,iSocketA;
-	int iSType,iSDomain;
-	struct sockaddr_in server;
-	struct hostent *host_info;
-	unsigned long addr;
-    	char *signal_string;
-    	int signal_len;
-	if (argc < 3)
-        error_exit("Usage: client destination-ip signal\n");
-	iSocket = socket(AF_INET,SOCK_STREAM,0);
-	if(iSocket < 0)
-	error_exit("Error creating Socket");
-	memset( &server, 0, sizeof (server));
-	if ((addr = inet_addr( argv[1])) != INADDR_NONE) 
+	int sockfd, numbytes;
+	char buf[MAXDATASIZE];
+	struct hostent *he;
+	struct sockaddr_in remote_addr;
+	if(argc != 3)
 	{
-        	memcpy( (char *)&server.sin_addr, &addr, sizeof(addr));
-	}
-	else
-	{
-		host_info = gethostbyname(argv[1]);
-		if (NULL == host_info)
-            	error_exit("Unrecognized Server");
-		memcpy( (char *)&server.sin_addr,host_info->h_addr, host_info->h_length );
+		fprintf(stderr,"Usage: client hostname msg\n");
 		
 	}
-	server.sin_family = AF_INET;
-	server.sin_port = htons( PORT );
-	if(connect(iSocket,(struct sockaddr*)&server,sizeof(server)) <0)
-        error_exit("Kann keine Verbindung zum Server herstellen");
-	signal_string = argv[2];
-	signal_len = strlen(signal_string);
- 	if (send(iSocket, signal_string, signal_len, 0) != signal_len)
-        error_exit("send() hat eine unterschiedliche Anzahl von Bytes versendet, als erwartet!");
-	close(iSocket);
-	return(1);
+	if((he=gethostbyname(argv[1])) == NULL)
+	{
+		herror("gethostbyname");
+		exit(1);
+	}
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	{
+		perror("socket");
+		exit(1);
+	}
+
+	remote_addr.sin_family = AF_INET;
+	remote_addr.sin_port = htons(PORT);
+	remote_addr.sin_addr = *((struct in_addr *)he->h_addr);
+	bzero(&(remote_addr.sin_zero),8);
+	if (connect(sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) == -1)
+	{
+		perror("connect");
+		exit(1);
+	}
+
+
+	if ((numbytes = recv(sockfd, buf, MAXDATASIZE,0)) == -1)
+	{
+		perror("recv");
+		exit(1);
+	}
+	buf[numbytes] = '\0';
+	printf("Received: %s\n", buf);
+	if (strcmp(buf,"CBW") == 0) printf("Servers welcomes us. Sending fingerprint...\n");
+	close(sockfd);
+
+	return (1);
 }
