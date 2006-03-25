@@ -8,48 +8,45 @@
 #include <sys/socket.h> 
 #define PORT 1234
 #define MAXDATASIZE 100
+#define BUF 1024
 int main(int argc, char *argv[])
 {
 	int sockfd, numbytes;
+	ssize_t size;
 	char buf[MAXDATASIZE];
+	char *buffer=malloc(BUF);
 	struct hostent *he;
 	struct sockaddr_in remote_addr;
-	if(argc != 3)
+		
+	if(argc != 2)
 	{
-		fprintf(stderr,"Usage: client hostname msg\n");
+		fprintf(stderr,"Usage: client hostname \n");
 		
 	}
-	if((he=gethostbyname(argv[1])) == NULL)
-	{
-		herror("gethostbyname");
-		exit(1);
-	}
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
-		perror("socket");
-		exit(1);
-	}
-
+	
+	sockfd = socket(AF_INET, SOCK_STREAM,0);
+	if(sockfd > 0)printf("Socket wurde korrekt angelegt\n");
 	remote_addr.sin_family = AF_INET;
 	remote_addr.sin_port = htons(PORT);
-	remote_addr.sin_addr = *((struct in_addr *)he->h_addr);
-	bzero(&(remote_addr.sin_zero),8);
+	inet_aton (argv[1], &remote_addr.sin_addr);
 	if (connect(sockfd, (struct sockaddr *)&remote_addr, sizeof(struct sockaddr)) == -1)
 	{
 		perror("connect");
 		exit(1);
 	}
-
-
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE,0)) == -1)
+	printf("Verbindung mit dem Server(%s) hergestellt...\n",inet_ntoa(remote_addr.sin_addr));
+	do
 	{
-		perror("recv");
-		exit(1);
-	}
-	buf[numbytes] = '\0';
-	printf("Received: %s\n", buf);
-	if (strcmp(buf,"CBW") == 0) printf("Servers welcomes us. Sending fingerprint...\n");
-	send(sockfd,"CSH",4,0);
+		size = recv(sockfd,buffer,BUF-1,0);
+		if(size > 0) buffer[size] = '\0';
+		printf("Nachricht empfangen: %s\n",buffer);
+		if (strcmp(buffer,"quit\n"))
+		{
+			printf("Nachricht zum Versenden: ");
+			fgets(buffer,BUF,stdin);
+			send(sockfd,buffer,strlen(buffer),0);
+		}
+	}while(strcmp (buffer, "quit\n") != 0);
 	close(sockfd);
 
 	return (1);

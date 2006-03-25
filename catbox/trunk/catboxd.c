@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h> 
 #define PORT 1234
+#define BUF 1024
 #define BACKLOG 10
 
 
@@ -19,8 +20,10 @@ int main (int argc, char *argv[])
 	int sockfd,new_fd;
 	struct sockaddr_in local_addr;
 	struct sockaddr_in remote_addr;
+	ssize_t size;
 	int sin_size;
 	char buf[100];
+	char *buffer = malloc(BUF);
 	
 	if ((sockfd = socket(AF_INET, SOCK_STREAM,0)) == -1)
 	{
@@ -33,7 +36,7 @@ int main (int argc, char *argv[])
 	local_addr.sin_addr.s_addr = htonl (INADDR_ANY);
 	bzero(&(local_addr.sin_zero), 8);
 	
-	if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(struct sockaddr)) == -1)
+	if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr)) == -1)
 	{
 		perror("bind");
 		exit(1);
@@ -45,7 +48,7 @@ int main (int argc, char *argv[])
         }
 	while(1)
 	{
-		sin_size = sizeof(struct sockaddr_in);
+		sin_size = sizeof(remote_addr);
 		new_fd = accept(sockfd, ( struct sockaddr *)&remote_addr, &sin_size);
 		if(new_fd == -1)
 		{
@@ -54,19 +57,18 @@ int main (int argc, char *argv[])
 		}
 		printf("server: got connection from %s\n",inet_ntoa(remote_addr.sin_addr));
 		int send_err,recv_err;
-		if (!fork())
+		do
 		{
-		send_err = send(new_fd, "CBW", 4, 0);
-		if (send_err == -1)
-		{
-             		perror("send");
-                	close(new_fd);
-                	exit(0);
-		}	
-		close(new_fd);
-		while(waitpid(-1,NULL,WNOHANG) > 0);
-		}
+			printf("Nachricht zum Versenden: ");
+			fgets(buffer, BUF,stdin);
+			send(new_fd,buffer,strlen(buffer),0);
+			size = recv(new_fd,buffer,BUF-1,0);
+			if(size > 0) buffer[size] = '\0';
+			printf("Nachricht empfangen: %s \n",buffer);
+		}while(strcmp(buffer,"quit\n") != 0);
+		close (new_fd);
 		
 	}
+	close  (sockfd);
 	return (1);
 }
