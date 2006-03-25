@@ -8,7 +8,6 @@ int main (int argc, char *argv[])
 	CatSocket csSocket;
 	printf("Starting CatBox-Daemon...\n");
 	iInitNetwork(&csSocket);
-	printf("%d",argc);
 	if(argc < 2)
 	{
 		iArgLocal = 1;

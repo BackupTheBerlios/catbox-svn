@@ -4,7 +4,11 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h> 
+#include <netdb.h>
+#include <string.h>
 #include "daemon.h"
+
 /*!
 @brief This is the linux-daemon for CatBox
 @author Michael Durrer
@@ -14,16 +18,20 @@
 @param 
 @return
 */
-
+struct sockaddr_in server;
 int iIsLocal(CatSocket *csSocket)
 {
+	int iRet;
 	switch(csSocket->iLocal)
 	{
 		case 1:
-		return 1;
+		iRet = 1;
+		break;
 		case 0:
-		return 0;
+		iRet = 0;
+		break;
 	} 
+	return(iRet);
 }
 	
 int iInitNetwork(CatSocket *csSocket)
@@ -53,4 +61,12 @@ int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
 		printf("%d is no valid type",iLocal);
 	}
 	if (csSocket->socket < 0) printf("Socket creation failed with error-code %d",csSocket->socket);
+	memset(&server,0,sizeof(server));
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = htonl( INADDR_ANY );
+	server.sin_port = htons( 666 );
+	if(bind(csSocket->socket,(struct sockaddr*)&server,sizeof (server)) < 0) printf("Fehler beim Binden des Sockets!\n");
+	if(listen(csSocket->socket,5) == -1)printf("Fehler beim Einrichten von Listen!\n!");
+	return (1);
 }
+

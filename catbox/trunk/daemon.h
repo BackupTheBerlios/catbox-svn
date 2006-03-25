@@ -1,6 +1,5 @@
-#ifndef DAEMON_H
-#define DAEMON_H
-#include <stdbool.h>
+#ifndef _DAEMON_H
+#define _DAEMON_H
 #endif
 
 typedef struct 
@@ -9,6 +8,7 @@ typedef struct
 	int (*sConnect) (int,int,int);
 	int iLocal;
 	int socket;
+	
 }CatSocket;
 typedef struct 
 {
@@ -17,8 +17,8 @@ typedef struct
 
 typedef struct
 {
-
+	int running;
 }CatApp;
 int iInitNetwork(CatSocket *csSocket);
 int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType);
-int IsLocal(CatSocket *csSocket);
+int iIsLocal(CatSocket *csSocket);
