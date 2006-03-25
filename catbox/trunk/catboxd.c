@@ -18,37 +18,36 @@
 int main (int argc, char *argv[])
 {
 	int sockfd,new_fd;
+	int bind_err;
+	const int y = 1;
 	struct sockaddr_in local_addr;
 	struct sockaddr_in remote_addr;
 	ssize_t size;
 	int sin_size;
-	char buf[100];
 	char *buffer = malloc(BUF);
 	
-	if ((sockfd = socket(AF_INET, SOCK_STREAM,0)) == -1)
+	if ((sockfd = socket(PF_INET, SOCK_STREAM,0)) == -1)
 	{
 		perror("socket");
 		exit(1);
 	}
-	
-	local_addr.sin_family = AF_INET;
+	printf("Socket angelegt...\n");
+	setsockopt( sockfd, SOL_SOCKET,SO_REUSEADDR, &y, sizeof(int));
+	local_addr.sin_family = PF_INET;
 	local_addr.sin_port = htons(PORT);
-	local_addr.sin_addr.s_addr = htonl (INADDR_ANY);
-	bzero(&(local_addr.sin_zero), 8);
-	
-	if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr)) == -1)
+	local_addr.sin_addr.s_addr = INADDR_ANY;
+	bind_err = bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr));
+		
+	if (bind_err == -1)
 	{
-		perror("bind");
+		printf("Port belegt!\n");
 		exit(1);
 	}
-        if (listen(sockfd, BACKLOG) == -1) 
-	{
-            perror("listen");
-            exit(1);
-        }
+	printf("Bind executed normally...\n");
+	listen(sockfd,5);
+	sin_size = sizeof(remote_addr);
 	while(1)
 	{
-		sin_size = sizeof(remote_addr);
 		new_fd = accept(sockfd, ( struct sockaddr *)&remote_addr, &sin_size);
 		if(new_fd == -1)
 		{
