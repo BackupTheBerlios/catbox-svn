@@ -6,7 +6,7 @@ int main (int argc, char *argv[])
 {
 	int iArgLocal,iArgType;
 	CatSocket csSocket;
-	printf("Starting CatBox-Daemon...\n");
+	printf("Starting CatBox-Daemon...");
 	iInitNetwork(&csSocket);
 	if(argc < 2)
 	{
@@ -19,5 +19,10 @@ int main (int argc, char *argv[])
 	iArgType = atoi(argv[2]);
 	}
 	iSetUpSocket(&csSocket,iArgLocal,iArgType);
+	printf("CatBox-Daemon ready for incoming connections.\n");
+	/*for(;;)
+	{
+		iPollConnection(&csSocket);
+	}*/
 	return (1);
 }

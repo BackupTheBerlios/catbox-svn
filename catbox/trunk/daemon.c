@@ -18,6 +18,9 @@
 @param 
 @return
 */
+struct sockaddr_in client;
+int sock2;
+socklen_t len;
 struct sockaddr_in server;
 int iIsLocal(CatSocket *csSocket)
 {
@@ -70,3 +73,11 @@ int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType)
 	return (1);
 }
 
+int iPollConnection(CatSocket *csSocket)
+{
+	
+	len = sizeof( client );
+        sock2 = accept( csSocket->socket, (struct sockaddr*)&client, &len);
+        if (sock2 < 0) printf("Accept fehlgeschlagen");
+	return(1);
+}

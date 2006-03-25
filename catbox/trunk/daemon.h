@@ -22,3 +22,4 @@ typedef struct
 int iInitNetwork(CatSocket *csSocket);
 int iSetUpSocket(CatSocket *csSocket, int iLocal, int iType);
 int iIsLocal(CatSocket *csSocket);
+int iPollConnection(CatSocket *csSocket);
