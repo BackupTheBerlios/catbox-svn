@@ -20,6 +20,7 @@ int main (int argc, char *argv[])
 	struct sockaddr_in local_addr;
 	struct sockaddr_in remote_addr;
 	int sin_size;
+	char buf[100];
 	
 	if ((sockfd = socket(AF_INET, SOCK_STREAM,0)) == -1)
 	{
@@ -52,10 +53,10 @@ int main (int argc, char *argv[])
 			continue;
 		}
 		printf("server: got connection from %s\n",inet_ntoa(remote_addr.sin_addr));
-		int send_err;
+		int send_err,recv_err;
 		if (!fork())
 		{
-		send_err = send(new_fd, "CBW", 14, 0);
+		send_err = send(new_fd, "CBW", 4, 0);
 		if (send_err == -1)
 		{
              		perror("send");
@@ -65,6 +66,7 @@ int main (int argc, char *argv[])
 		close(new_fd);
 		while(waitpid(-1,NULL,WNOHANG) > 0);
 		}
+		
 	}
 	return (1);
 }

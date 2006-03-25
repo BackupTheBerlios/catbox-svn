@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 	buf[numbytes] = '\0';
 	printf("Received: %s\n", buf);
 	if (strcmp(buf,"CBW") == 0) printf("Servers welcomes us. Sending fingerprint...\n");
+	send(sockfd,"CSH",4,0);
 	close(sockfd);
 
 	return (1);
