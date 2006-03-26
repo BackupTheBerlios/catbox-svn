@@ -100,7 +100,8 @@ char rem_client_version[10];
 	printf("Bind executed normally...\n");
 	listen(sockfd,100);
 	sin_size = sizeof(remote_addr);
-	while(1)
+	int success=0;
+	while(1 || success ==1)
 	{
 		new_fd = accept(sockfd, ( struct sockaddr *)&remote_addr, &sin_size);
 		if(new_fd == -1)
@@ -114,13 +115,19 @@ char rem_client_version[10];
 		printf("Hand Shake was successful!\n");*/
 		do
 		{
-			strcpy(buffer,"CBW");
+			strcpy(buffer,"CBW\0");
 			send(new_fd,buffer,strlen(buffer),0);
 			size = recv(new_fd,buffer,BUF-1,0);
 			if(size > 0) buffer[size] = '\0';
+			if(strncmp(buffer,"CBID",4) == 0)
+			{
+				printf("Client erkannt, HandShake abgeschlossen.\n");
+				success = 1;
+			}
+			
 			printf("Nachricht empfangen: %s \n",buffer);
-		}while(strcmp(buffer,"quit\n") != 0);
-		strcpy(buffer,"RHCC");
+		}while(strncmp(buffer,"quit",4) != 0 || success == 1);
+		write(sockfd,"RHCC",4);
 		send(new_fd,buffer,strlen(buffer),0);
 		close (new_fd);
 		exit(1);

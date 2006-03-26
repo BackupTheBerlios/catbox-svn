@@ -89,17 +89,18 @@ int main(int argc, char *argv[])
 	//HandShake(sockfd,buffer);
 	do
 	{
-		size = recv(sockfd,buffer,BUF-1,0);
-		if(size > 0) buffer[size] = '\0';
+		size = recv(sockfd,buffer,BUF,0);
 		if(strcmp(buffer,"CBW")==0)
 		{
-				printf("CatBox-Daemon sagt Hallo...schicke Client-ID");
+				if(size > 0) buffer[size] = '\0';
+				printf("CatBox-Daemon sagt %s...schicke Client-ID",buffer);
 				strcpy(buffer,"CBID");
-				send(sockfd,buffer,strlen(buffer),0);
+				write(sockfd,buffer,strlen(buffer));
+				//send(sockfd,buffer,strlen(buffer),0);
 		}
 		size = recv(sockfd,buffer,BUF-1,0);
 		if(size > 0) buffer[size] = '\0';
-		if(strcmp(buffer,"RHCC")==0)
+		if(strncmp(buffer,"RHCC",4)==0)
 		{
 			close(sockfd);
 			exit(1);
@@ -114,3 +115,4 @@ int main(int argc, char *argv[])
 
 	return (1);
 }
+                                                  
