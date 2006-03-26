@@ -9,6 +9,57 @@
 #define PORT 1234
 #define MAXDATASIZE 100
 #define BUF 1024
+#define CLIENT_VERSION "0.1"
+char *hostnameptr;
+char hostname;
+int HandShake(int sockfd, char *buffer)
+{
+		hostnameptr = &hostname;
+		ssize_t size;
+		int success=0;
+		size = recv(sockfd,buffer,BUF-1,0);
+		if(size > 0)buffer[size]='\0';
+		if(strcmp(buffer,"CBW") == 0)
+		{
+			buffer[size] = '\0';
+			printf("%s empfangen, Server begrüsst uns. Wir senden Identifikationsstring...\n",buffer);
+		}
+		else
+		{
+			printf("Handshake fehlgeschlagen. Beende Verbindung!\n");
+			close(sockfd);
+			exit(1);
+		}
+		strcpy(buffer,"CBSTDC"); // CatBox Standard Client
+		send(sockfd,buffer,strlen(buffer),0);
+	do
+	{
+		size=recv(sockfd,buffer,BUF-1,0);
+		if(size > 0)
+		{
+		if (strcmp(buffer,"CBCACK") == 0)
+		{
+				strcpy(buffer,CLIENT_VERSION);
+				send(sockfd,buffer,strlen(buffer),0);
+		}			
+		if (strcmp(buffer,"CBHOST")== 0)
+		{
+				gethostname(hostname,256);
+				strcpy(buffer,hostnameptr);
+				send(sockfd,buffer,strlen(buffer),0);	
+			
+		}
+		if (strcmp(buffer,"CBREADY")== 0)
+		{
+				printf("CatBox Daemon ist bereit! Starte Shell...\n");
+				success=1;
+		}
+		}
+		
+		
+	}while(success != 1);
+}
+
 int main(int argc, char *argv[])
 {
 	int sockfd, numbytes;
@@ -34,12 +85,17 @@ int main(int argc, char *argv[])
 		perror("connect");
 		exit(1);
 	}
-	printf("Verbindung mit dem Server(%s) hergestellt...\n",inet_ntoa(remote_addr.sin_addr));
+	printf("Verbindung mit dem Server(%s) hergestellt...\n",inet_ntoa (remote_addr.sin_addr));
+	HandShake(sockfd,buffer);
 	do
 	{
 		size = recv(sockfd,buffer,BUF-1,0);
 		if(size > 0) buffer[size] = '\0';
-		printf("Nachricht empfangen: %s\n",buffer);
+		if(strcmp(buffer,"RHCC")==0)
+		{
+			close(sockfd);
+			exit(1);
+		}
 		if (strcmp(buffer,"quit\n"))
 		{
 			printf("Nachricht zum Versenden: ");
