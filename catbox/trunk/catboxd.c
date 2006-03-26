@@ -115,18 +115,20 @@ char rem_client_version[10];
 		printf("Hand Shake was successful!\n");*/
 		do
 		{
-			strcpy(buffer,"CBW\0");
+			printf("Sende HandShake-Gruss. Warte auf Client-Identifizierung.\n");
+			strcpy(buffer,"CBW");
 			send(new_fd,buffer,strlen(buffer),0);
 			size = recv(new_fd,buffer,BUF-1,0);
-			if(size > 0) buffer[size] = '\0';
 			if(strncmp(buffer,"CBID",4) == 0)
 			{
-				printf("Client erkannt, HandShake abgeschlossen.\n");
+				if(size > 0) buffer[size] = '\0';
+				printf("Standard-Client erkannt, HandShake abgeschlossen.\n",buffer);
 				success = 1;
 			}
 			
-			printf("Nachricht empfangen: %s \n",buffer);
-		}while(strncmp(buffer,"quit",4) != 0 || success == 1);
+		}while(success != 1);
+		success = 0;
+		
 		write(sockfd,"RHCC",4);
 		send(new_fd,buffer,strlen(buffer),0);
 		close (new_fd);

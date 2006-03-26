@@ -1,7 +1,8 @@
 PARAMETERS=-g -Wall
 COMPILER=gcc
 OBJECTS=#files.o daemon.o #parser.o
-
+all:	catboxd catboxc
+	make catboxc && make catboxd
 catboxd:	catboxd.c  
 	$(COMPILER) $(PARAMETERS) -o catboxd catboxd.c
 catboxc:	catboxc.c
