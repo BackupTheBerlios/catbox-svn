@@ -14,14 +14,14 @@ char *hostnameptr;
 char hostname;
 int HandShake(int sockfd, char *buffer)
 {
-		hostnameptr = &hostname;
+		//hostnameptr = &hostname;
 		ssize_t size;
 		int success=0;
 		size = recv(sockfd,buffer,BUF-1,0);
-		if(size > 0)buffer[size]='\0';
+		
 		if(strcmp(buffer,"CBW") == 0)
 		{
-			buffer[size] = '\0';
+			if(size > 0)buffer[size]='\0';
 			printf("%s empfangen, Server begrüsst uns. Wir senden Identifikationsstring...\n",buffer);
 		}
 		else
@@ -86,9 +86,17 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	printf("Verbindung mit dem Server(%s) hergestellt...\n",inet_ntoa (remote_addr.sin_addr));
-	HandShake(sockfd,buffer);
+	//HandShake(sockfd,buffer);
 	do
 	{
+		size = recv(sockfd,buffer,BUF-1,0);
+		if(size > 0) buffer[size] = '\0';
+		if(strcmp(buffer,"CBW")==0)
+		{
+				printf("CatBox-Daemon sagt Hallo...schicke Client-ID");
+				strcpy(buffer,"CBID");
+				send(sockfd,buffer,strlen(buffer),0);
+		}
 		size = recv(sockfd,buffer,BUF-1,0);
 		if(size > 0) buffer[size] = '\0';
 		if(strcmp(buffer,"RHCC")==0)
@@ -96,10 +104,9 @@ int main(int argc, char *argv[])
 			close(sockfd);
 			exit(1);
 		}
-		if (strcmp(buffer,"quit\n"))
+		if (strcmp(buffer,"quit\n") == 0)
 		{
-			printf("Nachricht zum Versenden: ");
-			fgets(buffer,BUF,stdin);
+
 			send(sockfd,buffer,strlen(buffer),0);
 		}
 	}while(strcmp (buffer, "quit\n") != 0);
