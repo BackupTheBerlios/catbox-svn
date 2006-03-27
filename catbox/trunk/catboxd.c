@@ -58,6 +58,7 @@ int HandShake(int *sockfd, char  *buffer)
 }*/
 int main (int argc, char *argv[])
 {
+	char welcome[]= "Welcome to the CBDS console!";
 	/*char rem_hostname[256];
 char rem_client_type[20];
 char rem_client_version[10];
@@ -122,13 +123,18 @@ char rem_client_version[10];
 			if(strncmp(buffer,"CBID",4) == 0)
 			{
 				if(size > 0) buffer[size] = '\0';
-				printf("Standard-Client erkannt, HandShake abgeschlossen.\n",buffer);
+				printf("Standard-Client erkannt.\n Schicke Bestaetigung an Client, HandShake abgeschlossen.\n",buffer);
+				strncpy(buffer,"CBACK",5);
+				send(new_fd,buffer,strlen(buffer),0);
+				printf("Starte CBDS...\n");
 				success = 1;
 			}
 			
 		}while(success != 1);
 		success = 0;
-		
+		/* Shell zu Client senden */
+
+			
 		write(sockfd,"RHCC",4);
 		send(new_fd,buffer,strlen(buffer),0);
 		close (new_fd);

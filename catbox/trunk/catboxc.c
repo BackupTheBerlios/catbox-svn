@@ -62,10 +62,12 @@ int HandShake(int sockfd, char *buffer)
 
 int main(int argc, char *argv[])
 {
+	int success=0;
 	int sockfd, numbytes;
 	ssize_t size;
 	char buf[MAXDATASIZE];
 	char *buffer=malloc(BUF);
+	char *sendbuffer=malloc(BUF);
 	struct hostent *he;
 	struct sockaddr_in remote_addr;
 		
@@ -89,28 +91,27 @@ int main(int argc, char *argv[])
 	//HandShake(sockfd,buffer);
 	do
 	{
-		size = recv(sockfd,buffer,BUF,0);
-		if(strcmp(buffer,"CBW")==0)
+		
+		size = recv(sockfd,buffer,BUF-1,0);
+		success=1;
+		if(strncmp(buffer,"CBW",3)==0)
 		{
 				if(size > 0) buffer[size] = '\0';
-				printf("CatBox-Daemon sagt %s...schicke Client-ID",buffer);
-				strcpy(buffer,"CBID");
+				printf("CatBox-Daemon sagt %s...schicke Client-ID...",buffer);
+				//scanf("%s",&buffer);
+				strncpy(buffer,"CBID",4);
 				write(sockfd,buffer,strlen(buffer));
 				//send(sockfd,buffer,strlen(buffer),0);
+				size = recv(sockfd,buffer,BUF-1,0);
+				if( strncmp(buffer,"CBACK",5) ==0)
+				{
+					printf("Bestaetigung empfangen.\nStarte Shell-Verbindung!\n");
+					success=1;
+				}
 		}
-		size = recv(sockfd,buffer,BUF-1,0);
-		if(size > 0) buffer[size] = '\0';
-		if(strncmp(buffer,"RHCC",4)==0)
-		{
-			close(sockfd);
-			exit(1);
-		}
-		if (strcmp(buffer,"quit\n") == 0)
-		{
 
-			send(sockfd,buffer,strlen(buffer),0);
-		}
-	}while(strcmp (buffer, "quit\n") != 0);
+
+	}while(success != 1);
 	close(sockfd);
 
 	return (1);
