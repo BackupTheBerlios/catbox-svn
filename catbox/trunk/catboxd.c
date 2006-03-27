@@ -141,6 +141,7 @@ char rem_client_version[10];
 		exit(1);
 		
 	}
+	printf("\nBeende CBDS.!\n");
 	close  (sockfd);
 	return (1);
 }

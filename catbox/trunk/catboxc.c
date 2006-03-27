@@ -110,7 +110,18 @@ int main(int argc, char *argv[])
 				}
 		}
 
-
+	}while(success != 1);
+	success=0;
+	
+	do
+	{
+		printf("$> ");
+		fgets(sendbuffer,50,stdin);
+		if(strncmp(sendbuffer,"quit",4) ==0)
+		{
+				success=1;
+			printf("\nConnection closed!\n");
+		}
 	}while(success != 1);
 	close(sockfd);
 
