@@ -56,9 +56,30 @@ int HandShake(int *sockfd, char  *buffer)
 	
 	return(1);
 }*/
+
+
+void help()
+{
+	printf("Hello");
+}
+void quit()
+{
+
+}
+void info()
+{
+	printf("Info");
+}
+struct   
+{
+	void (*fptr) (void);
+	char *name;
+}command[] = {{help,"help"},{quit,"quit"},{info,"info"}, { NULL, NULL } };
 int main (int argc, char *argv[])
 {
+	int fcnt;
 	char welcome[]= "Welcome to the CBDS console!";
+	char cVersion = "version" + '\0';
 	/*char rem_hostname[256];
 char rem_client_type[20];
 char rem_client_version[10];
@@ -102,7 +123,7 @@ char rem_client_version[10];
 	listen(sockfd,100);
 	sin_size = sizeof(remote_addr);
 	int success=0;
-	while(1 || success ==1)
+	do
 	{
 		new_fd = accept(sockfd, ( struct sockaddr *)&remote_addr, &sin_size);
 		if(new_fd == -1)
@@ -127,21 +148,36 @@ char rem_client_version[10];
 				strncpy(buffer,"CBACK",5);
 				send(new_fd,buffer,strlen(buffer),0);
 				printf("Starte CBDS...\n");
+				
 				success = 1;
 			}
-			
 		}while(success != 1);
-		success = 0;
 		/* Shell zu Client senden */
 
 			
-		write(sockfd,"RHCC",4);
+		/*write(sockfd,"RHCC",4);
 		send(new_fd,buffer,strlen(buffer),0);
 		close (new_fd);
-		exit(1);
+		exit(1);*/
 		
-	}
+	}while (success !=1);
+	success = 0;
+/*	do
+	{
+		size = recv(new_fd,buffer,BUF-1,0);
+		//printf("%s",buffer);
+		char *p;
+		for (p = buffer; *p != 0; ++p) printf("%x ", (unsigned)*p);
+		p=strchr(buffer, '\n');
+		*p='\0';
+		for (fcnt=0;command[fcnt].name != NULL;fcnt++)
+		{
+			if(strcmp(buffer,command[fcnt].name)==0) command[fcnt].fptr();
+		}
+		
+	}while(success != 1);*/
 	printf("\nBeende CBDS.!\n");
+	close(new_fd);
 	close  (sockfd);
 	return (1);
 }

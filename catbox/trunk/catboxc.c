@@ -116,7 +116,10 @@ int main(int argc, char *argv[])
 	do
 	{
 		printf("$> ");
-		fgets(sendbuffer,50,stdin);
+		fgets(sendbuffer,10,stdin);
+		strncpy(buffer,sendbuffer,strlen(sendbuffer));
+		send(sockfd,buffer,strlen(buffer),0);
+		printf("%s",buffer);
 		if(strncmp(sendbuffer,"quit",4) ==0)
 		{
 				success=1;
