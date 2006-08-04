@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <malloc.h>
+#include <sys/malloc.h>
 #include <stdio.h>
 #include <math.h>
 #include <SDL/SDL.h>
