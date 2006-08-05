@@ -14,6 +14,7 @@ class CNetwork
 		CLIENT_MODE= 1
 	};
 	public:
+	int iNet;
 	void CNetwork::Connect(const char* cHostname, int iPort);
 	CNetwork();
 	~CNetwork();	

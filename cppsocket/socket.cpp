@@ -26,24 +26,30 @@ void CSocket::Bind(int iPort)
 	int iBinding;
 	if(s_socket ==-1)cout<<"Konnte bind() nicht ausführen, es wurde kein Socket erzeugt\n";
 	struct sockaddr_in addr;
+	memset(&addr,0,sizeof(struct sockaddr_in));
 	addr.sin_family = s_type;
-	addr.sin_addr.s_addr= inet_addr("127.0.0.1"); // htonl(INADDR_ANY)
+	addr.sin_addr.s_addr= htonl(INADDR_ANY);
 	addr.sin_port = htons(iPort);
 	iBinding = bind(s_socket,(struct sockaddr*)&addr,sizeof(addr));
 	if (iBinding < 0)cout << "Konnte Socket nicht an Port "<<iPort<<" binden, breche ab" <<endl;
+	else
+	{
+		cout << "Socket an Port " << iPort <<" gebunden!\n";
+	}
 }
+
 
 bool CSocket::IsListening()
 {
-	if (s_flag < 1)
+	if (s_flag == 0)
 	{
 		cout <<"Das Socket ist nicht im Listen-Modus\n";
 		return(false);
 	}
-	else
+	if (s_flag == 1)
 	{
-	cout <<"Das Socket ist bereits im Listen-Modus\n";
-	return(true);
+		cout <<"Das Socket ist bereits im Listen-Modus"<<endl;
+		return(true);
 	} 
 }
 void CSocket::SetListen(int iClients)
@@ -52,5 +58,39 @@ void CSocket::SetListen(int iClients)
 	{
 		cout << "Konnte nicht in den Listen-Modus wechseln\n";
 	}
+	else
+	{
+		cout << "Started listening..." << endl;
+	}
 	s_flag = 1; // Starts listening
+}
+void CSocket::AcceptClient(CClient *cC)
+{ 
+
+	int i;
+   for (i=0; i<MAX_CLIENTS; i++)
+      s_clientsocket[i] = -1;
+	FD_ZERO(&c_sockets);
+	FD_SET(s_socket,&c_sockets);
+	for(i=0;i<MAX_CLIENTS;i++)
+	{
+		if(s_clientsocket[i] != -1)
+		{
+			FD_SET(s_clientsocket[i],&c_sockets);
+		}	
+	}
+	if(select(FD_SETSIZE,&c_sockets,NULL,NULL,NULL) < 0)
+	cout <<"Select failed"<<endl;
+	if(FD_ISSET(s_socket,&c_sockets))
+	{
+		for(i=0;i<MAX_CLIENTS;i++)
+		{
+			if(s_clientsocket[i] == -1)
+			{
+				s_clientsocket[i] = accept (s_socket, (struct sockaddr *)&s_client[i],&client_len);
+				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
+				break;
+			}
+		}
+	}
 }

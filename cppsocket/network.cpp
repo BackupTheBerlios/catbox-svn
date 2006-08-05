@@ -1,6 +1,5 @@
 #include "network.h"
 #include "socket.h"
-using namespace std;
 CNetwork::CNetwork()
 {
 	InstanceCount++;
