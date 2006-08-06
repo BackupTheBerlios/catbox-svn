@@ -32,7 +32,11 @@ int main(int argc , char **argv)
 	cS.SetListen(10);
 	while(1)
 	{
-		cS.AcceptClient(&cC[0]);
+		for(int iCnt=0;iCnt=<MAX_CLIENTS;iCnt++)
+		{
+			if(cC.ClientOccupied[iCnt] == true)
+			cS.AcceptClient(&cC[iCnt]);
+		}
 	}
 	/*for(;;)
 	{

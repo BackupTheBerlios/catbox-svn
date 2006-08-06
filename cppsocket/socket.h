@@ -7,8 +7,7 @@
 #include <string.h>
 #include <unistd.h>#include <arpa/inet.h>
 #include "client.h"
-#define MAX_CLIENTS 10
-#define MAX_SERVERBUFFER 2048
+#include "constants.h"
 using namespace std;
 class CSocket
 {
