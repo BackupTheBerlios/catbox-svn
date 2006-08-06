@@ -15,6 +15,7 @@ class CSocket
 	private:
 	static int InstanceCount;
 	protected:
+	char recv_buffer[MAX_SERVERBUFFER];
 	int s_socket;
 	int s_type;
 	int s_flag;

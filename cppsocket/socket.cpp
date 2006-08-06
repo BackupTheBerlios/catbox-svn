@@ -66,7 +66,7 @@ void CSocket::SetListen(int iClients)
 }
 void CSocket::AcceptClient(CClient *cC)
 { 
-
+	int errcheck;
 	int i;
    for (i=0; i<MAX_CLIENTS; i++)
       s_clientsocket[i] = -1;
@@ -87,10 +87,26 @@ void CSocket::AcceptClient(CClient *cC)
 		{
 			if(s_clientsocket[i] == -1)
 			{
+				char *clientaddr;
 				s_clientsocket[i] = accept (s_socket, (struct sockaddr *)&s_client[i],&client_len);
 				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
+				clientaddr = inet_ntoa(s_client[i].sin_addr);
+					cout << "Man abord: " << clientaddr <<endl;
 				break;
 			}
 		}
 	}
+	/*for(i=0;i<MAX_CLIENTS;i++)
+	{
+		if(s_clientsocket[i] != -1 && FD_ISSET(s_clientsocket[i],&c_sockets))
+		{
+			errcheck = recv(s_clientsocket[i],recv_buffer,MAX_SERVERBUFFER,0);
+			if(errcheck <= 0)
+			{
+				close(s_clientsocket[i]);
+				s_clientsocket[i] = -1;
+				cout << "Connection lost!"<<endl;
+			}
+		}
+	}*/
 }
