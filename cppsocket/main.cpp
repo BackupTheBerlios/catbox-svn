@@ -6,6 +6,7 @@
 using namespace std;
 int CSocket::InstanceCount = 0;
 int CNetwork::InstanceCount = 0;
+bool CClient::ClientOccupied[MAX_CLIENTS];
 int main(int argc , char **argv)
 {
 	CNetwork cNet;
@@ -29,14 +30,20 @@ int main(int argc , char **argv)
 	cNet.iNet=20;
 	cS.Socket();
 	cS.Bind(1050);
-	cS.SetListen(10);
+	cS.SetListen(2);
 	while(1)
 	{
-		for(int iCnt=0;iCnt=<MAX_CLIENTS;iCnt++)
+		for(int iCnt=0;iCnt <= MAX_CLIENTS;iCnt++)
 		{
-			if(cC.ClientOccupied[iCnt] == true)
+			if(CClient::ClientOccupied[iCnt]== false)
+			{
+				cout <<"Freier Client\n";
 			cS.AcceptClient(&cC[iCnt]);
+				cC[0].ListClients();
+			}
 		}
+	
+		
 	}
 	/*for(;;)
 	{

@@ -1,4 +1,5 @@
 #include "client.h"
+#include "socket.h"
 #include "constants.h"
 CClient::CClient()
 {
@@ -11,4 +12,21 @@ CClient::CClient()
 CClient::~CClient()
 {
 	cout << "Client destroyed.\n";
+}
+void CClient::GetInfo()
+{
+}
+void CClient::ListClients()
+{
+	int c=1,d=0;
+		do
+		{
+		if(ClientOccupied[d] == true)
+		{
+			cout << "Client Nr. " << c << " hat die IP: " << addr << "\n";
+			c++;
+		}
+		d++;
+		}while(d <= MAX_CLIENTS);
+	
 }
