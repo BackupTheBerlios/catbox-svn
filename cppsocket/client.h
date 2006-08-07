@@ -12,7 +12,7 @@ public:
 char *addr;
 static bool ClientOccupied[MAX_CLIENTS];
 int c_socket;
-int rang;
+static int rang;
 CClient();
 ~CClient();
 void CClient::GetInfo();

@@ -1,6 +1,7 @@
 #include "client.h"
 #include "socket.h"
 #include "constants.h"
+int CClient::rang=0;
 CClient::CClient()
 {
 	for(int c=0;c<=MAX_CLIENTS;c++)
@@ -19,5 +20,5 @@ void CClient::GetInfo()
 void CClient::ListClients()
 {
 	rang++;
-	cout << "Client Nr. " << rang << " hat die IP: "; //<< 	addr << "\n";
+	cout << "Client Nr. " << rang << " hat die IP: "  << addr << "\n";
 }
