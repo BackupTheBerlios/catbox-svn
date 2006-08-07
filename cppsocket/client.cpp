@@ -19,6 +19,8 @@ void CClient::GetInfo()
 }
 void CClient::ListClients()
 {
-	rang++;
-	cout << "Client Nr. " << rang << " hat die IP: "  << addr << "\n";
+	for(int i=0;i<=MAX_CLIENTS;i++)
+	{
+		cout << "Client Nr. " << i+1 << " hat die IP: "  << addr << "\n";
+	}
 }

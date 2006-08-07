@@ -33,16 +33,18 @@ int main(int argc , char **argv)
 	cS.SetListen(2);
 	while(1)
 	{
-		for(int iCnt=0;iCnt <= MAX_CLIENTS;iCnt++)
+		for(int iCnt=0;iCnt <= 1;iCnt++)
 		{
 			if(CClient::ClientOccupied[iCnt]== false)
 			{
 				CClient::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
 				cS.AcceptClient(cC[iCnt]);
-				cC[iCnt].ListClients();
+				
 			}
 		}
+		break;
+		cC[0].ListClients();
 		
 	}
 	/*for(;;)
