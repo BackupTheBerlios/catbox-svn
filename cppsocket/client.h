@@ -16,6 +16,5 @@ static int rang;
 CClient();
 ~CClient();
 void CClient::GetInfo();
-void CClient::ListClients();
 };
 #endif

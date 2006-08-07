@@ -44,7 +44,7 @@ int main(int argc , char **argv)
 			}
 		}
 		break;
-		cC[0].ListClients();
+		cS.ListClients(*cC);
 		
 	}
 	/*for(;;)

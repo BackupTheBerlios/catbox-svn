@@ -31,5 +31,6 @@ class CSocket
 	bool IsListening();
 	void SetListen(int iClients);
 	void AcceptClient(CClient& cC);
+	void ListClients(CClient *cC[]);
 };
 #endif

@@ -114,3 +114,12 @@ void CSocket::AcceptClient(CClient& cC)
 		}
 	}
 }
+
+void CSocket::ListClients(CClient *cC[])
+{
+	for(int i=0;i<=MAX_CLIENTS;i++)
+	{
+		if(CClient::ClientOccupied[i] != -1)
+		cout << "Client Nr. " << i+1 << " hat die IP: "  << cC[i]->addr << "\n";
+	}
+}
