@@ -96,7 +96,7 @@ void CSocket::AcceptClient()
 		{
 			if(s_clientsocket[i] == -1)
 			{
-				s_clientsocket[i] = accept (s_socket, (struct sockaddr *)&s_client[i],&client_len);
+				s_clientsocket[i] = accept (s_socket, &s_client[i],&client_len);
 				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
 				
 			//    cC->addr = inet_ntoa(s_client[i].sin_addr);i	
