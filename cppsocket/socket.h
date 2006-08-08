@@ -29,7 +29,7 @@ class CSocket
 	void Bind(int iPort);
 	bool IsListening();
 	void SetListen(int iClients);
-	void AcceptClient();
+	CSocket AcceptClient();
 	void ListClients();
 };
 #endif

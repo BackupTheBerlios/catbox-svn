@@ -73,11 +73,12 @@ void CSocket::SetListen(int iClients)
 	}
 	s_flag = 1; // Starts listening
 }
-void CSocket::AcceptClient()
+CSocket CSocket::AcceptClient()
 { 
 	int errcheck;
 	int i;
-   for (i=0; i<MAX_CLIENTS; i++)
+	int correctid;
+	   for (i=0; i<MAX_CLIENTS; i++)
       s_clientsocket[i] = -1;
 	FD_ZERO(&c_sockets);
 	FD_SET(s_socket,&c_sockets);
@@ -92,12 +93,12 @@ void CSocket::AcceptClient()
 	cout <<"Select failed"<<endl;
 	if(FD_ISSET(s_socket,&c_sockets))
 	{
-		for(i=0;i<MAX_CLIENTS;i++)	
+		for(correctid=0;correctid<MAX_CLIENTS;correctid++)	
 		{
-			if(s_clientsocket[i] == -1)
+			if(s_clientsocket[correctid] == -1)
 			{
-				s_clientsocket[i] = accept (s_socket, &s_client[i],&client_len);
-				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
+				s_clientsocket[correctid] = accept (s_socket, &s_client[correctid],&client_len);
+				if (s_clientsocket[correctid] == -1) cout <<"Error accepting client!"<<endl;
 				
 			//    cC->addr = inet_ntoa(s_client[i].sin_addr);i	
 				
@@ -106,6 +107,7 @@ void CSocket::AcceptClient()
 			}
 		}
 	}
+	/*
 	for(i=0;i<MAX_CLIENTS;i++)
 	{
 		if(s_clientsocket[i] != -1 && FD_ISSET(s_clientsocket[i],&c_sockets))
@@ -118,7 +120,7 @@ void CSocket::AcceptClient()
 				cout << "Connection lost!"<<endl;
 			}
 		}
-	}
+	}*/ 
 }
 
 void CSocket::ListClients()

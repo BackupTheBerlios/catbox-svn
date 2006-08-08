@@ -42,7 +42,7 @@ int main(int argc , char **argv)
 				CClient::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
 				cout << iCnt<<endl;
-				cS.AcceptClient();
+				CSocket cSClient = cS.AcceptClient();
 				
 			}
 		}
