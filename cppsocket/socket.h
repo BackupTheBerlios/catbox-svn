@@ -14,7 +14,6 @@ class CSocket
 	private:
 	int omg;
 	static int InstanceCount;
-	protected:
 	public:
 	struct sockaddr s_client[MAX_CLIENTS];
 	char recv_buffer[MAX_SERVERBUFFER];

@@ -8,15 +8,8 @@
 using namespace std;
 class CClient
 {
-	class ClConn
-	{
-		public:
-		char *addr;
-		int c_socket;
-		ClConn *next;
-	};
+
 private:
-ClConn *clStart;
 protected:
 public:
 char *addr;
@@ -30,4 +23,5 @@ CClient();
 void CClient::GetInfo();
 bool CClient::AppendClient();
 };
+
 #endif
