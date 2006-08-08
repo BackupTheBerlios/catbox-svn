@@ -28,7 +28,7 @@ bool CClient::AppendClient()
 	{
 	clLocal = new CClient;
 	
-	inet_aton("31.121.11.11",(struct sockaddr*)&(CSocket::s_client[0].sin_addr));
+	inet_aton("31.121.11.11",(struct sockaddr*)&CSocket::s_client[0].sin_addr);
 	//clLocal->addr = inet_ntoa(CSocket::s_client[0].sin_addr);
 	}
 	return(0);
