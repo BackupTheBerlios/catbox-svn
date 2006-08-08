@@ -68,7 +68,7 @@ void CSocket::SetListen(int iClients)
 	}
 	s_flag = 1; // Starts listening
 }
-void CSocket::AcceptClient(CClient& cC)
+void CSocket::AcceptClient()
 { 
 	int errcheck;
 	int i;
@@ -87,15 +87,15 @@ void CSocket::AcceptClient(CClient& cC)
 	cout <<"Select failed"<<endl;
 	if(FD_ISSET(s_socket,&c_sockets))
 	{
-		for(i=0;i<MAX_CLIENTS;i++)
+		for(i=0;i<MAX_CLIENTS;i++)	
 		{
 			if(s_clientsocket[i] == -1)
 			{
 				s_clientsocket[i] = accept (s_socket, (struct sockaddr *)&s_client[i],&client_len);
 				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
-				cC.addr = inet_ntoa(s_client[i].sin_addr);
+			//	cC.addr = inet_ntoa(s_client[i].sin_addr);
 				
-					cout << "Man abord: " << cC.addr  <<endl;
+				//	cout << "Man abord: " << cC.addr  <<endl;
 				break;
 			}
 		}
@@ -115,11 +115,11 @@ void CSocket::AcceptClient(CClient& cC)
 	}
 }
 
-void CSocket::ListClients(CClient *cC[])
+void CSocket::ListClients()
 {
 	for(int i=0;i<=MAX_CLIENTS;i++)
 	{
 		if(CClient::ClientOccupied[i] != -1)
-		cout << "Client Nr. " << i+1 << " hat die IP: "  << cC[i]->addr << "\n";
+		cout << "Client Nr. " << i+1 << " hat die IP: "; // << cC[i]->addr << "\n";
 	}
 }

@@ -21,7 +21,7 @@ int main(int argc , char **argv)
 	{
 		char *arguments = argv[i];
 		
-		cout << arguments << "\n";
+		cout << argumen ts << "\n";
 	}
 	if (argc == 1)
 	{	
@@ -39,12 +39,12 @@ int main(int argc , char **argv)
 			{
 				CClient::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
-				cS.AcceptClient(cC[iCnt]);
+				cS.AcceptClient();
 				
 			}
 		}
 		break;
-		cS.ListClients(*cC);
+	//	cS.ListClients();
 		
 	}
 	/*for(;;)

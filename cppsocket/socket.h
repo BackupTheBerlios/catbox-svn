@@ -30,7 +30,7 @@ class CSocket
 	void Bind(int iPort);
 	bool IsListening();
 	void SetListen(int iClients);
-	void AcceptClient(CClient& cC);
-	void ListClients(CClient *cC[]);
+	void AcceptClient();
+	void ListClients();
 };
 #endif
