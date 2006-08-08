@@ -11,7 +11,7 @@ int main(int argc , char **argv)
 {
 	CNetwork cNet;
 	CSocket cS(SOCK_STREAM);
-	CClient cC[MAX_CLIENTS];
+	CClient cC;
 	cout << argc;
 	char *argument=argv[0]+2;
 	cout << endl;
@@ -21,7 +21,7 @@ int main(int argc , char **argv)
 	{
 		char *arguments = argv[i];
 		
-		cout << argumen ts << "\n";
+		cout << arguments << "\n";
 	}
 	if (argc == 1)
 	{	
@@ -30,7 +30,9 @@ int main(int argc , char **argv)
 	cNet.iNet=20;
 	cS.Socket();
 	cS.Bind(1050);
+	cS.IsListening();
 	cS.SetListen(2);
+	cS.IsListening();
 	while(1)
 	{
 		for(int iCnt=0;iCnt <= 1;iCnt++)
@@ -39,12 +41,13 @@ int main(int argc , char **argv)
 			{
 				CClient::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
+				cout << iCnt<<endl;
 				cS.AcceptClient();
 				
 			}
 		}
 		break;
-	//	cS.ListClients();
+	cS.ListClients();
 		
 	}
 	/*for(;;)

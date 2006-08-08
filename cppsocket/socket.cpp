@@ -55,6 +55,11 @@ bool CSocket::IsListening()
 		cout <<"Das Socket ist bereits im Listen-Modus"<<endl;
 		return(true);
 	} 
+	else
+	{
+		cout << "No idea.. I guess it failed.\n";
+		return (false);
+	}
 }
 void CSocket::SetListen(int iClients)
 {
@@ -93,7 +98,8 @@ void CSocket::AcceptClient()
 			{
 				s_clientsocket[i] = accept (s_socket, (struct sockaddr *)&s_client[i],&client_len);
 				if (s_clientsocket[i] == -1) cout <<"Error accepting client!"<<endl;
-			//	cC.addr = inet_ntoa(s_client[i].sin_addr);
+				
+			//    cC->addr = inet_ntoa(s_client[i].sin_addr);i	
 				
 				//	cout << "Man abord: " << cC.addr  <<endl;
 				break;
