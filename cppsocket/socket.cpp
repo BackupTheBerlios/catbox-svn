@@ -8,6 +8,14 @@ CSocket::CSocket(int iType)
 	s_type = iType;
 	s_flag = 0;
 }
+CSocket::CSocket()
+{
+	InstanceCount++;
+	cout <<"CSocket Klasse erstellt, Nr.: " << InstanceCount <<"\n";
+	s_socket = -1;
+	s_type = -1;
+	s_flag = 0;
+}
 CSocket::~CSocket()
 {
 	InstanceCount--;

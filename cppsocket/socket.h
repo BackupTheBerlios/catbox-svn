@@ -24,6 +24,7 @@ class CSocket
 	int s_clientsocket[MAX_CLIENTS];	
 	socklen_t client_len;
 	CSocket(int iType);
+	CSocket();
 	~CSocket();
 	void Socket();
 	void Bind(int iPort);
