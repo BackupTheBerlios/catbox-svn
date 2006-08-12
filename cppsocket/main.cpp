@@ -10,8 +10,8 @@ bool CClient::ClientOccupied[MAX_CLIENTS];
 int main(int argc , char **argv)
 {
 	CNetwork cNet;
-	CSocket cS(SOCK_STREAM);
-	CClient cC;
+	CServerSocket cS(SOCK_STREAM);
+	CClientSocket cC;
 	cout << argc;
 	char *argument=argv[0]+2;
 	cout << endl;
@@ -42,7 +42,7 @@ int main(int argc , char **argv)
 				CClient::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
 				cout << iCnt<<endl;
-				CSocket cSClient = cS.AcceptClient();
+				cS.AcceptClient();
 				
 			}
 		}

@@ -4,7 +4,7 @@
 
 //int CClient::rang=0;
 
-CClient::CClient()
+CClientSocket::CClientSocket()
 {
 	clNew=NULL;
 	clLocal=NULL;
@@ -14,21 +14,21 @@ CClient::CClient()
 	}
 	cout << "New Client created.\n";
 }
-CClient::~CClient()
+CClientSocket::~CClientSocket()
 {
 	cout << "Client destroyed.\n";
 }
-void CClient::GetInfo()
+void CClientSocket::GetInfo()
 {
 }
-bool CClient::AppendClient()
+bool CClientSocket::AppendClient()
 {
 	CClient *a,*b;
 	if(clNew == NULL)
 	{
 	clLocal = new CClient;
 	
-	inet_aton("31.121.11.11",(struct sockaddr*)&CSocket::s_client[0].sin_addr);
+//	inet_aton("31.121.11.11",(struct sockaddr*)&CSocket::s_client[0].sin_addr);
 	//clLocal->addr = inet_ntoa(CSocket::s_client[0].sin_addr);
 	}
 	return(0);

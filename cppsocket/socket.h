@@ -27,10 +27,6 @@ class CSocket
 	CSocket();
 	~CSocket();
 	void Socket();
-	void Bind(int iPort);
-	bool IsListening();
-	void SetListen(int iClients);
-	CSocket AcceptClient();
-	void ListClients();
+
 };
 #endif
