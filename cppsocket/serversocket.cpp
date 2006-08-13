@@ -1,4 +1,6 @@
 #include "serversocket.h"
+#include "clientsocket.h"
+#include "socket.h"
 #include "constants.h"
 CServerSocket::CServerSocket(int iType) : CSocket(iType)
 {
@@ -30,7 +32,7 @@ void CServerSocket::Bind(int iPort)
 	}
 }
 
-void CSocket::SetListen(int iClients)
+void CServerSocket::SetListen(int iClients)
 {
 	if(listen(s_socket,iClients) == -1)
 	{
@@ -43,7 +45,7 @@ void CSocket::SetListen(int iClients)
 	s_flag = 1; // Starts listening
 }
 
-bool CSocket::IsListening()
+bool CServerSocket::IsListening()
 {
 	if (s_flag == 0)
 	{

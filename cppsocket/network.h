@@ -15,7 +15,7 @@ class CNetwork
 	};
 	public:
 	int iNet;
-	void CNetwork::Connect(const char* cHostname, int iPort);
+	void Connect(const char* cHostname, int iPort);
 	CNetwork();
 	~CNetwork();	
 };

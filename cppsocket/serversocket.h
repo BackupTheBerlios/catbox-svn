@@ -4,10 +4,15 @@
 #include <sys/types.h>#include <sys/socket.h>
 #include <netinet/in.h>#include <arpa/inet.h>
 #include "socket.h"
+#include "constants.h"
 using namespace std;
 class CServerSocket : public CSocket
 {
+	protected:
+	struct sockaddr s_client[MAX_CLIENTS];
 	public:
+	fd_set c_sockets;
+	int s_clientsocket[MAX_CLIENTS];
 	CServerSocket(int iType);
 	~CServerSocket();
 	void Bind(int iPort);

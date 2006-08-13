@@ -2,11 +2,12 @@
 #include <cstdio>
 #include "socket.h"
 #include "network.h"
-#include "client.h"
+#include "serversocket.h"
+#include "clientsocket.h"
 using namespace std;
 int CSocket::InstanceCount = 0;
 int CNetwork::InstanceCount = 0;
-bool CClient::ClientOccupied[MAX_CLIENTS];
+bool CClientSocket::ClientOccupied[MAX_CLIENTS];
 int main(int argc , char **argv)
 {
 	CNetwork cNet;
@@ -37,9 +38,9 @@ int main(int argc , char **argv)
 	{
 		for(int iCnt=0;iCnt <= 1;iCnt++)
 		{
-			if(CClient::ClientOccupied[iCnt]== false)
+			if(CClientSocket::ClientOccupied[iCnt]== false)
 			{
-				CClient::ClientOccupied[iCnt] == true;
+				CClientSocket::ClientOccupied[iCnt] == true;
 				cout <<"Freien Slot fuer Client gefunden, warte auf Verbindung.\n";
 				cout << iCnt<<endl;
 				cS.AcceptClient();
