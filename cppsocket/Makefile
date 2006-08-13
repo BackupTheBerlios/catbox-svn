@@ -1,5 +1,5 @@
 CFLAGS = -Wall -g
-main:	socket	main.cpp network clientsocket
+serv:	socket	main.cpp network clientsocket
 	g++ -o main main.cpp socket.o network.o serversocket.o clientsocket.o $(CFLAGS)
 socket:	socket.cpp
 	g++ -c socket.cpp $(CFLAGS)

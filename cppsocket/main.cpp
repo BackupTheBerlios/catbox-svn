@@ -10,6 +10,7 @@ int CNetwork::InstanceCount = 0;
 bool CClientSocket::ClientOccupied[MAX_CLIENTS];
 int main(int argc , char **argv)
 {
+
 	CNetwork cNet;
 	CServerSocket cS(SOCK_STREAM);
 	CClientSocket cC;
@@ -17,17 +18,20 @@ int main(int argc , char **argv)
 	char *argument=argv[0]+2;
 	cout << endl;
 	cout << "Executable is named <<" << argument << ">> and uses the following arguments:"<< endl;
-
+	if (argc == 1)
+	{	
+		cout << "No Arguments delivered.\n";	
+		exit(1);
+	}
 	for(int i=1;i<argc;i++)
 	{
 		char *arguments = argv[i];
 		
 		cout << arguments << "\n";
 	}
-	if (argc == 1)
-	{	
-		cout << "No Arguments delivered.\n";	
-	}
+	switch(argv[1])
+	{
+		case SERVER_MODE:
 	cNet.iNet=20;
 	cS.Socket();
 	cS.Bind(1050);
@@ -50,6 +54,10 @@ int main(int argc , char **argv)
 		break;
 	cS.ListClients();
 		
+	}
+	break;
+		case CLIENT_MODE:
+		cout << "You've chosen the client-mode. Now you'll die :(\n";
 	}
 	/*for(;;)
 	{
