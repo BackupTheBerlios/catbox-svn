@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="30">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>client.cc</itemPath>
+      <itemPath>../cppsocket/clientsocket.cpp</itemPath>
+      <itemPath>../cppsocket/main.cpp</itemPath>
+      <itemPath>../cppsocket/network.cpp</itemPath>
+      <itemPath>../cppsocket/serversocket.cpp</itemPath>
+      <itemPath>../cppsocket/socket.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>client.h</itemPath>
+      <itemPath>../cppsocket/clientsocket.h</itemPath>
+      <itemPath>../cppsocket/constants.h</itemPath>
+      <itemPath>../cppsocket/network.h</itemPath>
+      <itemPath>../cppsocket/serversocket.h</itemPath>
+      <itemPath>../cppsocket/socket.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <defaultConf>0</defaultConf>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>1</compilerSet>
+        <platform>4</platform>
+      </toolsSet>
+      <compileType>
+        <cCompilerTool>
+        </cCompilerTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+        <fortranCompilerTool>
+        </fortranCompilerTool>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../cppsocket/clientsocket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/main.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/network.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/serversocket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/socket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/clientsocket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/constants.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/network.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/serversocket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/socket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="client.cc">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="client.h">
+        <itemTool>3</itemTool>
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>1</compilerSet>
+        <platform>4</platform>
+      </toolsSet>
+      <compileType>
+        <cCompilerTool>
+          <developmentMode>5</developmentMode>
+        </cCompilerTool>
+        <ccCompilerTool>
+          <developmentMode>5</developmentMode>
+        </ccCompilerTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../cppsocket/clientsocket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/main.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/network.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/serversocket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/socket.cpp">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="../cppsocket/clientsocket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/constants.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/network.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/serversocket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="../cppsocket/socket.h">
+        <itemTool>3</itemTool>
+      </item>
+      <item path="client.cc">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="client.h">
+        <itemTool>3</itemTool>
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
