@@ -29,7 +29,7 @@ int main(int argc , char **argv)
 		
 		cout << arguments << "\n";
 	}
-	switch(argv[1])
+	switch(atoi(argv[1])
 	{
 		case SERVER_MODE:
 	cNet.iNet=20;
