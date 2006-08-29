@@ -8,7 +8,6 @@ CGame::CGame()
 }
 CGame::~CGame()
 {
-	active = false;
 	cout << "Game quitted." << endl;
 
 }

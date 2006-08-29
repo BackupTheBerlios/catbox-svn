@@ -15,15 +15,19 @@ void CInput::ChangeDeviceType(int devtype)
 }
 int CInput::UpdateInput(SDL_Event &event)
 {
+	CGame *cTmp;
+	cTmp = new CGame();
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-		CGame::active=0;
+	
+		cTmp->SetActive(0);
 		break;
 		case SDL_QUIT:
-		CGame::active=0;
+		cTmp->SetActive(0);
 		default:
 		break;
 	}
+	delete cTmp;
 	return event.type;
 }
