@@ -1,5 +1,5 @@
 CC = g++
-OBJ = main.o cdisplay.o cball.o
+OBJ = main.o cdisplay.o cball.o csurface.o
 CFLAGS = -c -Wall `sdl-config --cflags`
 
 main: $(OBJ)
@@ -10,4 +10,6 @@ cdisplay.o: cdisplay.cpp
 	g++ cdisplay.cpp $(CFLAGS)
 cball.o: cball.cpp
 	g++ cball.cpp $(CFLAGS)
+csurface.o: csurface.cpp
+	g++ csurface.cpp $(CFLAGS)
 	
