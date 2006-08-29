@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 	CInput *cInp;
 	cInp = new CInput(1);
 	cout << cPlayer->GetLives()<<endl;
+	cApp->StartGameLoop();
 	return(0);
 }
 

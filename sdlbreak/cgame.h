@@ -8,11 +8,14 @@ class CGame
 {
 	private:
 	protected:
-	bool active;
 	public:
+	static bool active;
 	CGame();
 	~CGame();
 	void SetActive(bool mode);
 	bool GetActive();
+	int StartGameLoop();
+	//int UpdateGameData();
+	int StopGameLoop();
 };
 #endif

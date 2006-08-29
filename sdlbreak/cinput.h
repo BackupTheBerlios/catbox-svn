@@ -13,5 +13,6 @@ class CInput
 	CInput(int devtype);
 	~CInput();
 	void ChangeDeviceType(int devtype);
+	int UpdateInput(SDL_Event &event);
 };
 #endif

@@ -1,4 +1,6 @@
 #include "cgame.h"
+#include "cinput.h"
+ bool CGame::active;
 CGame::CGame()
 {
 	active = true;
@@ -18,4 +20,25 @@ void CGame::SetActive(bool mode)
 bool CGame::GetActive()
 {
 	return active;
+}
+int CGame::StartGameLoop()
+{
+	SDL_Event event;
+	SetActive(true);
+	while (active)
+	{
+		while(SDL_PollEvent(&event))
+		{
+			CInput *cInp;
+			cInp = new CInput(1);
+			
+			cout<<(cInp->UpdateInput(event))<<endl;
+		}
+	}
+	return (0);
+}
+int CGame::StopGameLoop()
+{
+	SetActive(false);
+	return (0);
 }
