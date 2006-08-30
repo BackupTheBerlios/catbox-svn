@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
 	cApp = new CGame();
 	CBall *cPlayer;
 	cPlayer = new CBall();
-	/*CDisplay *cDsp;
-	cDsp = new CDisplay(XRES,YRES,BPP,SDL_HWSURFACE|SDL_DOUBLEBUF,0);*/
+	CDisplay *cDsp;
+	cDsp = new CDisplay(XRES,YRES,BPP,SDL_SWSURFACE|SDL_DOUBLEBUF|SDL_ANYFORMAT,0);
 	CInput *cInp;
 	cInp = new CInput(1);
 	CPaddle *cPdl;

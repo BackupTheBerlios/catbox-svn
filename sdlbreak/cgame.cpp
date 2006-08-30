@@ -2,7 +2,7 @@
  bool CGame::active;
 CGame::CGame()
 {
-	cDsp = new CDisplay(XRES,YRES,BPP,SDL_HWSURFACE|SDL_DOUBLEBUF,0);
+	
 	active = true;
 	cout << "New Game started." << endl;
 }
@@ -31,9 +31,10 @@ int CGame::StartGameLoop()
 			CInput *cInp;
 			cInp = new CInput(1);
 			
-			//cout<<(cInp->UpdateInput(event))<<endl;
+			cout<<(cInp->UpdateInput(event))<<endl;
+			delete cInp;
 		}
-		SDL_Flip(cDsp->GetSurface());
+		
 	}
 	return (0);
 }
