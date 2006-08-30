@@ -26,3 +26,8 @@ int CDisplay::SetVideoMode(int x,int y, int bpp, unsigned int flags,bool fullscr
 	}
 	return (0);
 }
+
+SDL_Surface* CDisplay::GetSurface()
+{
+	return screen;
+}

@@ -1,8 +1,8 @@
 #include "cgame.h"
-#include "cinput.h"
  bool CGame::active;
 CGame::CGame()
 {
+	cDsp = new CDisplay(XRES,YRES,BPP,SDL_HWSURFACE|SDL_DOUBLEBUF,0);
 	active = true;
 	cout << "New Game started." << endl;
 }
@@ -33,6 +33,7 @@ int CGame::StartGameLoop()
 			
 			cout<<(cInp->UpdateInput(event))<<endl;
 		}
+		SDL_Flip(cDsp->GetSurface());
 	}
 	return (0);
 }

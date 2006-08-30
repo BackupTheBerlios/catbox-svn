@@ -16,5 +16,6 @@ class CDisplay
 	CDisplay();
 	CDisplay(int x,int y,int bpp, unsigned int flags, bool fullscreen);
 	~CDisplay();
+	SDL_Surface* GetSurface();
 };
 #endif

@@ -3,12 +3,16 @@
 #include <iostream>
 #include <SDL/SDL.h>
 #include "constants.h"
+#include "cinput.h"
+#include "cdisplay.h"
+
 using namespace std;
 class CGame
 {
 	private:
 	protected:
 	public:
+	CDisplay *cDsp;
 	static bool active;
 	CGame();
 	~CGame();

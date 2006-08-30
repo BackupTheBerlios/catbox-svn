@@ -16,5 +16,6 @@ class CBall
 	CBall();
 	~CBall();
 	int GetLives();
+	void LoadIMG(const char* filename);
 };
 #endif

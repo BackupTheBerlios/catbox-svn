@@ -14,3 +14,7 @@ int CBall::GetLives()
 {
 	return lives;
 }
+void CBall::LoadIMG(const char *filename)
+{
+	Surface->Surface = SDL_LoadBMP(filename);
+}

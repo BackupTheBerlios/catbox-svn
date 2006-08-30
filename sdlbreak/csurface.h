@@ -8,6 +8,7 @@ class CSurface
 	private:
 	protected:
 	public:
+	SDL_Surface *Surface; // Shouldn't be public...
 	CSurface();
 	~CSurface();
 };
