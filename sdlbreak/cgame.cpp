@@ -31,7 +31,7 @@ int CGame::StartGameLoop()
 			CInput *cInp;
 			cInp = new CInput(1);
 			
-			cout<<(cInp->UpdateInput(event))<<endl;
+			//cout<<(cInp->UpdateInput(event))<<endl;
 		}
 		SDL_Flip(cDsp->GetSurface());
 	}
