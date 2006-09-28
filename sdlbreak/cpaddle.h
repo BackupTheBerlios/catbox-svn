@@ -23,3 +23,5 @@ class CPaddle : public CBall
 	int GetY();
 	};
 #endif
+        
+        
