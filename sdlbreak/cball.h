@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include "csurface.h"
 using namespace std;
+
 class CBall
 {
 	private:
