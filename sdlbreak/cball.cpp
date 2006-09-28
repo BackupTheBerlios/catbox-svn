@@ -1,3 +1,4 @@
+
 #include "cball.h"
 #include "constants.h"
 CBall::CBall()
@@ -18,3 +19,4 @@ void CBall::LoadIMG(const char *filename)
 {
 	Surface->Surface = SDL_LoadBMP(filename);
 }
+
