@@ -9,25 +9,24 @@ CInput::~CInput()
 {
 	cout << "Input Device Type " << type << " deleted." << endl;
 }
-void CInput::ChangeDeviceType(int devtype)
+void CInput::changeDeviceType(int devtype)
 {
 	type = devtype;
 }
-int CInput::UpdateInput(SDL_Event &event)
+int CInput::updateInput(SDL_Event &event)
 {
-	CGame *cTmp;
-	cTmp = new CGame();
+    
+    SDL_Event event;
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-	
-		cTmp->SetActive(0);
+                running = 0;
+
 		break;
 		case SDL_QUIT:
-		cTmp->SetActive(0);
+                running=0;
 		default:
 		break;
 	}
-	delete cTmp;
 	return event.type;
 }
