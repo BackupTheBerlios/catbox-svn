@@ -12,7 +12,9 @@ class CInput
 	public:
 	CInput(int devtype);
 	~CInput();
-	void ChangeDeviceType(int devtype);
-	int UpdateInput(SDL_Event &event);
+        CInput::checkInput
+	void changeDeviceType(int devtype);
+	int updateInput(SDL_Event &event);
 };
 #endif
+
