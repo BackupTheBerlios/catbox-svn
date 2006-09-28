@@ -24,7 +24,7 @@ int CGame::StartGameLoop()
 {
 	SDL_Event event;
 	SetActive(true);
-	while (active)
+	while (running)
 	{
 		while(SDL_PollEvent(&event))
 		{
@@ -43,3 +43,4 @@ int CGame::StopGameLoop()
 	SetActive(false);
 	return (0);
 }
+
