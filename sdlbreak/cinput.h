@@ -3,6 +3,7 @@
 #include <iostream>
 #include <SDL/SDL.h>
 #include "constants.h"
+#include "main.h"
 using namespace std;
 class CInput
 {
@@ -12,7 +13,6 @@ class CInput
 	public:
 	CInput(int devtype);
 	~CInput();
-        CInput::checkInput
 	void changeDeviceType(int devtype);
 	int updateInput(SDL_Event &event);
 };
