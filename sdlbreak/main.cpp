@@ -2,12 +2,14 @@
 #include <SDL/SDL.h>
 #include "cball.h"
 #include "cdisplay.h"
-#include "constants.h""
+#include "constants.h"
 #include "cinput.h"
 #include "cpaddle.h"
-int CBall::lives;
+int CBall::lives; 
+
 int main(int argc, char *argv[])
 {
+     
 	CBall *cPlayer;
 	cPlayer = new CBall();
 	CDisplay *cDsp;
@@ -17,19 +19,19 @@ int main(int argc, char *argv[])
 	CPaddle *cPdl;
 	cPdl = new CPaddle();
 	cout << cPlayer->GetLives()<<endl;
-	cPlayer->LoadIMG("images/cball.bmp");
+	cPlayer->LoadIMG("irmages/cball.bmp");
 	cPdl->LoadPaddle("images/paddle.bmp");
 	cPdl->SetXY(10,20);
 	cout << cPdl->GetX() << " " << cPdl->GetY();
 	SDL_Event event;
-	while (running)
+	while (cPlayer->running)
 	{
 		while(SDL_PollEvent(&event))
 		{
 			CInput *cInp;
 			cInp = new CInput(1);
 			
-			cout<<(cInp->UpdateInput(event))<<endl;
+			cout<<(cInp->updateInput(event))<<endl;
 			delete cInp;
 		}
 	SDL_Flip(cDsp->screen);  	
