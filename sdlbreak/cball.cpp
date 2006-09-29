@@ -3,9 +3,11 @@
 #include "constants.h"
 CBall::CBall()
 {
+        running=1;
 	lives=LIVES;
 	cout << "New Ball created." << endl;
 	Surface = new CSurface();
+        
 }
 CBall::~CBall()
 {
