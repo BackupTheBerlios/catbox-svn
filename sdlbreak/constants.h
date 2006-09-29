@@ -5,5 +5,4 @@
 #define YRES 600
 #define BPP 0
 #define FLAGS 0
-int running=1;
 #endif
