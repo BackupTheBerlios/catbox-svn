@@ -1,5 +1,6 @@
 #include "cinput.h"
 #include "cgame.h"
+#include "cball.h"
 #include "main.h"
 
 CInput::CInput(int devtype)
@@ -11,19 +12,18 @@ CInput::~CInput()
 {
 	cout << "Input Device Type " << type << " deleted." << endl;
 }
-CBall *balltmp;
-balltmp = new CBall(),
+
 int CInput::updateInput(SDL_Event &event)
 {
-    
+
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-                balltmp->running = 0;
+                //balltmp->running = 0;
 
 		break;
 		case SDL_QUIT:
-                balltemp->running=0;
+                //balltemp->running=0;
 		default:
 		break;
 	}
