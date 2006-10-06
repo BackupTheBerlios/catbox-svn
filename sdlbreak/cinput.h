@@ -3,7 +3,7 @@
 #include <iostream>
 #include <SDL/SDL.h>
 #include "constants.h"
-#include "main.h"
+
 using namespace std;
 class CInput
 {

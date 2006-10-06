@@ -1,8 +1,6 @@
 #include "cinput.h"
-#include "cgame.h"
 #include "cball.h"
-#include "main.h"
-
+int CBall::running=1;
 CInput::CInput(int devtype)
 {
 	type = devtype;
@@ -19,11 +17,11 @@ int CInput::updateInput(SDL_Event &event)
 	switch(event.type)
 	{
 		case SDL_KEYDOWN:
-                //balltmp->running = 0;
-
+                CBall::running=0;
+                   
 		break;
 		case SDL_QUIT:
-                //balltemp->running=0;
+                CBall::running=0;
 		default:
 		break;
 	}

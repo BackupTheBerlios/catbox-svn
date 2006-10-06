@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	cPdl->SetXY(10,20);
 	cout << cPdl->GetX() << " " << cPdl->GetY();
 	SDL_Event event;
-	while (cPlayer->running)
+	while (CBall::running)
 	{
 		while(SDL_PollEvent(&event))
 		{

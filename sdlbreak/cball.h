@@ -16,7 +16,7 @@ class CBall
 	public:
 	CBall();
 	~CBall();
-        int running;
+        static int running;
 	int GetLives();
 	void LoadIMG(const char* filename);
 };
