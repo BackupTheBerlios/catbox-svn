@@ -2,6 +2,7 @@
 #define _CBALL_H_
 #include <iostream>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include "csurface.h"
 using namespace std;
 
@@ -9,7 +10,7 @@ class CBall
 {
 	private:
 	protected:
-	int x,y;
+	int ux,uy;
 	bool active;
 	static int lives;
 	CSurface *Surface;

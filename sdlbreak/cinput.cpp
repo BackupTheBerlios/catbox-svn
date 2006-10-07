@@ -20,6 +20,9 @@ int CInput::updateInput(SDL_Event &event)
                 CBall::running=0;
                    
 		break;
+                case SDL_MOUSEMOTION:
+                
+                break;
 		case SDL_QUIT:
                 CBall::running=0;
 		default:

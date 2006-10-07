@@ -7,20 +7,42 @@ CPaddle::~CPaddle()
 {
 	cout << "CPaddle destroyed." << endl;
 }
+void CPaddle::updatePaddle()
+{
+    
+}
 void CPaddle::LoadPaddle(const char *filename)
 {
-	Surface->Surface = SDL_LoadBMP(filename);	
+	Surface->Surface = IMG_Load("images/paddle.png");	
 }
-void CPaddle::SetXY(int xcoord,int ycoord)
+void CPaddle::setXY(int xcoord,int ycoord)
 {
-	x=xcoord;
-	y=ycoord;
+	xco=xcoord;
+	yco=ycoord;
 }
-int CPaddle::GetX()
+void CPaddle::setX(int xcoord)
 {
-	return x;
+    xco=xcoord;
 }
-int CPaddle::GetY()
+void CPaddle::setY(int ycoord)
 {
-	return y;
+    yco=ycoord;
+}
+int CPaddle::getX()
+{
+	return xco;
+}
+int CPaddle::getY()
+{
+	return yco;
+}
+int CPaddle::addX(signed int xrel)
+{
+    xco += xrel;
+    return (0);
+}
+int CPaddle::addY(signed int yrel)
+{
+   
+    return(0);
 }

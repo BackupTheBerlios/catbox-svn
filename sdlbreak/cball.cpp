@@ -19,6 +19,9 @@ int CBall::GetLives()
 }
 void CBall::LoadIMG(const char *filename)
 {
-	Surface->Surface = SDL_LoadBMP(filename);
+        SDL_Surface *temp;
+	temp = IMG_Load(filename);
+        Surface->Surface = SDL_DisplayFormat(temp);
 }
+
 
