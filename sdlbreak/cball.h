@@ -4,6 +4,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include "csurface.h"
+#include "cpaddle.h"
 using namespace std;
 
 class CBall

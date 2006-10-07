@@ -1,5 +1,4 @@
 #include "cinput.h"
-#include "cball.h"
 int CBall::running=1;
 CInput::CInput(int devtype)
 {
@@ -13,6 +12,7 @@ CInput::~CInput()
 
 int CInput::updateInput(SDL_Event &event)
 {
+    CPaddle *cTempPaddle = new CPaddle();    
 
 	switch(event.type)
 	{
@@ -21,7 +21,7 @@ int CInput::updateInput(SDL_Event &event)
                    
 		break;
                 case SDL_MOUSEMOTION:
-                
+                cTempPaddle->addX(event.motion.xrel);
                 break;
 		case SDL_QUIT:
                 CBall::running=0;

@@ -3,7 +3,8 @@
 #include <iostream>
 #include <SDL/SDL.h>
 #include "constants.h"
-
+#include "cball.h"
+#include "cpaddle.h"
 using namespace std;
 class CInput
 {

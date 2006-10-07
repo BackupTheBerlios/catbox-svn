@@ -19,8 +19,8 @@ class CPaddle// : public CBall
         CSurface *Surface;
 	CPaddle();
 	~CPaddle();
-        int xco;
-        int yco;
+        static int xco;
+        static int yco;
         void updatePaddle();
 	int GetLives();
 	void LoadPaddle(const char* filename);
@@ -29,7 +29,7 @@ class CPaddle// : public CBall
         void setX(int xcoord);
 	int getY();
         void setY(int ycoord);
-       static int addX(signed int xrel);
-       static int addY(signed int yrel);
+        int addX(signed int xrel);
+        int addY(signed int yrel);
 	};
 #endif

@@ -1,4 +1,6 @@
 #include "cpaddle.h"
+int CPaddle::xco;
+int CPaddle::yco;
 CPaddle::CPaddle()
 {
 	cout << "New Paddle created." << endl;
@@ -17,12 +19,12 @@ void CPaddle::LoadPaddle(const char *filename)
 }
 void CPaddle::setXY(int xcoord,int ycoord)
 {
-	xco=xcoord;
-	yco=ycoord;
+	CPaddle::xco=xcoord;
+	CPaddle::yco=ycoord;
 }
 void CPaddle::setX(int xcoord)
 {
-    xco=xcoord;
+    CPaddle::xco=xcoord;
 }
 void CPaddle::setY(int ycoord)
 {
@@ -30,15 +32,15 @@ void CPaddle::setY(int ycoord)
 }
 int CPaddle::getX()
 {
-	return xco;
+	return CPaddle::xco;
 }
 int CPaddle::getY()
 {
-	return yco;
+	return CPaddle::yco;
 }
 int CPaddle::addX(signed int xrel)
 {
-    xco += xrel;
+    CPaddle::xco += xrel;
     return (0);
 }
 int CPaddle::addY(signed int yrel)
