@@ -13,10 +13,6 @@ void CPaddle::updatePaddle()
 {
     
 }
-void CPaddle::LoadPaddle(const char *filename)
-{
-	Surface->Surface = IMG_Load("images/paddle.png");	
-}
 void CPaddle::setXY(int xcoord,int ycoord)
 {
 	CPaddle::xco=xcoord;

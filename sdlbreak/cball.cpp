@@ -6,7 +6,7 @@ CBall::CBall()
         running=1;
 	lives=LIVES;
 	cout << "New Ball created." << endl;
-	Surface = new CSurface();
+	//Surface = new CSurface();
         
 }
 CBall::~CBall()
@@ -21,7 +21,9 @@ void CBall::LoadIMG(const char *filename)
 {
         SDL_Surface *temp;
 	temp = IMG_Load(filename);
-        Surface->Surface = SDL_DisplayFormat(temp);
+        Surface = SDL_DisplayFormat(temp);
 }
-
-
+void CBall::Blit(SDL_Surface &surf, SDL_Rect &srcrect, SDL_Rect &dstrect)
+{
+    SDL_BlitSurface(Surface,&srect,&surf,&drect);
+}

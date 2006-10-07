@@ -18,8 +18,8 @@ int CDisplay::SetVideoMode(int x,int y, int bpp, unsigned int flags,bool fullscr
 	{
 		flags |= SDL_FULLSCREEN;
 	}
-	screen = SDL_SetVideoMode(x,y,bpp,flags);
-	if(!screen)
+	Surface = SDL_SetVideoMode(x,y,bpp,flags);
+	if(!Surface)
 	{
 		cout << "Can't set Video Mode. Quitting..." << endl;
 		exit(1);
@@ -29,5 +29,5 @@ int CDisplay::SetVideoMode(int x,int y, int bpp, unsigned int flags,bool fullscr
 
 SDL_Surface* CDisplay::GetSurface()
 {
-	return screen;
+	return Surface;
 }

@@ -7,7 +7,7 @@
 #include "cball.h"
 #include "cinput.h"
 using namespace std;
-class CPaddle// : public CBall
+class CPaddle : public CBall
 {
 	private:
 	protected:
@@ -23,7 +23,6 @@ class CPaddle// : public CBall
         static int yco;
         void updatePaddle();
 	int GetLives();
-	void LoadPaddle(const char* filename);
 	void setXY(int xcoord,  int ycoord);
 	int getX();
         void setX(int xcoord);
@@ -31,5 +30,5 @@ class CPaddle// : public CBall
         void setY(int ycoord);
         int addX(signed int xrel);
         int addY(signed int yrel);
-	};
+};
 #endif

@@ -4,7 +4,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include "csurface.h"
-#include "cpaddle.h"
+#include "cdisplay.h"
 using namespace std;
 
 class CBall
@@ -14,12 +14,17 @@ class CBall
 	int ux,uy;
 	bool active;
 	static int lives;
-	CSurface *Surface;
+	
+       
 	public:
+        //CSurface *Surface;
+        SDL_Surface *Surface;
+        SDL_Rect srect,drect;
 	CBall();
 	~CBall();
         static int running;
 	int GetLives();
 	void LoadIMG(const char* filename);
+        virtual void Blit(SDL_Surface &surf, SDL_Rect &srcrect, SDL_Rect &dstrect);
 };
 #endif

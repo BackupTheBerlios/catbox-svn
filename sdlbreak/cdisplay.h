@@ -11,7 +11,7 @@ class CDisplay
 	int y;
 	int bpp;
 	public:
-	SDL_Surface *screen;
+	SDL_Surface *Surface;
 	int SetVideoMode(int x,int y, int bpp, unsigned int flags, bool fullscreen);
 	CDisplay();
 	CDisplay(int x,int y,int bpp, unsigned int flags, bool fullscreen);
