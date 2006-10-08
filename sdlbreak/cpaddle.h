@@ -16,7 +16,7 @@ class CPaddle : public CBall
 	static int lives;
 	CSurface *Surface;*/
 	public:
-        CSurface *Surface;
+     //   CSurface *Surface;
 	CPaddle();
 	~CPaddle();
         static int xco;

@@ -23,7 +23,7 @@ void CBall::LoadIMG(const char *filename)
 	temp = IMG_Load(filename);
         Surface = SDL_DisplayFormat(temp);
 }
-void CBall::Blit(SDL_Surface &surf, SDL_Rect &srcrect, SDL_Rect &dstrect)
+void CBall::Blit(SDL_Surface &surf, SDL_Rect &srcrec)//, SDL_Rect &dstrect)
 {
     SDL_BlitSurface(Surface,&srect,&surf,&drect);
 }

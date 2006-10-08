@@ -24,13 +24,13 @@ int main(int argc, char *argv[])
 	cPlayer->LoadIMG("images/ball.png");
 	cPdl->LoadIMG("images/paddle.png");
         cPdl->setY((YRES/3)*2);
-	cPdl->setX((XRES/2)-cPdl->Surface->Surface->w);
+	cPdl->setX((XRES/2));
  	cout << cPdl->getX() << " " << cPdl->getY();
-        cPdl->srect.w = cPdl->Surface->Surface->w;
-        cPdl->srect.h = cPdl->Surface->Surface->h;
+        cPdl->srect.w = cPdl->Surface->w;
+        cPdl->srect.h = cPdl->Surface->h;
         cPdl->srect.x = cPdl->srect.y = 0;
-        cPdl->drect.w = cPdl->Surface->Surface->w;
-        cPdl->drect.h = cPdl->Surface->Surface->h;
+        cPdl->drect.w = cPdl->Surface->w;
+        cPdl->drect.h = cPdl->Surface->h;
         
 	while (CBall::running)
 	{
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 		cout<<(cInp->updateInput(event))<<endl;
 		delete cInp;
 	}
-            cPdl->Blit(*cDsp->Surface,&cPdl->srect,&cPdl->drect);
+            cPdl->Blit(*cDsp->Surface,cPdl->srect);//,&cPdl->drect);
             updateGameData();
             SDL_Flip(cDsp->Surface);  	
 	}

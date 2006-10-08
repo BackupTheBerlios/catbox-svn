@@ -25,6 +25,6 @@ class CBall
         static int running;
 	int GetLives();
 	void LoadIMG(const char* filename);
-        virtual void Blit(SDL_Surface &surf, SDL_Rect &srcrect, SDL_Rect &dstrect);
+        virtual void Blit(SDL_Surface &sur, SDL_Rect &srcrect);//, SDL_Rect &dstrect);
 };
 #endif
