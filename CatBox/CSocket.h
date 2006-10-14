@@ -10,10 +10,11 @@ using namespace std;
 class CSocket
 {
 protected:
-	int CurrentSocket;
-	int ConnectionSocket;
+
 
 public:
+	int CurrentSocket;
+	int ConnectionSocket;
 	socklen_t AddressLength;
 	struct sockaddr_in ServerAddress;
 	struct sockaddr_in ClientAddress;
@@ -27,6 +28,7 @@ public:
 	int stopServer();
 	int startListening(int lengthOfQueue);
 	int acceptClient();
+	int connectToServer(const char *address, int port);
 	bool isSocketCreated();
 };
 

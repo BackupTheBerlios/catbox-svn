@@ -110,3 +110,12 @@ bool CSocket::isSocketCreated()
 		return(false);
 	}
 }
+int CSocket::connectToServer(const char *address, int port)
+{
+		ClientAddress.sin_family = PF_INET;
+		ClientAddress.sin_port = htons(port);
+		ClientAddress.sin_addr.s_addr = inet_addr(address);
+		connect(CurrentSocket,(struct sockaddr*)&ClientAddress,sizeof(ClientAddress)); // Fix error check!
+		cout << "Connected to " << address << " on port " << port << "." << endl;
+	return(0);
+}

@@ -46,10 +46,9 @@ int main(int argc, char *argv[])
 			ClientUnit *CUEnts[1];
 			CUEnts[0] = new ClientUnit();
 			CUEnts[0]->cClientSocket->createSocket(1);
-			while(running)
-			{
-				
-			}
+			CUEnts[0]->cClientSocket->connectToServer("127.0.0.1",CURPORT);
+			close(CUEnts[0]->cClientSocket->CurrentSocket);
+			cout << "Closed connection. Quitting session now."<<endl;
 		}
 	}
 
