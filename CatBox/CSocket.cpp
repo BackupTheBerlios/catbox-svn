@@ -2,11 +2,13 @@
 
 CSocket::CSocket()
 {
+	cout << "Created Socket-Instance."<<endl;
 	CurrentSocket = 0;
 }
 
 CSocket::~CSocket()
 {
+	cout << "Deleted Socket-Instance."<<endl;
 }
 int CSocket::getSocket(void)
 {

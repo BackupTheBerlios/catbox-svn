@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 	SUEnts[0]->cServerSocket->startListening(MaxListeners);
 	SUEnts[0]->cServerSocket->stopServer();
 //	init(SUEnts[0]);	
+	delete SUEnts[0];
 	return (0);
 }
 

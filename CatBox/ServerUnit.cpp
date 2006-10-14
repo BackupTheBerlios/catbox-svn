@@ -3,11 +3,11 @@
 ServerUnit::ServerUnit()
 {
 	cServerSocket = new CSocket();
-	cout << "Created Socket."<<endl;
+	cout << "Created Server Unit."<<endl;
 }
 
 ServerUnit::~ServerUnit()
 {
 	delete cServerSocket;
-	cout << "Deleted Socket."<<endl;
+	cout << "Deleted Server Unit."<<endl;
 }
