@@ -17,10 +17,12 @@ public:
 	virtual ~CSocket();
 	int getSocket();
 	int setSocket(int Socket);
-	int createSocket();
+	int createSocket(int type);
 	int destroySocket();
 	int startServer(int port);
 	int stopServer();
+	int startListening(int lengthOfQueue);
+	bool isSocketCreated();
 };
 
 #endif /*CSOCKET_H_*/

@@ -2,6 +2,7 @@
 
 CSocket::CSocket()
 {
+	CurrentSocket = 0;
 }
 
 CSocket::~CSocket()
@@ -16,17 +17,36 @@ int CSocket::setSocket(int Socket)
 	CurrentSocket = Socket;
 	return(0);
 }
-int CSocket::createSocket()
+int CSocket::createSocket(int type)
 {
-	int s;
-	s = socket(AF_INET,SOCK_STREAM,0);
-	if(s<0)
+	if(type < 1 || type > 2)
 	{
-		cout << "Error creating Socket. Exiting."<<endl;
-		exit(1);
+		cout << "No correct type given, can't create Socket."<<endl;
+		return(1);
 	}
-	CurrentSocket = s;
-	return CurrentSocket;
+	else 
+	{
+		int s;
+		switch(type)
+		{
+			case 1: //TCP
+			s = socket(AF_INET,SOCK_STREAM,0);
+			cout << "Using TCP: ";
+			break;
+			case 2: //UDP
+			s = socket(AF_INET,SOCK_DGRAM,0);
+			cout << "Using UDP: ";
+			break;
+		}
+		if(s<0)
+		{
+			cout << "Error creating Socket. Exiting."<<endl;
+			exit(1);
+		}
+		CurrentSocket = s;
+		cout << "Socket created." << endl;
+		return CurrentSocket;
+	}
 }
 int CSocket::destroySocket()
 {
@@ -56,4 +76,29 @@ int CSocket::stopServer()
 	close(CurrentSocket);
 	cout << "Stopped Server." <<endl;
 	return(0);
+}
+int CSocket::startListening(int lengthOfQueue)
+{
+	if(isSocketCreated())
+	{
+		listen(CurrentSocket,lengthOfQueue);
+		cout << "Started listening for " << lengthOfQueue << " Clients." << endl;
+		return(0);
+	}
+	else
+	{
+		cout << "No Socket was created, can't start listening." << endl;
+		exit(1);
+	}
+}
+bool CSocket::isSocketCreated()
+{
+	if(CurrentSocket != 0)
+	{
+		return(true);
+	}
+	else
+	{
+		return(false);
+	}
 }
