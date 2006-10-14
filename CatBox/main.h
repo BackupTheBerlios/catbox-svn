@@ -5,4 +5,5 @@
 #define TCP SOCK_STREAM
 #define UDP SOCK_DGRAM
 #define MAX_WAITING_LIST 2
+#define PLUGINS_DIRECTORY "plugins/"
 #endif /*MAIN_H_*/

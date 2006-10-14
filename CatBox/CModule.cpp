@@ -9,6 +9,8 @@ CModule::~CModule()
 {
 	cout << "Deleted Module-Instance."<<endl;
 }
-CModule::loadModule(const char *filename)
+int CModule::loadModule(const char *filename)
 {
+	return(0);
 }
+

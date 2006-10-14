@@ -1,7 +1,9 @@
 #include <iostream>
+#include <dirent.h>
 #include "ServerUnit.h"
 #include "main.h"
 int init (ServerUnit *SUE);
+int checkForModules(const char *filename);
 int main(int argc, char *argv[])
 { 
 	if(argc < 2)
@@ -18,6 +20,7 @@ int main(int argc, char *argv[])
 		if(Temp == 1)
 		{
 			cout << "Using CatBox Server Mode..." << endl;
+			checkForModules("plugins");
 		}
 		else if(Temp == 2)
 		{
@@ -40,4 +43,37 @@ int init (ServerUnit *SUE)
 {
 //	SUE->cServerSocket->ServerAddress.si
 	return (0);
+}
+int checkForModules(const char *filename)
+{
+	DIR *DirectoryPointer;
+	struct dirent *DirectoryContent;
+	int DirectoryCount;
+	DirectoryPointer = opendir(filename);
+	if(DirectoryPointer== NULL)
+	{
+		cout << "Couldn't find the Plugins directory, no plugins loaded. You can load them afterward manually on the console." << endl;
+	}
+	else
+	{
+		for(DirectoryCount=3;DirectoryCount!=0;DirectoryCount--)
+		{
+			DirectoryContent = readdir(DirectoryPointer);
+		}
+		while(DirectoryContent != NULL)
+		{
+			cout << "Loaded " << DirectoryContent->d_name << " plugin." <<endl;
+			DirectoryContent = readdir(DirectoryPointer);
+		}
+		if(DirectoryCount <= 2)
+		{
+			cout << "No plugins found." << endl;
+		}
+		else
+		{
+			cout << "Loaded " << DirectoryCount << " plugins." << endl;
+		}
+	}
+		
+	return(0);
 }
