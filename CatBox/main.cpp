@@ -2,9 +2,12 @@
 #include <dirent.h>
 #include "ServerUnit.h"
 #include "ClientUnit.h"
+#include "CModule.h"
 #include "main.h"
 int init (ServerUnit *SUE);
 int checkForModules(const char *filename);
+CModule *cMod;
+
 int main(int argc, char *argv[])
 { 
 	int running=1;
@@ -17,6 +20,7 @@ int main(int argc, char *argv[])
 	}
 	else 
 	{
+		cMod =  new CModule();
 		int Temp;
 		Temp = atoi(argv[1]);
 		if(Temp == 1)
@@ -37,6 +41,7 @@ int main(int argc, char *argv[])
 			}
 			SUEnts[0]->cServerSocket->stopServer();
 			delete SUEnts[0];
+			delete cMod;
 			return (0);
 		}
 		else if(Temp == 2)
@@ -77,6 +82,7 @@ int checkForModules(const char *filename)
 		}
 		while(DirectoryContent != NULL)
 		{
+			cMod->loadModule(DirectoryContent->d_name);
 			cout << "Loaded " << DirectoryContent->d_name << " plugin." <<endl;
 			DirectoryContent = readdir(DirectoryPointer);
 		}
