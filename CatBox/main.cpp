@@ -1,11 +1,13 @@
 #include <iostream>
 #include <dirent.h>
 #include "ServerUnit.h"
+#include "ClientUnit.h"
 #include "main.h"
 int init (ServerUnit *SUE);
 int checkForModules(const char *filename);
 int main(int argc, char *argv[])
 { 
+	int running=1;
 	if(argc < 2)
 	{
 		cout << "Please decide to use Server or Client mode like this:"<<endl;
@@ -13,7 +15,7 @@ int main(int argc, char *argv[])
 		cout << "If no port is given, CatBox will use the standard port ( " << CURPORT << " )."<<endl;
 		exit(1);
 	}
-	else
+	else 
 	{
 		int Temp;
 		Temp = atoi(argv[1]);
@@ -21,22 +23,36 @@ int main(int argc, char *argv[])
 		{
 			cout << "Using CatBox Server Mode..." << endl;
 			checkForModules("plugins");
+			int MaxListeners = MAX_WAITING_LIST;
+			ServerUnit *SUEnts[MAX_UNITS];
+			SUEnts[0] = new ServerUnit();
+			SUEnts[0]->cServerSocket->createSocket(1);
+			SUEnts[0]->cServerSocket->startServer(CURPORT);
+			SUEnts[0]->cServerSocket->startListening(MaxListeners);	
+			//SUEnts[0]->cServerSocket->acceptClient();
+			while(running)
+			{
+				SUEnts[0]->cServerSocket->acceptClient();
+				cout << "Got a Connection from " << inet_ntoa(SUEnts[0]->cServerSocket->ClientAddress.sin_addr)<<endl;
+			}
+			SUEnts[0]->cServerSocket->stopServer();
+			delete SUEnts[0];
+			return (0);
 		}
 		else if(Temp == 2)
 		{
 			cout << "Using CatBox Client Mode..." << endl;
+			checkForModules("plugins");
+			ClientUnit *CUEnts[1];
+			CUEnts[0] = new ClientUnit();
+			CUEnts[0]->cClientSocket->createSocket(1);
+			while(running)
+			{
+				
+			}
 		}
 	}
-	int MaxListeners = MAX_WAITING_LIST;
-	ServerUnit *SUEnts[MAX_UNITS];
-	SUEnts[0] = new ServerUnit();
-	SUEnts[0]->cServerSocket->createSocket(1);
-	SUEnts[0]->cServerSocket->startServer(CURPORT);
-	SUEnts[0]->cServerSocket->startListening(MaxListeners);
-	SUEnts[0]->cServerSocket->stopServer();
-//	init(SUEnts[0]);	
-	delete SUEnts[0];
-	return (0);
+
 }
 
 int init (ServerUnit *SUE)
@@ -73,6 +89,11 @@ int checkForModules(const char *filename)
 		{
 			cout << "Loaded " << DirectoryCount << " plugins." << endl;
 		}
+		if(closedir(DirectoryPointer) == -1)
+		{
+			cout << "Couldn't close directory."<<endl;
+		}
+		
 	}
 		
 	return(0);

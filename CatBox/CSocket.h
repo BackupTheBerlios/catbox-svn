@@ -11,8 +11,12 @@ class CSocket
 {
 protected:
 	int CurrentSocket;
-	struct sockaddr_in ServerAddress;
+	int ConnectionSocket;
+
 public:
+	socklen_t AddressLength;
+	struct sockaddr_in ServerAddress;
+	struct sockaddr_in ClientAddress;
 	CSocket();
 	virtual ~CSocket();
 	int getSocket();
@@ -22,6 +26,7 @@ public:
 	int startServer(int port);
 	int stopServer();
 	int startListening(int lengthOfQueue);
+	int acceptClient();
 	bool isSocketCreated();
 };
 

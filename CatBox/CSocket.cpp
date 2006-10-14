@@ -58,11 +58,11 @@ int CSocket::destroySocket()
 }
 int CSocket::startServer(int port)
 {
-	ServerAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
+	ServerAddress.sin_addr.s_addr = INADDR_ANY;
 	ServerAddress.sin_port = htons(port);
-	ServerAddress.sin_port = AF_INET;
+	ServerAddress.sin_family = PF_INET;
 	
-	if(bind(CurrentSocket,(const sockaddr*)&ServerAddress,sizeof(ServerAddress)) < 0)
+	if(bind(CurrentSocket,(const sockaddr*)&ServerAddress,sizeof(struct sockaddr_in)) < 0)
 	{
 		cout << "Failed setting up a Server on port " << port << "."<<endl;
 		exit(1);
@@ -92,6 +92,12 @@ int CSocket::startListening(int lengthOfQueue)
 		cout << "No Socket was created, can't start listening." << endl;
 		exit(1);
 	}
+}
+int CSocket::acceptClient()
+{
+	AddressLength = sizeof(struct sockaddr_in);
+	ConnectionSocket = accept(CurrentSocket, (struct sockaddr *) &ClientAddress,&AddressLength);
+	return(0);
 }
 bool CSocket::isSocketCreated()
 {
