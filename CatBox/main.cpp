@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 		else if(Temp == 2)
 		{
 			cout << "Using CatBox Client Mode..." << endl;
-			checkForModules("plugins");
+			//checkForModules("plugins");
 			ClientUnit *CUEnts[1];
 			CUEnts[0] = new ClientUnit();
 			CUEnts[0]->cClientSocket->createSocket(1);
