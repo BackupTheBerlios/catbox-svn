@@ -39,14 +39,25 @@ int CModule::openModule(const char *filename)
 	}
 	cout << "Opened " << filename << " successfully." << endl;
 	cout << "Loading symbol initPlugin..." << endl;
-	typedef int (*initPlugin)();
+//	typedef int (*initPlugin_t)();
 	dlerror(); // Reset errors
-	
-	return(0);
+	initPlugin = (initPlugin_t) dlsym(LibraryHandle, "initPlugin");
+	const char *dlsym_error = dlerror();
+	if(dlsym_error)
+	{
+		cout << "Can't load symbol '" << INIT_PLUGIN << "': " << dlsym_error << endl;
+		dlclose(LibraryHandle);
+		return(1);
+	}
+	else
+	{
+		return(0);
+	}	
 }
+
 int CModule::closeModule(char *filename)
 {
 	dlclose(LibraryHandle);
-	cout << "Closed " << filename << "." << endl;
+	cout << "Closed " << filename << " successfully." << endl;
 	return(0);
 }

@@ -28,19 +28,24 @@ int main(int argc, char *argv[])
 			cout << "Using CatBox Server Mode..." << endl;
 			//checkForModules("./plugins");
 			cMod->openModule("plugins/cb-samba.so");
-			cMod->closeModule("plugins/cb-samba.so");
+			
+		//	cMod->closeModule("plugins/cb-samba.so");
 			int MaxListeners = MAX_WAITING_LIST;
 			ServerUnit *SUEnts[MAX_UNITS];
 			SUEnts[0] = new ServerUnit();
 			SUEnts[0]->cServerSocket->createSocket(1);
 			SUEnts[0]->cServerSocket->startServer(CURPORT);
 			SUEnts[0]->cServerSocket->startListening(MaxListeners);	
+			cMod->openModule("plugins/cb-samba.so");
+			cMod->initPlugin();
+			cMod->closeModule("plugins/cb-samba.so");	
 			//SUEnts[0]->cServerSocket->acceptClient();
 			while(running)
 			{
 				SUEnts[0]->cServerSocket->acceptClient();
 				cout << "Got a Connection from " << inet_ntoa(SUEnts[0]->cServerSocket->ClientAddress.sin_addr)<<endl;
 			}
+
 			SUEnts[0]->cServerSocket->stopServer();
 			delete SUEnts[0];
 			delete cMod;

@@ -4,6 +4,8 @@
 #include <fstream>
 #include <malloc.h>
 #include <dlfcn.h>
+/* Plugin Developer API */
+#define INIT_PLUGIN initPlugin
 using namespace std;
 class CModule
 {
@@ -12,6 +14,8 @@ void* LibraryHandle;
 public:
 	ifstream ModuleFileStream;
 	public:
+	typedef int (*initPlugin_t)();
+	initPlugin_t initPlugin;
 	int *ModuleMemoryPointer;
 	CModule();
 	virtual ~CModule();
