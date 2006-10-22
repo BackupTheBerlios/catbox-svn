@@ -1,0 +1,3 @@
+samba:	cb-samba.c
+	gcc -c -g cb-samba.c
+	gcc  -shared -o cb-samba.so -Wl,-soname,cb-samba.so cb-samba.o

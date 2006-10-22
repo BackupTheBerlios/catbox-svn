@@ -26,7 +26,9 @@ int main(int argc, char *argv[])
 		if(Temp == 1)
 		{
 			cout << "Using CatBox Server Mode..." << endl;
-			checkForModules("plugins");
+			//checkForModules("./plugins");
+			cMod->openModule("plugins/cb-samba.so");
+			cMod->closeModule("plugins/cb-samba.so");
 			int MaxListeners = MAX_WAITING_LIST;
 			ServerUnit *SUEnts[MAX_UNITS];
 			SUEnts[0] = new ServerUnit();
@@ -68,7 +70,7 @@ int checkForModules(const char *filename)
 {
 	DIR *DirectoryPointer;
 	struct dirent *DirectoryContent;
-	int DirectoryCount;
+	int DirectoryCount=0;
 	DirectoryPointer = opendir(filename);
 	if(DirectoryPointer== NULL)
 	{
@@ -80,11 +82,46 @@ int checkForModules(const char *filename)
 		{
 			DirectoryContent = readdir(DirectoryPointer);
 		}
+		cout << "First one:" << DirectoryContent->d_name;
+		bool IsLibrary=false;
 		while(DirectoryContent != NULL)
 		{
-			cMod->loadModule(DirectoryContent->d_name);
-			cout << "Loaded " << DirectoryContent->d_name << " plugin." <<endl;
-			DirectoryContent = readdir(DirectoryPointer);
+			
+			char *FilePointer = DirectoryContent->d_name;
+			while(!IsLibrary)
+			{
+				if(*FilePointer == '.')
+				{
+					FilePointer++;
+					if(*FilePointer == 's')
+					{
+						FilePointer++;
+						if(*FilePointer == 'o')
+						{
+							cout << "Library is valid." << endl;
+							IsLibrary = true;
+							
+							cMod->loadModule(DirectoryContent->d_name);
+							cout << "Loaded " << DirectoryContent->d_name << " plugin." <<endl;
+						}
+					}
+				}
+				else
+				{
+					FilePointer++;
+					DirectoryCount++;
+					cout << "DirectoryCount: " << DirectoryCount << endl;
+					DirectoryContent = readdir(DirectoryPointer);
+				}
+			}
+
+			if(IsLibrary) 
+			{	
+				//cMod->loadModule(DirectoryContent->d_name);
+				/*cout << "Loaded " << DirectoryContent->d_name << " plugin." <<endl;
+				DirectoryContent = readdir(DirectoryPointer);*/
+			}
+			IsLibrary=false;
 		}
 		if(DirectoryCount <= 2)
 		{

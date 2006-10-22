@@ -29,4 +29,24 @@ int CModule::loadModule(const char *filename)
 	
 	return(0);
 }
-
+int CModule::openModule(const char *filename)
+{
+	LibraryHandle = dlopen(filename,RTLD_LAZY);
+	if(LibraryHandle == NULL)
+	{
+		cout << "Couldn't open " << filename << "." << endl;
+		return(1);
+	}
+	cout << "Opened " << filename << " successfully." << endl;
+	cout << "Loading symbol initPlugin..." << endl;
+	typedef int (*initPlugin)();
+	dlerror(); // Reset errors
+	
+	return(0);
+}
+int CModule::closeModule(char *filename)
+{
+	dlclose(LibraryHandle);
+	cout << "Closed " << filename << "." << endl;
+	return(0);
+}
