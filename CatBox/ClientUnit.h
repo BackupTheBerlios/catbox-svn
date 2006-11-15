@@ -11,6 +11,7 @@ public:
 	ClientUnit();
 	virtual ~ClientUnit();
 	CSocket *cClientSocket;
+
 };
 
 #endif /*CLIENTUNIT_H_*/
