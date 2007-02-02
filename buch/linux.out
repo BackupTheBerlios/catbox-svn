@@ -1,0 +1,27 @@
+\BOOKMARK [-1][-]{part.1}{I GNU Linux - Das fremde System}{}
+\BOOKMARK [0][-]{section.0.1}{Vorwort}{part.1}
+\BOOKMARK [0][-]{chapter.1}{Hardware-Grundkenntnisse und Wissenswertes}{part.1}
+\BOOKMARK [1][-]{section.1.1}{Bits and Bytes - Wie der Computer Zahlen liest und speichert}{chapter.1}
+\BOOKMARK [1][-]{section.1.2}{Big- and Little-Endianness - Byte-Strukturierung im Speicher}{chapter.1}
+\BOOKMARK [2][-]{subsection.1.2.1}{Anwendungszwecke}{section.1.2}
+\BOOKMARK [0][-]{chapter.2}{Programmieren unter Linux}{part.1}
+\BOOKMARK [-1][-]{part.2}{II SDL - Der Simple DirectMedia Layer}{}
+\BOOKMARK [0][-]{chapter.3}{SDL-Initialisierung}{part.2}
+\BOOKMARK [1][-]{section.3.1}{Einige Hintergrundinformationen...}{chapter.3}
+\BOOKMARK [1][-]{section.3.2}{Installation}{chapter.3}
+\BOOKMARK [2][-]{subsection.3.2.1}{Header-Dateien}{section.3.2}
+\BOOKMARK [1][-]{section.3.3}{SDL Modi initialisieren}{chapter.3}
+\BOOKMARK [2][-]{subsection.3.3.1}{Die ODER-Tabelle}{section.3.3}
+\BOOKMARK [-1][-]{part.3}{III ANSI-C-Kurs f\374r Anf\344nger}{}
+\BOOKMARK [0][-]{chapter.4}{Hintergrundwissen}{part.3}
+\BOOKMARK [1][-]{section.4.1}{Entwicklung und Geschichte von C}{chapter.4}
+\BOOKMARK [1][-]{section.4.2}{\334ber ANSI-C und C++}{chapter.4}
+\BOOKMARK [2][-]{subsection.4.2.1}{C-Standards und dieses Buch}{section.4.2}
+\BOOKMARK [1][-]{section.4.3}{Datentypen}{chapter.4}
+\BOOKMARK [1][-]{section.4.4}{Das erste Programm}{chapter.4}
+\BOOKMARK [-1][-]{part.4}{IV Der C++-Kurs}{}
+\BOOKMARK [-1][-]{part.5}{V Emulation - Fremde Systeme simulieren}{}
+\BOOKMARK [0][-]{chapter.5}{Von Emulatoren und Nostalgikern}{part.5}
+\BOOKMARK [1][-]{section.5.1}{Definition}{chapter.5}
+\BOOKMARK [1][-]{section.5.2}{Anwendungszwecke von Emulatoren}{chapter.5}
+\BOOKMARK [1][-]{section.5.3}{Aufbau dieses Parts}{chapter.5}

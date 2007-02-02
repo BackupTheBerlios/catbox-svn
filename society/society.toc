@@ -1,0 +1,4 @@
+\select@language {ngerman}
+\contentsline {part}{I\hspace {1em}Beweggr\IeC {\"u}nde}{5}{part.1}
+\contentsline {chapter}{\numberline {1}Wieso man ein Buch schreibt}{9}{chapter.1}
+\contentsline {section}{\numberline {1.1}Meine Wenigkeit}{9}{section.1.1}
