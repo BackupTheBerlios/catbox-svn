@@ -3,6 +3,7 @@
 #include <string>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include "stdtypes.h"
 #include "environment.h"
 
 using namespace std;
@@ -57,6 +58,7 @@ int UpdateScreen(tEnvironment envExtern, SDL_Surface *surface)
     static int frames=0;
     int xcoord,ycoord;
     int curframe=0;
+    unsigned short int *ScreenBit;
     do
     {
         curframe = SDL_GetTicks();
@@ -74,8 +76,11 @@ int UpdateScreen(tEnvironment envExtern, SDL_Surface *surface)
    {
            for(int BitCount=0;BitCount < 8;BitCount++)
            {
-               if((env->memory->memory[0x2000]+VRAMcount) & (1 << BitCount))
+               if((env->memory->memory[0x2400+VRAMcount]) & (1 << BitCount))
                {
+                   
+                   ScreenBit = (unsigned short int *) surface->pixels+((VRAMcount*8)+BitCount); // Pointer to the screen-memory
+                   *ScreenBit = SDL_MapRGB(surface->format,0xff,0xff,0xff);
                    
                        
                }
@@ -116,7 +121,7 @@ int main(int argc, char** argv)
         cout << "Can't initialize SDL" << endl;
         exit(-1);
     }
-    buffer = SDL_SetVideoMode(224,256,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
+    buffer = SDL_SetVideoMode(256,224,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
     if(buffer == NULL)
     {
             fprintf(stderr,"Fehler: %s", SDL_GetError());
@@ -127,7 +132,7 @@ int main(int argc, char** argv)
     
     while(!running==0)
     {
-        UpdateScreen(*env,screen);
+        UpdateScreen(*env,buffer);
         while(SDL_PollEvent(&event))
         {
             switch(event.type)
