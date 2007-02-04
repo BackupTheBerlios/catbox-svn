@@ -49,7 +49,40 @@ static const unsigned char cycle_table[0x100]={
 	5, 10,10,4, 11,11,7, 11,5, 5, 10,4, 11,0, 7, 11
 };
 
-
+int UpdateScreen(tEnvironment envExtern, SDL_Surface *surface)
+{
+    tEnvironment *env;
+    env = &envExtern;
+    static int lastframe=0;
+    static int frames=0;
+    int xcoord,ycoord;
+    int curframe=0;
+    do
+    {
+        curframe = SDL_GetTicks();
+        if((curframe-lastframe) >= 16) //(1000/(60/1))
+        {
+            lastframe = curframe;
+                
+        }
+        else
+        {
+            SDL_Delay(1);
+        }
+    }while(lastframe != curframe );
+   for (int VRAMcount=0;VRAMcount < 0x1c000;VRAMcount++)
+   {
+           for(int BitCount=0;BitCount < 8;BitCount++)
+           {
+               if((env->memory->memory[0x2000]+VRAMcount) & (1 << BitCount))
+               {
+                   
+                       
+               }
+           }
+   }
+    return (0);
+}
 int main(int argc, char** argv) 
 {
     using namespace std;
@@ -83,7 +116,7 @@ int main(int argc, char** argv)
         cout << "Can't initialize SDL" << endl;
         exit(-1);
     }
-    buffer = SDL_SetVideoMode(800,600,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
+    buffer = SDL_SetVideoMode(224,256,16,SDL_HWSURFACE|SDL_DOUBLEBUF);
     if(buffer == NULL)
     {
             fprintf(stderr,"Fehler: %s", SDL_GetError());
@@ -94,6 +127,7 @@ int main(int argc, char** argv)
     
     while(!running==0)
     {
+        UpdateScreen(*env,screen);
         while(SDL_PollEvent(&event))
         {
             switch(event.type)

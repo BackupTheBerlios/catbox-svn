@@ -333,15 +333,17 @@ void tCPU::executeCycles(int cycles)
 
     }
 }
-   
+// NOP
 void tCPU::Opcode_00()
 {
     cout << "00 called" << endl;
     
 }
-
+// LXI B, Word
+// BC <- Word
 void tCPU::Opcode_01()
 {
+    
     
 }
 void tCPU::Opcode_02()
