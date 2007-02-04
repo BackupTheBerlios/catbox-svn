@@ -16,7 +16,7 @@ class tMemory
 {
     public:
         unsigned char *screen;
-        unsigned char *memory;
+        char *memory;
         tMemory();
         tMemory(tEnvironment &envExtern);
         ~tMemory();

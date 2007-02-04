@@ -19,7 +19,7 @@ class tROM
         unsigned char *memory;
         char *loadTemp;
         char *filenames[];
-        bool loadROM();
+        bool loadROM(int destination, const char *filename);
         tROM(tEnvironment &envExtern);
         tROM();
         ~tROM();

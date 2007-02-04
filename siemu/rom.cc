@@ -8,12 +8,14 @@ tROM::~tROM()
 {
     cout << "ROM-Object deleted." << endl;
 }
-bool tROM::loadROM()
+bool tROM::loadROM(int destination, const char *filename)
 {
     /* memory has to be set on variable mem[0x4000] in main.cpp ! */
-    ifstream romFile("invaders.h",ios::binary|ios::in);
+    fstream romFile;
     int byteCount = 0x00;
-    if (!romFile)
+    romFile.open(filename,ios::binary|ios::in);
+    cout << romFile.is_open();
+    if (romFile.is_open())
     {
             cout << "ROM file opened." <<endl;
     }
@@ -23,10 +25,8 @@ bool tROM::loadROM()
             exit(1);
     }
     
-    while (!romFile.eof())
-    {
-        romFile.read((char*)memory,0x800);
-    }
+    romFile.read(&env.memory->memory[destination],0x0800);
+    romFile.close();
     cout << "Finished.";
     return false;
 }

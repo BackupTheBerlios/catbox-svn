@@ -50,6 +50,12 @@ int main(int argc, char** argv)
     SDL_Surface *buffer;
     SDL_Init(SDL_INIT_VIDEO);
     atexit(SDL_Quit);
+    env->rom->loadROM(0x0,"invaders.h");
+    env->rom->loadROM(0x800,"invaders.g");
+    env->rom->loadROM(0x1000,"invaders.f");
+    env->rom->loadROM(0x1800,"invaders.e");
+    unsigned int omg = env->readWord(0x0014);
+    cout << hex << omg;
     int running=1;
     if(SDL_Init(SDL_INIT_VIDEO) == -1)
     {
@@ -62,7 +68,7 @@ int main(int argc, char** argv)
             fprintf(stderr,"Fehler: %s", SDL_GetError());
     }
     
-    env->rom->loadROM();
+    
     SDL_ShowCursor(0);
     
     while(!running==0)

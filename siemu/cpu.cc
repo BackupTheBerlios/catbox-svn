@@ -31,6 +31,13 @@ static const unsigned char opcodeCycles[0x100]={
 	5, 10,10,18,11,11,7, 11,5, 5, 10,4, 11,0, 7, 11,
 	5, 10,10,4, 11,11,7, 11,5, 5, 10,4, 11,0, 7, 11
 };
+OpcodeInformation OpcodeList[256] = 
+{
+    {
+        &tCPU::Opcode_00,
+        4
+    }
+};
 }
 tCPU::~tCPU()
 {
@@ -38,6 +45,7 @@ tCPU::~tCPU()
     tCPU::pc== 0x100;
     running=0;
 }
+
 void tCPU::executeCycles(int cycles)
 {
     int opcode;
@@ -46,13 +54,15 @@ void tCPU::executeCycles(int cycles)
     {
         opcode = R8(tCPU::sp);
         tCPU::pc++;
-        tCPU::cycles-=opcodeCycles[opcode];
+        tCPU::cycles-=OpcodeList[opcode].cycles;
         //(tCPU::sp);
         //cout << "Opcode:" << opcode << endl;
-        switch(opcode)
-        {
-            
-        }
+
     }
 }
    
+void tCPU::Opcode_00()
+{
+    cout << "00 called" << endl;
+    
+}

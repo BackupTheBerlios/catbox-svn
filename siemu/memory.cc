@@ -2,7 +2,7 @@
 
 tMemory::tMemory(tEnvironment &envExtern):env(envExtern)
 {
-    memory = new unsigned char[0x4000];
+    memory = new char[0x4000];
     cout << "Memory [0x4000 Bytes] allocated/created."<<endl;
 }
 tMemory::~tMemory()

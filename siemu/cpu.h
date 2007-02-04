@@ -62,15 +62,15 @@ class tCPU
     unsigned char irq;
     unsigned char irqpending;
     unsigned char aux;
-    unsigned char *memory;
-    unsigned char opcodeCycles[0x100];
+    char opcodeCycles[0x100];
     void executeCycles(int cycles);
     tEnvironment &env;
-    typedef void (*OpcodeHandler)();
+    typedef void (tCPU::* OpcodeHandler)();
+    void Opcode_00();
     typedef struct 
     {
-        OpcodeHandler opcodeMethod;
-        unsigned int cycles;
+        OpcodeHandler OpcodeMethod;
+        int cycles;
     }OpcodeInformation;
     OpcodeInformation OpcodeList[256];
     
