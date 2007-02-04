@@ -54,8 +54,8 @@ int main(int argc, char** argv)
     env->rom->loadROM(0x800,"invaders.g");
     env->rom->loadROM(0x1000,"invaders.f");
     env->rom->loadROM(0x1800,"invaders.e");
-    unsigned int omg = env->readWord(0x0014);
-    cout << hex << omg;
+   // env->readByte(PC);
+  
     int running=1;
     if(SDL_Init(SDL_INIT_VIDEO) == -1)
     {
