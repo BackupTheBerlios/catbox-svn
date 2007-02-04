@@ -27,25 +27,18 @@ class tCPU
         Zero      = 0x40,
         Sign      = 0x80
     };
-    union
+    union tWord
     {
-        unsigned short pc;
+       // unsigned short pc;
         struct
         {
-            unsigned char pchi,pclo;
-        };
+            unsigned char hi,lo;
+        }byte;
+        unsigned short word;
     
     };
-    
-    
-    union
-    {
-        unsigned short sp;
-        struct
-        {
-            unsigned char sphi,splo;  
-        };
-    };
+    tWord PCWord;
+    tWord SPWord;
      union
     {   
             unsigned short af,bc,de,hl;    
@@ -62,7 +55,7 @@ class tCPU
     unsigned char irq;
     unsigned char irqpending;
     unsigned char aux;
-    char opcodeCycles[0x100];
+    int OpcodeCycles[0x100];
     void executeCycles(int cycles);
     tEnvironment &env;
     typedef void (tCPU::* OpcodeHandler)();

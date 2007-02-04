@@ -9,11 +9,11 @@ tCPU::tCPU(tEnvironment &envExtern):env(envExtern)
 {
     
     cout << "New Intel 8080 CPU created." << endl;
-    tCPU::pc = 0x100;
-    tCPU::sp =0x25;
+    tCPU::PCWord.word = 0x100;
+    tCPU::SPWord.word =0x25;
     running=1;
     cycles=20;
-static const unsigned char opcodeCycles[0x100]={
+ int OpcodeCycles[0x100]={
 	4, 10,7, 5, 5, 5, 7, 4, 0, 10,7, 5, 5, 5, 7, 4,
 	0, 10,7, 5, 5, 5, 7, 4, 0, 10,7, 5, 5, 5, 7, 4,
 	0, 10,16,5, 5, 5, 7, 4, 0, 10,16,5, 5, 5, 7, 4,
@@ -306,11 +306,16 @@ OpcodeInformation OpcodeList[256] =
     {&tCPU::Opcode_fe,4},
     {&tCPU::Opcode_ff,4}
 };
+for (int i=0;i!=0x100;i++)
+{
+    tCPU::OpcodeList[i].cycles = OpcodeCycles[i];
+   cout << "Opcode 0x"<<hex<<i<<":" << dec << OpcodeCycles[i] << endl;
+}
 }
 tCPU::~tCPU()
 {
     cout << "CPU destroyed." << endl;
-    tCPU::pc== 0x100;
+    tCPU::PCWord.word = 0x100;
     running=0;
 }
 
@@ -320,8 +325,8 @@ void tCPU::executeCycles(int cycles)
     tCPU::cycles + cycles;
     while(tCPU::cycles > 0)
     {
-        opcode = R8(tCPU::sp);
-        tCPU::pc++;
+        opcode = R8(tCPU::SPWord.word);
+        tCPU::PCWord.word++;
         tCPU::cycles-=OpcodeList[opcode].cycles;
         //(tCPU::sp);
         //cout << "Opcode:" << opcode << endl;
