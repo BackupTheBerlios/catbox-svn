@@ -2,7 +2,8 @@
 %\pagestyle{headings}
 \usepackage[utf8]{inputenc}
 \usepackage{amsfonts}
-\usepackage{multirow}
+\usepackage{listings}
+\lstset{language=C}
 \usepackage[ngerman]{babel}
 \usepackage[T1]{fontenc}
 \pagestyle{headings}
@@ -22,7 +23,6 @@
 \usepackage{makeidx}
 \makeindex
 \begin{document}
-
 \begin{titlepage}
 \begin{center}
 \begin{huge} \textbf{Game \& Emulation Development on GNU Linux}\end{huge}
@@ -58,7 +58,7 @@ Aus den verschiedenen Beweggründen und Ursachen, die jemanden zu diesem Buch ge
 \item C++ Kurs (aufbauend auf den ANSI-C Kurs)
 \item Die Grundlagen von Python
 \item Emulation - Fremde Systeme simulieren
-\end{itemize}\medskip 
+\end{itemize}\medskip
 Dabei ist der Schwerpunkt auf Linux gesetzt, doch habe ich auch durchgehend Wert auf Portabilit\"{a}t gelegt. Alle Programmbeispiele sollten auch unter Windows 2000 und höher laufen.\newline
 Speziell in der Spielewelt w\"{a}re eine h\"{a}ufigere Verwendung der SDL angebracht, ist sie doch portabel auf alle g\"{a}ngigen Plattformen wie Windows Vista/XP, Linux oder Mac OS X.\newline
 Portabel heisst in diesem Sinne, dass durch Verwendung von SDL f\"{u}r Steuer-, Eingabe-, Audio- und Videoger\"{a}te diese universal programmierbar werden. Eine einheitliche API (\textit{Application Programming Interface}) steuert die Ger\"{a}te nun an, der Programmierer sieht nur noch die API und deren Dokumentation. Spezifische Eigenheiten f\"{u}r jeweilige Ger\"{a}te und Betriebssysteme, z.B. verschiedene Grafikkarten, \"{u}bernimmt nun die SDL-Schicht komplett und \"{u}bersetzt sie in die Sprache der jeweiligen Betriebssysteme und Hardware um.\newline
@@ -168,7 +168,7 @@ Dank der vielen F\"{a}higkeiten der Bibliothek und ihren OpenGL-Erweiterungen ha
 
 Durch die grosse Verbreitung ergibt sich noch ein besonders interessanter Vorteil: Die Plattformunabh\"{a}ngigkeit. Mittlerweile unterst\"{u}tzt SDL mehr als nur alle g\"{a}ngigen Betriebssysteme wie Linux, Windows und Mac OS X sowie die meisten Hochsprachen wie C/C++ sondern auch viele Nischen-Betriebssysteme und -Plattformen. Unter Anderem AmigaOS, SEGA Dreamcast, Microsoft XBox, Sony Playstation u.v.m.\newline Ganz im Gegensatz zu DirectX von Microsoft, welches ja alles Andere als cross-platform-f\"{a}hig ist...
 
-Unter Windows hat SDL zudem einen kleinen (selbst unverschuldeten) Haken: Microsoft l\"{a}sst den Zugriff auf die Multimedia-Hardware, insbesondere Grafikkarten, nur \"{u}ber ihr eigenes Entwicklungs-Kit zu, n\"{a}mlich DirectX. Somit kann auch die SDL-Schicht nur auf die DirectX-Schicht aufbauen und ist somit gezwungenermassen leicht langsamer unter Windows, wenn man das Programm mit einem Kompilat auf dem gleichen Rechner, jedoch unter einem anderen Betriebssystem testet. Dieser f\"{a}llt jedoch nicht allzustark ins Gewicht und seien wir doch ehrlich:\newline Uns ist die einfache Programmierung und das Erreichen eines gr\"{o}sseren Zielpublikums durch Cross-Platform-Kompatibilit\"{a}t ein paar Frames pro Sekunde wert, oder? 
+Unter Windows hat SDL zudem einen kleinen (selbst unverschuldeten) Haken: Microsoft l\"{a}sst den Zugriff auf die Multimedia-Hardware, insbesondere Grafikkarten, nur \"{u}ber ihr eigenes Entwicklungs-Kit zu, n\"{a}mlich DirectX. Somit kann auch die SDL-Schicht nur auf die DirectX-Schicht aufbauen und ist somit gezwungenermassen leicht langsamer unter Windows, wenn man das Programm mit einem Kompilat auf dem gleichen Rechner, jedoch unter einem anderen Betriebssystem testet. Dieser f\"{a}llt jedoch nicht allzustark ins Gewicht und seien wir doch ehrlich:\newline Uns ist die einfache Programmierung und das Erreichen eines gr\"{o}sseren Zielpublikums durch Cross-Platform-Kompatibilit\"{a}t ein paar Frames pro Sekunde wert, oder?
 \newpage
 \section{Installation}
 Zuerst brauchen wir nat\"{u}rlich eine saubere SDL-Installation f\"{u}r unseren Compiler (in unserem Fall GCC).
@@ -206,7 +206,7 @@ Erhältlich sind die Bibliotheken (und viele andere Sachen) allesamt unter:\newl
 \newpage
 \section{SDL Modi initialisieren}
 
-SDL kann in mehreren Modi initialisiert werden, jedoch werden nicht immer alle ben\"{o}tigt. Daf\"{u}r kann man mehrere Modi kreuzen. So braucht man beispielsweise in einigen Programmen gar keinen Audio-Modus oder es wird bei selbstablaufenden Programmen nichteinmal Input/Eingabe ben\"{o}tigt. 
+SDL kann in mehreren Modi initialisiert werden, jedoch werden nicht immer alle ben\"{o}tigt. Daf\"{u}r kann man mehrere Modi kreuzen. So braucht man beispielsweise in einigen Programmen gar keinen Audio-Modus oder es wird bei selbstablaufenden Programmen nichteinmal Input/Eingabe ben\"{o}tigt.
 
 Deswegen kann man Ressourcen (und damit Leistung!) sparen, indem wir nur das initialisieren, was wir auch wirklich ben\"{o}tigen.
 
@@ -218,7 +218,7 @@ Daf\"{u}r ben\"{o}tigen wir den Befehl \emph{SDL\_Init()}:
 
 Wir ersehen daraus, dass wir sogenannte Flags \"{u}bergeben, hier nehmen wir den Video-Modus:\newline
 \begin{verbatim}
-SDL_Init(SDL_INIT_VIDEO); 
+SDL_Init(SDL_INIT_VIDEO);
 \end{verbatim}
 
 
@@ -238,7 +238,7 @@ SDL\_INIT\_EVENTTHREAD & Event Manager wird in einem separaten Thread gestartet\
 \end{tabular}\newline
 
 Besonders hinzuweisen ist noch auf \emph{SDL\_INIT\_NOPARACHUTE}.
-Der SDL-Parachute ("`Fallschirm"`) schützt vorzusagen vor einem Absturz, einer 'unsanften' Bruchlandung. Er fängt zuverlässig 
+Der SDL-Parachute ("`Fallschirm"`) schützt vorzusagen vor einem Absturz, einer 'unsanften' Bruchlandung. Er fängt zuverlässig
 \subsection{Die ODER-Tabelle}
 Doch zuvor wollen wir noch sehen, wie man mehrere Modi miteinander kombiniert, wir möchten den Input-Modus zus\"{a}tzlich! Dies bewerkstelligen wir, indem wir die Werte bitweise miteinander in einer ODER-Tabelle verkn\"{u}pfen. Die ODER-Tabelle verkn\"{u}pft Bits nach folgendem Schema:
 \begin{center}
@@ -364,21 +364,7 @@ Fliesspunktzahl(Floating Point) nur mit Vorzeichen & double & 8&\\\hline
 \section{Das erste Programm}
 Für Ihr erstes C-Programm, können Sie untenstehenden Quelltext verwenden; diese Anwendung liest über die \textbf{Standardeingabe (STDIN)}, in Ihrem Fall die Tastatur, einen String ein. Jener String darf maximal 15 Zeichen betragen, da nicht mehr Speicher alloziiert worden ist, und wird nach der Eingabe mit Return in das Programm übergeben, welches diesen Satz anschliessend auf der \textbf{Standardausgabe (STDOUT)}, dem Bildschirm, ausgegeben.
 \newpage
-\begin{verbatim}
-/* ReadString.c - Ein Programm, welches einen String einliest und über den Bildschirm ausgibt.
-*/
-\newlabel
 
-#include <stdio.h> // Einbinden der Standard-Ein-/Ausgabe-Funktionen.
-
-int main (int argc, char *argv[])
-{
-	char stringPhrase[16];  // String aus 15 Zeichen + 1 Zeichen für das Terminierungssymbol ('\0)
-	scanf("%s",&stringPhrase[0]); // Einlesen des Strings von Tastatur
-	printf("Ihre Eingabe lautete: %s",stringPhrase); // Eingabe ausgeben auf Bildschirm
-	return(0); // Programm erfolgreich ausgeührt, Gebe Wert zurück
-}
-\end{verbatim}
 \part{Der C++-Kurs}
 \part{Emulation - Fremde Systeme simulieren}
 \chapter{Von Emulatoren und Nostalgikern}
