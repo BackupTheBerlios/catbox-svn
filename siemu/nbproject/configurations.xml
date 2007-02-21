@@ -4,15 +4,17 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>cpu.h</itemPath>
       <itemPath>cpu.cc</itemPath>
-      <itemPath>environment.cc</itemPath>
+      <itemPath>cpu.h</itemPath>
       <itemPath>environment.h</itemPath>
+      <itemPath>environment.cc</itemPath>
       <itemPath>main.cc</itemPath>
-      <itemPath>memory.h</itemPath>
       <itemPath>memory.cc</itemPath>
-      <itemPath>rom.cc</itemPath>
+      <itemPath>memory.h</itemPath>
+      <itemPath>network.h</itemPath>
+      <itemPath>network.cc</itemPath>
       <itemPath>rom.h</itemPath>
+      <itemPath>rom.cc</itemPath>
       <itemPath>stdtypes.h</itemPath>
     </logicalFolder>
     <logicalFolder name="HeaderFiles"
@@ -91,6 +93,14 @@
         <ccCompilerTool>
         </ccCompilerTool>
       </item>
+      <item path="network.cc">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="network.h">
+        <itemTool>3</itemTool>
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -151,6 +161,14 @@
         <itemTool>1</itemTool>
         <ccCompilerTool>
         </ccCompilerTool>
+      </item>
+      <item path="network.cc">
+        <itemTool>1</itemTool>
+        <ccCompilerTool>
+        </ccCompilerTool>
+      </item>
+      <item path="network.h">
+        <itemTool>3</itemTool>
       </item>
     </conf>
   </confs>

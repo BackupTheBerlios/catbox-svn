@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=SI_back
+PROJECTNAME=siemu
 
 # Active Configuration
 ACTIVECONF=Debug

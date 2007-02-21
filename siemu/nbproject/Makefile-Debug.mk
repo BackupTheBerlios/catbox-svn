@@ -24,6 +24,7 @@ include Makefile
 OBJECTFILES= \
 	build/Debug/GNU-Linux-x86/main.o \
 	build/Debug/GNU-Linux-x86/rom.o \
+	build/Debug/GNU-Linux-x86/network.o \
 	build/Debug/GNU-Linux-x86/cpu.o \
 	build/Debug/GNU-Linux-x86/memory.o \
 	build/Debug/GNU-Linux-x86/environment.o
@@ -44,11 +45,11 @@ LDLIBSOPTIONS=\
 	-lSDL_image
 
 # Build Targets
-.build-conf: ${BUILD_SUBPROJECTS} dist/Debug/GNU-Linux-x86/si_back
+.build-conf: ${BUILD_SUBPROJECTS} dist/Debug/GNU-Linux-x86/siemu
 
-dist/Debug/GNU-Linux-x86/si_back: ${OBJECTFILES}
+dist/Debug/GNU-Linux-x86/siemu: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-Linux-x86
-	${LINK.cc} -o dist/Debug/GNU-Linux-x86/si_back ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o dist/Debug/GNU-Linux-x86/siemu ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 build/Debug/GNU-Linux-x86/main.o: main.cc 
 	${MKDIR} -p build/Debug/GNU-Linux-x86
@@ -57,6 +58,10 @@ build/Debug/GNU-Linux-x86/main.o: main.cc
 build/Debug/GNU-Linux-x86/rom.o: rom.cc 
 	${MKDIR} -p build/Debug/GNU-Linux-x86
 	$(COMPILE.cc) -g -o build/Debug/GNU-Linux-x86/rom.o rom.cc
+
+build/Debug/GNU-Linux-x86/network.o: network.cc 
+	${MKDIR} -p build/Debug/GNU-Linux-x86
+	$(COMPILE.cc) -g -o build/Debug/GNU-Linux-x86/network.o network.cc
 
 build/Debug/GNU-Linux-x86/cpu.o: cpu.cc 
 	${MKDIR} -p build/Debug/GNU-Linux-x86
@@ -76,7 +81,7 @@ build/Debug/GNU-Linux-x86/environment.o: environment.cc
 # Clean Targets
 .clean-conf:
 	${RM} -r build/Debug
-	${RM} dist/Debug/GNU-Linux-x86/si_back
+	${RM} dist/Debug/GNU-Linux-x86/siemu
 
 # Subprojects
 .clean-subprojects:

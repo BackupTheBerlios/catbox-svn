@@ -24,6 +24,7 @@ include Makefile
 OBJECTFILES= \
 	build/Release/GNU-Linux-x86/main.o \
 	build/Release/GNU-Linux-x86/rom.o \
+	build/Release/GNU-Linux-x86/network.o \
 	build/Release/GNU-Linux-x86/cpu.o \
 	build/Release/GNU-Linux-x86/memory.o \
 	build/Release/GNU-Linux-x86/environment.o
@@ -42,11 +43,11 @@ FFLAGS=
 LDLIBSOPTIONS=
 
 # Build Targets
-.build-conf: ${BUILD_SUBPROJECTS} dist/Release/GNU-Linux-x86/si_back
+.build-conf: ${BUILD_SUBPROJECTS} dist/Release/GNU-Linux-x86/siemu
 
-dist/Release/GNU-Linux-x86/si_back: ${OBJECTFILES}
+dist/Release/GNU-Linux-x86/siemu: ${OBJECTFILES}
 	${MKDIR} -p dist/Release/GNU-Linux-x86
-	${LINK.cc} -o dist/Release/GNU-Linux-x86/si_back ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o dist/Release/GNU-Linux-x86/siemu ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 build/Release/GNU-Linux-x86/main.o: main.cc 
 	${MKDIR} -p build/Release/GNU-Linux-x86
@@ -55,6 +56,10 @@ build/Release/GNU-Linux-x86/main.o: main.cc
 build/Release/GNU-Linux-x86/rom.o: rom.cc 
 	${MKDIR} -p build/Release/GNU-Linux-x86
 	$(COMPILE.cc) -O2 -o build/Release/GNU-Linux-x86/rom.o rom.cc
+
+build/Release/GNU-Linux-x86/network.o: network.cc 
+	${MKDIR} -p build/Release/GNU-Linux-x86
+	$(COMPILE.cc) -O2 -o build/Release/GNU-Linux-x86/network.o network.cc
 
 build/Release/GNU-Linux-x86/cpu.o: cpu.cc 
 	${MKDIR} -p build/Release/GNU-Linux-x86
@@ -74,7 +79,7 @@ build/Release/GNU-Linux-x86/environment.o: environment.cc
 # Clean Targets
 .clean-conf:
 	${RM} -r build/Release
-	${RM} dist/Release/GNU-Linux-x86/si_back
+	${RM} dist/Release/GNU-Linux-x86/siemu
 
 # Subprojects
 .clean-subprojects:
