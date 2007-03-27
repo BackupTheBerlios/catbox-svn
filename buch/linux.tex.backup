@@ -1,4 +1,4 @@
-\documentclass[b5paper,10pt,dvips,fleqn,titlepage,twoside]{book}
+\documentclass[a4paper,10pt,dvips,fleqn,titlepage,twoside]{book}
 %\pagestyle{headings}
 \usepackage[utf8]{inputenc}
 \usepackage{amsfonts}
@@ -9,7 +9,7 @@
 \pagestyle{headings}
 \usepackage{rotating}
 \usepackage{subfigure}
-\usepackage{xcolor}
+%\usepackage{xcolor}
 
 \usepackage[dvips]{hyperref}
 \hypersetup{%
@@ -35,6 +35,7 @@
 \newpage
 \tableofcontents
 \setcounter{secnumdepth}{2}
+
 \part{GNU Linux - Das fremde System}
 \section{Vorwort}
 Sie haben dieses Buch gekauft, von meiner Seite als PDF runtergeladen oder sonstwie erhalten mit einem bestimmten Hintergedanken und einer Erwartungshaltung. Und vielleicht haben sich auch schon einmal eine der folgenden Fragen an den Kopf geworfen:

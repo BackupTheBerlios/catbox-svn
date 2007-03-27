@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2007.2.9)  10 FEB 2007 18:15
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2007.3.17)  27 MAR 2007 10:40
 entering extended mode
 **linux.tex
 (./linux.tex
@@ -360,18 +360,6 @@ Package: subfigure 2002/07/30 v2.1.4 subfigure package
 \subfig@top=\skip47
 \subfig@bottom=\skip48
 )
-(/usr/share/texmf/tex/latex/xcolor/xcolor.sty
-Package: xcolor 2004/07/04 v2.00 LaTeX color extensions (UK)
-
-(/usr/share/texmf-tetex/tex/latex/graphics/color.cfg
-File: color.cfg 2005/02/03 v1.3 color configuration of teTeX/TeXLive
-)
-Package xcolor Info: Driver file: dvips.def on input line 136.
-Package xcolor Info: Color model `cmy' added on input line 972.
-Package xcolor Info: Color model `HTML' added on input line 1000.
-Package xcolor Info: Color model `HSB' added on input line 1006.
-Package xcolor Info: Color model `Gray' added on input line 1012.
-)
 (/usr/share/texmf-tetex/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2003/11/30 v6.74m Hypertext links for LaTeX
 \@linkdim=\dimen113
@@ -473,50 +461,47 @@ File: umsb.fd 2002/01/19 v2.2g AMS font definitions
 
 ] [2
 
-] (./linux.toc
-[3])
+] (./linux.toc)
 \tf@toc=\write5
 \openout5 = `linux.toc'.
 
- [4] [5
 
-] [6]
+[3] [4
+
+] [5] [6]
 
 Package hyperref Warning: Difference (2) between bookmark levels is greater 
-(hyperref)                than one, level fixed on input line 39.
+(hyperref)                than one, level fixed on input line 40.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 47--52
+Underfull \hbox (badness 10000) in paragraph at lines 48--53
 
  []
 
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 54.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 55.
 (/usr/share/texmf-tetex/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 54.
- [7]
-Underfull \hbox (badness 10000) in paragraph at lines 62--65
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 55.
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--66
 
  []
 
-[8] [9] [10
+[7] [8] [9] [10
 
 ]
 Kapitel 1.
 
-Underfull \hbox (badness 10000) in paragraph at lines 86--87
+Underfull \hbox (badness 10000) in paragraph at lines 87--88
 
  []
 
 [11]
-Overfull \hbox (115.21524pt too wide) in paragraph at lines 112--120
+Overfull \hbox (115.21524pt too wide) in paragraph at lines 113--121
 [][] 
  []
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 Overfull \hbox (7.75888pt too wide) has occurred while \output is active
@@ -525,22 +510,32 @@ UND WISSENSWERTES
  []
 
 [12]
-Overfull \hbox (27.20737pt too wide) in paragraph at lines 125--125
+Overfull \hbox (27.20737pt too wide) in paragraph at lines 126--126
 []\T1/cmr/bx/n/14.4 Big- and Little-Endianness - Byte-Strukturierung
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 126--127
+Underfull \hbox (badness 10000) in paragraph at lines 127--128
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 138--139
+Underfull \hbox (badness 10000) in paragraph at lines 139--140
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--141
+Underfull \hbox (badness 10000) in paragraph at lines 141--142
+
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 147--147
+[]\T1/cmr/m/n/10 $FFF0 im Spei-cher,wie es bei
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--156
 
  []
 
@@ -551,16 +546,6 @@ IM SPEICHER \T1/cmr/m/n/10 13
  []
 
 [13]
-Underfull \hbox (badness 1178) in paragraph at lines 146--146
-[]\T1/cmr/m/n/10 $FFF0 im Spei-cher,wie es bei
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 153--155
-
- []
-
-
 Overfull \hbox (7.75888pt too wide) has occurred while \output is active
 [][][][]\T1/cmr/m/n/10 14 \T1/cmr/m/sl/10 KAPITEL 1.  HARDWARE-GRUNDKENNTNISSE 
 UND WISSENSWERTES
@@ -575,7 +560,7 @@ Kapitel 2.
 ] [17] [18]
 Kapitel 3.
 
-Overfull \hbox (3.28885pt too wide) in paragraph at lines 169--170
+Overfull \hbox (3.28885pt too wide) in paragraph at lines 170--171
 \T1/cmr/m/n/10 und -Plattformen. Un-ter An-de-rem Ami-ga-OS, SE-GA Dre-am-cast,
  Mi-cro-soft XBox,
  []
@@ -583,60 +568,57 @@ Overfull \hbox (3.28885pt too wide) in paragraph at lines 169--170
 [19
 
 ] [20] [21]
-Underfull \hbox (badness 3601) in paragraph at lines 193--193
+Underfull \hbox (badness 3601) in paragraph at lines 194--194
 []\T1/cmr/m/n/10 Bild-Manipulation und di-ver-se
  []
 
 
-Underfull \hbox (badness 1028) in paragraph at lines 193--193
+Underfull \hbox (badness 1028) in paragraph at lines 194--194
 \T1/cmr/m/n/10 Grafik-Funktionen, liest versch.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 201--204
+Underfull \hbox (badness 10000) in paragraph at lines 202--205
 
  []
 
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 205.
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 206.
 
 (/usr/share/texmf-tetex/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 ) [22]
-Underfull \hbox (badness 10000) in paragraph at lines 219--220
+Underfull \hbox (badness 10000) in paragraph at lines 220--221
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 225--228
+Underfull \hbox (badness 10000) in paragraph at lines 226--229
 
  []
 
 
-Overfull \hbox (82.7662pt too wide) in paragraph at lines 229--239
+Overfull \hbox (82.7662pt too wide) in paragraph at lines 230--240
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 229--239
+Underfull \hbox (badness 10000) in paragraph at lines 230--240
 
  []
 
 
-Overfull \hbox (3.47949pt too wide) in paragraph at lines 240--242
+Overfull \hbox (3.47949pt too wide) in paragraph at lines 241--243
 []\T1/cmr/m/n/10 Besonders hin-zu-wei-sen ist noch auf \T1/cmr/m/it/10 SDL_INIT
 _NOPARACHUTE\T1/cmr/m/n/10 . Der SDL-
  []
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 256--268
+Underfull \hbox (badness 10000) in paragraph at lines 257--269
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 256--268
+Underfull \hbox (badness 10000) in paragraph at lines 257--269
 
  []
 
@@ -645,71 +627,74 @@ Underfull \hbox (badness 10000) in paragraph at lines 256--268
 ] [26]
 Kapitel 4.
 
-Underfull \hbox (badness 10000) in paragraph at lines 277--280
+Underfull \hbox (badness 10000) in paragraph at lines 278--281
 
  []
 
 [27
 
-] [28]
-Underfull \hbox (badness 10000) in paragraph at lines 300--302
-
- []
-
-[29]
-Underfull \hbox (badness 10000) in paragraph at lines 316--317
+]
+Underfull \hbox (badness 10000) in paragraph at lines 301--303
 
  []
 
 
-Overfull \hbox (23.33176pt too wide) in paragraph at lines 321--322
+Underfull \vbox (badness 3815) has occurred while \output is active []
+
+ [28]
+Underfull \hbox (badness 10000) in paragraph at lines 317--318
+
+ []
+
+
+Overfull \hbox (23.33176pt too wide) in paragraph at lines 322--323
 \T1/cmr/m/n/10 Klas-sen nun (in C be-kannt als Funk-tio-nen:)Methoden und (Va-r
 ia-blen:)Attribute
  []
 
-[30] [31]
-Overfull \hbox (175.69308pt too wide) in paragraph at lines 347--358
+[29] [30]
+Overfull \hbox (175.69308pt too wide) in paragraph at lines 348--359
 [][] 
  []
 
-[32] [33] [34
+[31] [32
 
-] [35] [36] [37
+] [33] [34] [35
 
-] [38]
+] [36]
 Kapitel 5.
 
-Overfull \hbox (9.6623pt too wide) in paragraph at lines 375--376
+Overfull \hbox (9.6623pt too wide) in paragraph at lines 373--374
 \T1/cmr/m/n/10 die auf Ih-ren PC al-te Kon-so-len oder Com-pu-ter, rea-li-täts-
 ge-treu in Ih-rer (Re)Aktion,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 375--376
+Underfull \hbox (badness 10000) in paragraph at lines 373--374
 
  []
 
-[39
+
+Underfull \hbox (badness 10000) in paragraph at lines 383--386
+
+ []
+
+[37
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 385--388
-
- []
-
-[40]
-Overfull \hbox (0.94696pt too wide) in paragraph at lines 399--401
+Overfull \hbox (0.94696pt too wide) in paragraph at lines 397--399
 []\T1/cmr/m/n/10 Diesem Buch bei-lie-gend fin-den Sie ei-ne kom-plet-te Do-ku-m
 en-ta-ti-on in-kl. Quell-
  []
 
-[41] (./linux.aux) ) 
+[38] (./linux.aux) ) 
 Here is how much of TeX's memory you used:
- 5450 strings out of 94496
- 70003 string characters out of 1175540
- 134677 words of memory out of 1000000
- 8520 multiletter control sequences out of 10000+50000
+ 4793 strings out of 94496
+ 63578 string characters out of 1175539
+ 127422 words of memory out of 1000000
+ 7869 multiletter control sequences out of 10000+50000
  23988 words of font info for 59 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 8191
- 32i,11n,59p,765b,1080s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 32i,10n,59p,765b,282s stack positions out of 1500i,500n,5000p,200000b,5000s
 
-Output written on linux.dvi (41 pages, 105200 bytes).
+Output written on linux.dvi (38 pages, 95748 bytes).
